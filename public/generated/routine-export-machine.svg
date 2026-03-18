@@ -1,0 +1,58 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="machinePanel" x1="148" y1="132" x2="560" y2="582" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1F5FF"/>
+    </linearGradient>
+    <linearGradient id="cardBlue" x1="270" y1="182" x2="484" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6287FF"/>
+      <stop offset="1" stop-color="#264BDA"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(360 316) rotate(90) scale(264)">
+      <stop stop-color="#9DB7FF" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#9DB7FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="720" height="720" rx="180" fill="#F6F4EE"/>
+  <circle cx="360" cy="318" r="244" fill="url(#halo)"/>
+  <rect x="126" y="118" width="468" height="484" rx="64" fill="url(#machinePanel)" stroke="#E4E7F2" stroke-width="2"/>
+  <rect x="176" y="172" width="368" height="150" rx="38" fill="#F8FAFF" stroke="#E6EBFF" stroke-width="2"/>
+  <rect x="214" y="206" width="180" height="16" rx="8" fill="#111111"/>
+  <rect x="214" y="238" width="230" height="12" rx="6" fill="#C7D2FE"/>
+  <rect x="214" y="268" width="164" height="12" rx="6" fill="#D7E3FF"/>
+  <rect x="194" y="360" width="332" height="52" rx="26" fill="#E8EEFF"/>
+  <rect x="306" y="346" width="108" height="148" rx="28" fill="url(#cardBlue)">
+    <animateTransform attributeName="transform" type="translate" values="0 -92; 0 16; 0 16; 0 -92" keyTimes="0;0.28;0.68;1" dur="4.6s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="334" y="378" width="42" height="34" rx="10" fill="#F7DFA1">
+    <animateTransform attributeName="transform" type="translate" values="0 -92; 0 16; 0 16; 0 -92" keyTimes="0;0.28;0.68;1" dur="4.6s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="332" y="434" width="58" height="10" rx="5" fill="#FFFFFF">
+    <animateTransform attributeName="transform" type="translate" values="0 -92; 0 16; 0 16; 0 -92" keyTimes="0;0.28;0.68;1" dur="4.6s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="262" y="404" width="196" height="4" rx="2" fill="#D4DEFF" opacity="0.85"/>
+  <g>
+    <rect x="224" y="438" width="272" height="148" rx="34" fill="#FFFFFF" stroke="#E4E7F2" stroke-width="2">
+      <animate attributeName="y" values="486;438;438;486" keyTimes="0;0.34;0.76;1" dur="4.6s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="256" y="470" width="158" height="8" rx="4" fill="#111111" opacity="0.85">
+      <animate attributeName="y" values="518;470;470;518" keyTimes="0;0.34;0.76;1" dur="4.6s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="256" y="494" width="198" height="8" rx="4" fill="#CBD5E1">
+      <animate attributeName="y" values="542;494;494;542" keyTimes="0;0.34;0.76;1" dur="4.6s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="256" y="518" width="164" height="8" rx="4" fill="#D8E2FF">
+      <animate attributeName="y" values="566;518;518;566" keyTimes="0;0.34;0.76;1" dur="4.6s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="256" y="450" width="208" height="4" rx="2" fill="#CBD5E1" stroke-dasharray="8 8">
+      <animate attributeName="y" values="498;450;450;498" keyTimes="0;0.34;0.76;1" dur="4.6s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  <circle cx="474" cy="544" r="26" fill="#426CFF">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.56;0.64;0.88;1" dur="4.6s" repeatCount="indefinite"/>
+    <animate attributeName="transform" values="translate(0 12);translate(0 12);translate(0 0);translate(0 0);translate(0 12)" keyTimes="0;0.56;0.64;0.88;1" dur="4.6s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M463 544L472 553L488 535" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.56;0.64;0.88;1" dur="4.6s" repeatCount="indefinite"/>
+  </path>
+</svg>

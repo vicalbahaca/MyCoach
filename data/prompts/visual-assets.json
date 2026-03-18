@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-03-19",
+  "notes": "Prompts internos para regenerar assets offline. No se usan en runtime.",
+  "assets": [
+    {
+      "file": "public/generated/routine-export-machine.svg",
+      "kind": "animated-svg",
+      "prompt": "Generate the code of a continuous SVG animation for MyCoach: a minimal editorial app machine in ivory white and electric blue, with a glossy routine card sliding into a side slot, a receipt-style mesocycle sheet unrolling upward, and a small success stamp locking in. Keep the UI flat and premium, with rounded corners, thin outlines, subtle fog gradients and smooth easing."
+    },
+    {
+      "file": "public/generated/body-scan-analysis.svg",
+      "kind": "animated-svg",
+      "prompt": "Generate a premium SVG illustration for MyCoach showing a body scan and physique analysis interface: a minimal athlete silhouette, scan brackets, subtle muscle target dots, and a moving horizontal scan line. Use ivory, near-black, pale blue and one vivid blue accent. Keep the composition clean, technical and editorial, not sci-fi."
+    },
+    {
+      "file": "public/generated/mesocycle-progress.svg",
+      "kind": "svg",
+      "prompt": "Generate a high-end SVG card for MyCoach showing mesocycle progression across four rotations. Include a smooth line chart, compact KPI pills, light grid lines, short Spanish labels and an elegant ivory-to-blue mist background. The style should feel closer to a premium health app than a generic dashboard."
+    },
+    {
+      "file": "public/generated/phone-hero-overview.svg",
+      "kind": "svg",
+      "prompt": "Generate a premium mobile app dashboard mockup for MyCoach inspired by calorie tracking apps but adapted to training: top week selector, large block with plan readiness, circular progress meter, three small KPI cards and a recent activity feed. Use ivory backgrounds, black CTA details, soft blue accents and rounded iPhone-like framing."
+    },
+    {
+      "file": "public/generated/phone-onboarding.svg",
+      "kind": "svg",
+      "prompt": "Generate a mobile onboarding mockup for MyCoach with a slim progress bar, one large question, two selection cards, helper text and a black bottom CTA. The visual language should be minimal, premium and airy, with a cold ivory background and subtle blue accents."
+    },
+    {
+      "file": "public/generated/phone-routine.svg",
+      "kind": "svg",
+      "prompt": "Generate a mobile routine results mockup for MyCoach with a mesocycle summary header, priority chips, two compact KPI rings and stacked session cards with exercise rows. Make it feel premium, editorial and product-ready, using ivory white, near-black, soft gray and blue accents."
+    },
+    {
+      "file": "public/generated/loader-orbit.svg",
+      "kind": "animated-svg",
+      "prompt": "Generate a loader SVG for MyCoach made of two rotating orbit rings, a central pulse and three short progress dashes. Keep it minimal, elegant and brand-aligned in blue, ivory and black."
+    }
+  ]
+}

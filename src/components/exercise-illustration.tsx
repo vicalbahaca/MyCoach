@@ -155,11 +155,11 @@ export function ExerciseIllustration({ pattern, name }: Props) {
         width="268"
         height="208"
         rx="26"
-        fill="rgba(255,255,255,0.72)"
-        stroke="rgba(87,150,255,0.2)"
+        fill="rgba(255,255,255,0.82)"
+        stroke="rgba(66,108,255,0.16)"
       />
       <g
-        stroke="rgba(36,99,235,0.88)"
+        stroke="rgba(17,17,17,0.9)"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="10"
@@ -168,8 +168,8 @@ export function ExerciseIllustration({ pattern, name }: Props) {
       </g>
       <defs>
         <linearGradient id="exercise-bg" x1="28" y1="18" x2="312" y2="262" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#EFF6FF" />
-          <stop offset="1" stopColor="#D9ECFF" />
+          <stop stopColor="#FBFAF7" />
+          <stop offset="1" stopColor="#EAF0FF" />
         </linearGradient>
       </defs>
     </svg>

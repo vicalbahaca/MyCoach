@@ -1,0 +1,46 @@
+<svg width="760" height="900" viewBox="0 0 760 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scanBg" x1="112" y1="88" x2="620" y2="822" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F0F4FF"/>
+    </linearGradient>
+    <linearGradient id="scanLine" x1="200" y1="0" x2="560" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#426CFF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#426CFF"/>
+      <stop offset="1" stop-color="#426CFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="760" height="900" rx="96" fill="#F7F5EF"/>
+  <rect x="92" y="78" width="576" height="744" rx="56" fill="url(#scanBg)" stroke="#E5E7EB" stroke-width="2"/>
+  <path d="M238 226C238 184.026 272.026 150 314 150H446C487.974 150 522 184.026 522 226V250C522 295.582 504 339.313 472 371L448 394V502L484 610V682C484 713.48 458.48 739 427 739H333C301.52 739 276 713.48 276 682V610L312 502V394L288 371C256 339.313 238 295.582 238 250V226Z" fill="#111111" fill-opacity="0.04" stroke="#111111" stroke-opacity="0.12" stroke-width="2"/>
+  <circle cx="380" cy="220" r="54" fill="#F8FAFF" stroke="#D6E0FF" stroke-width="2"/>
+  <path d="M328 220C328 191.281 351.281 168 380 168C408.719 168 432 191.281 432 220V244C432 274.928 406.928 300 376 300H384C353.072 300 328 274.928 328 244V220Z" fill="#DDE6FF"/>
+  <rect x="182" y="200" width="66" height="66" rx="20" stroke="#426CFF" stroke-width="6"/>
+  <path d="M182 238H156V176H218V200" stroke="#426CFF" stroke-width="6" stroke-linecap="round"/>
+  <rect x="512" y="200" width="66" height="66" rx="20" stroke="#426CFF" stroke-width="6"/>
+  <path d="M578 238H604V176H542V200" stroke="#426CFF" stroke-width="6" stroke-linecap="round"/>
+  <rect x="182" y="626" width="66" height="66" rx="20" stroke="#426CFF" stroke-width="6"/>
+  <path d="M182 654H156V716H218V692" stroke="#426CFF" stroke-width="6" stroke-linecap="round"/>
+  <rect x="512" y="626" width="66" height="66" rx="20" stroke="#426CFF" stroke-width="6"/>
+  <path d="M578 654H604V716H542V692" stroke="#426CFF" stroke-width="6" stroke-linecap="round"/>
+  <g opacity="0.9">
+    <circle cx="330" cy="352" r="10" fill="#426CFF"/>
+    <circle cx="432" cy="352" r="10" fill="#426CFF"/>
+    <circle cx="318" cy="478" r="10" fill="#111111"/>
+    <circle cx="442" cy="478" r="10" fill="#111111"/>
+    <circle cx="380" cy="612" r="10" fill="#426CFF"/>
+  </g>
+  <path d="M340 352H248" stroke="#C7D2FE" stroke-width="3" stroke-linecap="round"/>
+  <path d="M422 352H516" stroke="#C7D2FE" stroke-width="3" stroke-linecap="round"/>
+  <path d="M328 478H214" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M452 478H548" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>
+  <path d="M380 612V724" stroke="#C7D2FE" stroke-width="3" stroke-linecap="round"/>
+  <rect x="190" y="118" width="380" height="4" rx="2" fill="#D8E2FF"/>
+  <rect x="200" y="0" width="360" height="12" rx="6" fill="url(#scanLine)">
+    <animate attributeName="y" values="160;690;160" dur="4.8s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="458" y="112" width="112" height="42" rx="21" fill="#111111"/>
+  <text x="514" y="138" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">Scan</text>
+  <rect x="142" y="744" width="476" height="50" rx="25" fill="#F6F7FB" stroke="#E4E7F2" stroke-width="2"/>
+  <text x="380" y="776" text-anchor="middle" fill="#111111" font-family="Arial, sans-serif" font-size="20" font-weight="700">Lectura visual opcional para personalizar el bloque</text>
+</svg>

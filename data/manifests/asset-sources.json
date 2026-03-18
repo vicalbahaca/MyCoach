@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-03-19",
+  "photos": [
+    {
+      "file": "public/photos/bodybuilder-workout.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Bodybuilder_doing_an_exercise.jpg",
+      "credit": "Suggmehard66100",
+      "license": "CC0 1.0",
+      "usage": ["landing", "exercise modal"]
+    },
+    {
+      "file": "public/photos/crossfit-ben-smith.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Ben_Smith_2012_CrossFit_Games.jpg",
+      "credit": "Lance Cpl. Derrick K. Irions",
+      "license": "Public domain (US Federal Government work)",
+      "usage": ["landing", "exercise modal"]
+    },
+    {
+      "file": "public/photos/gym-athlete-woman.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Beautiful_athlete_woman_working_out_in_the_gym.jpg",
+      "credit": "Nenad Stojkovic",
+      "license": "CC BY 2.0",
+      "usage": ["landing", "exercise modal"]
+    },
+    {
+      "file": "public/photos/workout-room.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:WorkoutRoom.jpg",
+      "credit": "Seanmurphy27",
+      "license": "Public domain",
+      "usage": ["landing", "exercise modal"]
+    }
+  ],
+  "generated": [
+    "public/generated/routine-export-machine.svg",
+    "public/generated/body-scan-analysis.svg",
+    "public/generated/mesocycle-progress.svg",
+    "public/generated/phone-hero-overview.svg",
+    "public/generated/phone-onboarding.svg",
+    "public/generated/phone-routine.svg",
+    "public/generated/loader-orbit.svg"
+  ]
+}
