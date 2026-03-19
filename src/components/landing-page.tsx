@@ -1,10 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Bell,
-  Bolt,
-  ChevronRight,
-  CircleUserRound,
   Dumbbell,
   Image as ImageIcon,
   TableProperties,
@@ -16,41 +12,41 @@ import { landingPhotos } from "@/lib/visual-assets";
 const pillars = [
   {
     icon: Dumbbell,
-    title: "Routine Specificity",
-    text: "Entrenamientos adaptados a tu biomecánica, material disponible y objetivos específicos de rendimiento o competición.",
+    title: "Análisis físico",
+    text: "Analizamos tu físico mediante imágenes o vídeo para detectar asimetrías, dominancias y prioridades reales antes de diseñar el bloque.",
   },
   {
     icon: ImageIcon,
-    title: "Physical Analysis",
-    text: "Monitorización visual opcional y lectura técnica para decidir prioridades musculares, sesgos y reajustes del bloque.",
+    title: "Rutina personalizada",
+    text: "Construimos la rutina en función de tu historial, objetivo, sensaciones, material disponible y contexto actual.",
   },
   {
     icon: TableProperties,
-    title: "Excel Export",
-    text: "Exporta el mesociclo en un formato editable y profesional para seguir cargas, RIR, sesiones y progresión real.",
+    title: "Exporta tu progreso",
+    text: "Descarga la rutina en Excel para registrar cargas, repeticiones, RIR y la evolución completa de tu mesociclo.",
   },
 ] as const;
 
 const steps = [
   {
     step: "01",
-    title: "Context",
-    text: "Analizamos tu punto de partida, historial, molestias y objetivo del bloque antes de pedir nada más.",
+    title: "Contexto",
+    text: "Analizamos tu rutina actual, tu punto de partida, tu objetivo y todo lo que condiciona la planificación.",
   },
   {
     step: "02",
-    title: "Visual",
-    text: "Vídeo o imágenes opcionales para detectar asimetrías, dominancias y posibles sesgos del planteamiento.",
+    title: "Análisis físico",
+    text: "Revisamos tu físico mediante vídeo o imágenes para detectar asimetrías, dominancias y posibles sesgos físicos.",
   },
   {
     step: "03",
-    title: "Custom Form",
-    text: "Formulario corto y técnico con preguntas que sí cambian la estructura, el volumen y la selección de ejercicios.",
+    title: "Formulario personalizado",
+    text: "Formulario corto y poco técnico con preguntas que cambiarán la estructura, el volumen y la selección de ejercicios.",
   },
   {
     step: "04",
-    title: "Editable Routine",
-    text: "Recibe tu mesociclo dinámico, revísalo, cambia ejercicios y expórtalo a Excel cuando lo necesites.",
+    title: "Rutina editable",
+    text: "Recibe tu rutina personalizada en un Excel editable desde el que podrás seguir tu progreso.",
   },
 ] as const;
 
@@ -60,45 +56,25 @@ export function LandingPage() {
   return (
     <>
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/30 bg-[#f9f9f7]/75 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 py-4">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center px-6 py-4">
           <BrandMark className="text-2xl font-extrabold" />
-
-          <div className="hidden items-center space-x-8 md:flex">
-            <a
-              className="border-b-2 border-[#0050cc] py-1 text-sm font-bold tracking-tight text-[#0050cc]"
-              href="#inicio"
-            >
-              Inicio
-            </a>
-            <a
-              className="py-1 text-sm font-medium tracking-tight text-[#1b1b1b]/60 transition-all hover:text-[#0050cc]"
-              href="#programa"
-            >
-              Programa
-            </a>
-            <a
-              className="py-1 text-sm font-medium tracking-tight text-[#1b1b1b]/60 transition-all hover:text-[#0050cc]"
-              href="#elite"
-            >
-              Élite
-            </a>
-          </div>
-
-          <div className="flex items-center gap-4 text-slate-500">
-            <Bell className="h-5 w-5 cursor-pointer" />
-            <CircleUserRound className="h-6 w-6 cursor-pointer" />
-          </div>
         </div>
       </nav>
 
       <main className="overflow-x-hidden bg-[#f9f9f7] pb-32 pt-24 text-[#1a1c1b] lg:pb-0">
-        <section className="relative mx-auto max-w-[1440px] px-6 py-12 lg:py-24" id="inicio">
+        <section className="relative mx-auto max-w-[1440px] px-6 py-16" id="inicio">
           <div className="grid items-center gap-12 lg:grid-cols-12">
             <div className="z-10 lg:col-span-6">
               <h1 className="mb-8 font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.05em] text-[#1b1b1b] md:text-7xl lg:text-8xl">
                 Entrena como la <span className="italic text-[#0050cc]">élite</span> con
-                mesociclos de alto rendimiento
+                rutinas personalizadas
               </h1>
+
+              <p className="mb-8 max-w-2xl text-lg leading-relaxed text-[#424656]">
+                Diseña tu rutina personalizada para hipertrofia, fuerza, CrossFit o
+                Hyrox con análisis físico, contexto real y exportación a Excel para
+                seguir tu progreso.
+              </p>
 
               <div className="flex flex-col items-start gap-4 sm:flex-row">
                 <Link
@@ -107,11 +83,6 @@ export function LandingPage() {
                 >
                   Iniciar proceso
                 </Link>
-
-                <div className="flex items-center gap-3 rounded-2xl bg-[#f1f3f8] px-4 py-3">
-                  <Bolt className="h-5 w-5 fill-[#0050cc] text-[#0050cc]" />
-                  <span className="text-sm font-medium">Resultados pro garantizados</span>
-                </div>
               </div>
             </div>
 
@@ -138,7 +109,7 @@ export function LandingPage() {
                 Metodología Élite
               </p>
               <h2 className="font-display text-4xl font-bold tracking-[-0.04em] text-[#1a1c1b] md:text-5xl">
-                Tres pilares de rendimiento absoluto.
+                Tres pilares para construir tu rutina.
               </h2>
             </div>
 
@@ -185,27 +156,9 @@ export function LandingPage() {
               </h2>
               <p className="mb-8 text-lg leading-relaxed text-[#424656]">
                 No creemos en plantillas genéricas. Nuestra lógica de contexto personal
-                analiza tu historial, el equipo disponible y la fatiga acumulada para
-                recalibrar tu mesociclo en tiempo real.
+                analiza tu físico, tu historial, tus sensaciones, la fatiga acumulada y
+                el equipo disponible para construir la mejor rutina posible para ti.
               </p>
-              <ul className="space-y-6">
-                <li className="flex items-start gap-4">
-                  <span className="rounded-full bg-[#dae1ff] p-2 text-[#0050cc]">
-                    <ChevronRight className="h-4 w-4" />
-                  </span>
-                  <span className="font-medium text-[#1a1c1b]">
-                    Adaptación biomecánica individualizada.
-                  </span>
-                </li>
-                <li className="flex items-start gap-4">
-                  <span className="rounded-full bg-[#dae1ff] p-2 text-[#0050cc]">
-                    <ChevronRight className="h-4 w-4" />
-                  </span>
-                  <span className="font-medium text-[#1a1c1b]">
-                    Gestión de carga basada en datos reales.
-                  </span>
-                </li>
-              </ul>
             </div>
           </div>
         </section>
@@ -215,6 +168,9 @@ export function LandingPage() {
             <h2 className="mb-16 text-center font-display text-4xl font-extrabold">
               Tu camino a la élite.
             </h2>
+            <p className="-mt-10 mb-16 text-center text-lg text-[#424656]">
+              Genera tu rutina personalizada en sencillos pasos.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {steps.map((step, index) => (
                 <div
@@ -239,30 +195,48 @@ export function LandingPage() {
         </section>
 
         <section className="mx-auto max-w-[1440px] px-6 py-24">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+            <div>
+              <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
+                La disciplina es clave
+              </p>
+              <h2 className="mb-8 font-display text-5xl font-bold leading-tight tracking-[-0.05em]">
+                Consigue un mesociclo personalizado que evoluciona contigo.
+              </h2>
+              <p className="max-w-3xl text-lg leading-relaxed text-[#424656]">
+                Con MyCoach consigues un mesociclo, entendido como una rutina de varias
+                semanas con progresión real, objetivos claros y una estructura pensada
+                para que notes mejoras significativas bloque a bloque.
+              </p>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200/30 bg-white p-8 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
+              <p className="text-sm leading-relaxed text-[#424656]">
+                Cuando terminas el mesociclo, vuelves a realizar el proceso añadiendo tu
+                nuevo contexto y feedback. Así generamos una nueva rutina adaptada a tu
+                evolución diaria para que la rutina se moldee a ti y no tú a tu rutina.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1440px] px-6 py-24">
           <div className="grid items-end gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
+              <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
+                Optimización avanzada
+              </p>
               <h2 className="mb-8 font-display text-5xl font-bold leading-tight tracking-[-0.05em]">
                 Optimizado para <span className="text-[#0050cc]">hipertrofia</span> de
                 máximo nivel y <span className="text-[#0050cc]">rendimiento</span> híbrido
-                en disciplinas como <span className="text-[#0050cc]">Hyrox</span>.
+                en disciplinas como <span className="text-[#0050cc]">CrossFit</span>,
+                <span className="text-[#0050cc]"> Hyrox</span> o
+                <span className="text-[#0050cc]"> powerlifting</span>.
               </h2>
-              <div className="flex flex-wrap gap-3">
-                {["Strength", "Endurance", "Recovery"].map((tag) => (
-                  <span
-                    className="rounded-full bg-[#dae1ff] px-6 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#003fa4]"
-                    key={tag}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[2rem] border border-slate-200/30 bg-[#f4f4f2] p-8">
-              <p className="text-sm leading-relaxed text-[#424656]">
+              <p className="max-w-4xl text-lg leading-relaxed text-[#424656]">
                 La plataforma utiliza una lógica de periodización avanzada para asegurar
-                que la fatiga no comprometa tus ganancias en hipertrofia mientras escalas
-                el rendimiento cardiovascular y la calidad del bloque.
+                que la fatiga no comprometa tus ganancias de hipertrofia mientras escalas
+                en rendimiento cardiovascular.
               </p>
             </div>
           </div>
