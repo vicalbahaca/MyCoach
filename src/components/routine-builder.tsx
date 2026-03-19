@@ -82,7 +82,7 @@ const STEP_META = [
   },
   {
     id: 2,
-    title: "Contexto",
+    title: "Rutina actual",
     blurb: "Aqui entra el bloque actual: puedes escribirlo en texto plano o adjuntarlo en archivo.",
     icon: FileText,
   },
@@ -190,6 +190,15 @@ export function RoutineBuilder() {
   function updateProfile<K extends keyof IntakeProfile>(key: K, value: IntakeProfile[K]) {
     invalidateAnalysis();
     setProfile((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateTrainingDescription(value: string) {
+    invalidateAnalysis();
+    setProfile((current) => ({
+      ...current,
+      currentTraining: value,
+      currentRoutineText: value,
+    }));
   }
 
   function toggleDiscipline(value: string) {
@@ -831,51 +840,46 @@ export function RoutineBuilder() {
             ) : null}
 
             {step === 2 ? (
-              <div className="space-y-10">
-                <FormStepIntro
-                  eyebrow="Contexto de entrenamiento"
-                  text="Puedes escribir cómo entrena ahora el atleta, pegar la rutina completa o adjuntar el archivo actual para que el análisis parta de algo real."
-                  title="Rutina actual en texto o archivo."
-                />
+              <div className="mx-auto max-w-xl space-y-12">
+                <section className="space-y-4">
+                  <label className="form-ui-label block pl-1">
+                    Descripción del entrenamiento
+                  </label>
+                  <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ring-1 ring-transparent transition-all focus-within:ring-2 focus-within:ring-[rgba(0,80,204,0.12)]">
+                    <textarea
+                      className="min-h-[240px] w-full resize-none border-0 bg-transparent px-6 py-6 font-display text-sm font-semibold text-[var(--form-ink)] outline-none placeholder:text-[rgba(114,118,135,0.45)]"
+                      onChange={(event) => updateTrainingDescription(event.target.value)}
+                      placeholder="Pega aquí tu rutina actual o describe cómo entrenas hoy (ej: 4 días de fuerza, foco en tren inferior...)"
+                      value={profile.currentRoutineText || profile.currentTraining || ""}
+                    />
+                  </div>
+                  <p className="pl-1 text-[11px] font-medium italic leading-relaxed text-[var(--form-muted)]/80">
+                    Este paso es opcional pero nos ayuda a entender tu punto de partida.
+                  </p>
+                </section>
 
-                <FormSection
-                  description="Resume el tipo de entrenamiento actual: división, clases, deporte, frecuencia o cualquier mezcla que esté haciendo ahora mismo."
-                  label="Entrenamiento actual"
-                >
-                  <FormTextArea
-                    label="Entrenamiento actual"
-                    onChange={(value) => updateProfile("currentTraining", value)}
-                    placeholder="Ej: torso-pierna 4 días, Hyrox 2 días y carrera 1 día..."
-                    rows={4}
-                    value={profile.currentTraining || ""}
-                  />
-                </FormSection>
-
-                <FormSection
-                  description="Añade feedback del bloque, limitaciones, contexto competitivo o cualquier nota que cambie la planificación."
-                  label="Texto libre"
-                >
-                  <FormTextArea
-                    label="Rutina o contexto pegado"
-                    onChange={(value) => updateProfile("currentRoutineText", value)}
-                    placeholder="Pega aquí la rutina actual, sensaciones, feedback del bloque o notas del atleta."
-                    rows={8}
-                    value={profile.currentRoutineText || ""}
-                  />
-                </FormSection>
-
-                <FormSection
-                  description="Acepta TXT, CSV, Excel, DOCX, PDF o Markdown."
-                  label="Adjuntar archivo"
-                >
-                  <FormUploadTile
-                    accept=".txt,.csv,.xlsx,.xls,.docx,.pdf,.md"
-                    onChange={(event) => updateFiles("context", event)}
-                    subtitle="Sube la rutina actual o cualquier documento útil para arrancar el análisis."
-                    title="Añadir archivo"
-                  />
+                <section className="space-y-4">
+                  <label className="form-ui-label block pl-1">Documentos adjuntos</label>
+                  <label className="block cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed border-[rgba(194,198,216,0.9)] bg-white px-6 py-12 text-center shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] transition-all hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(255,255,255,0.96)]">
+                    <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(244,244,242,0.95)] text-[rgba(179,197,255,0.95)]">
+                      <FileText className="h-5 w-5" />
+                    </span>
+                    <span className="block font-display text-base font-bold text-[var(--form-ink)]">
+                      Sube tu rutina actual
+                    </span>
+                    <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--form-muted)]">
+                      PDF, Excel, TXT
+                    </span>
+                    <input
+                      accept=".pdf,.xls,.xlsx,.txt,.csv"
+                      className="hidden"
+                      multiple
+                      onChange={(event) => updateFiles("context", event)}
+                      type="file"
+                    />
+                  </label>
                   <FormFilePills files={contextFiles} />
-                </FormSection>
+                </section>
               </div>
             ) : null}
 
