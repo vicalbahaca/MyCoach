@@ -53,7 +53,6 @@ import type {
   DynamicQuestion,
   DynamicSection,
   ExercisePlan,
-  GenerateRoutinePayload,
   IntakeAnalysis,
   IntakeProfile,
   RoutinePlan,
@@ -156,9 +155,6 @@ export function RoutineBuilder() {
   const [answers, setAnswers] = useState<DynamicAnswers>({});
   const [routine, setRoutine] = useState<RoutinePlan | null>(null);
   const [rotationIndex, setRotationIndex] = useState(0);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isRevising, setIsRevising] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<ExercisePlan | null>(null);
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
@@ -167,6 +163,7 @@ export function RoutineBuilder() {
   const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [changeRequest, setChangeRequest] = useState("");
+  const [isMaintenanceOpen, setIsMaintenanceOpen] = useState(false);
   const [visibleDisciplineValues, setVisibleDisciplineValues] = useState<string[]>(
     () => getInitialSportDisciplineOptions().map((option) => option.value)
   );
@@ -257,104 +254,25 @@ export function RoutineBuilder() {
     startTransition(() => setStep(nextStep));
   }
 
-  async function personalizeForm() {
-    setIsAnalyzing(true);
+  function openMaintenanceModal() {
     setErrorMessage("");
+    setIsMaintenanceOpen(true);
+  }
 
-    try {
-      const formData = new FormData();
-      formData.append("payload", JSON.stringify({ profile }));
-      contextFiles.forEach((file) => formData.append("contextFiles", file));
-      visualFiles.forEach((file) => formData.append("visualFiles", file));
-
-      const response = await fetch("/api/intake/analyze", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo preparar el formulario.");
-      }
-
-      const data = (await response.json()) as { analysis: IntakeAnalysis };
-      setAnalysis(data.analysis);
-      moveTo(4);
-    } catch {
-      setErrorMessage("No se pudo personalizar el formulario. Vuelve a intentarlo.");
-    } finally {
-      setIsAnalyzing(false);
-    }
+  function personalizeForm() {
+    openMaintenanceModal();
   }
 
   function updateAnswer(questionId: string, value: DynamicAnswerValue) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
   }
 
-  async function generatePlan() {
-    if (!analysis) return;
-
-    setIsGenerating(true);
-    setErrorMessage("");
-
-    try {
-      const payload: GenerateRoutinePayload = {
-        profile,
-        analysis,
-        answers,
-      };
-
-      const response = await fetch("/api/routine/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo generar la rutina.");
-      }
-
-      const data = (await response.json()) as { routine: RoutinePlan };
-      setRoutine(data.routine);
-      setRotationIndex(0);
-    } catch {
-      setErrorMessage("No se pudo generar la rutina. Vuelve a intentarlo.");
-    } finally {
-      setIsGenerating(false);
-    }
+  function generatePlan() {
+    openMaintenanceModal();
   }
 
-  async function reviseCurrentPlan() {
-    if (!routine || !analysis || !changeRequest.trim()) return;
-
-    setIsRevising(true);
-    setErrorMessage("");
-
-    try {
-      const response = await fetch("/api/routine/revise", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          profile,
-          analysis,
-          answers,
-          currentRoutine: routine,
-          changeRequest,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo revisar la rutina.");
-      }
-
-      const data = (await response.json()) as { routine: RoutinePlan };
-      setRoutine(data.routine);
-      setIsModifyOpen(false);
-      setChangeRequest("");
-    } catch {
-      setErrorMessage("No se pudo modificar la rutina. Vuelve a intentarlo.");
-    } finally {
-      setIsRevising(false);
-    }
+  function reviseCurrentPlan() {
+    openMaintenanceModal();
   }
 
   function swapExercise(alternative: string) {
@@ -410,19 +328,12 @@ export function RoutineBuilder() {
           ?.exercises.find((exercise) => exercise.id === swapTarget.exerciseId) || null
       : null;
 
-  useEffect(() => {
-    if (!currentSwapExercise) {
-      setSelectedSwapAlternative("");
-      return;
-    }
-
-    if (
-      !selectedSwapAlternative ||
-      !currentSwapExercise.alternatives.includes(selectedSwapAlternative)
-    ) {
-      setSelectedSwapAlternative(currentSwapExercise.alternatives[0] || "");
-    }
-  }, [currentSwapExercise, selectedSwapAlternative]);
+  const activeSwapAlternative =
+    currentSwapExercise &&
+    selectedSwapAlternative &&
+    currentSwapExercise.alternatives.includes(selectedSwapAlternative)
+      ? selectedSwapAlternative
+      : currentSwapExercise?.alternatives[0] || "";
 
   if (routine) {
     const selectedVisual = selectedExercise ? getExerciseVisual(selectedExercise.pattern) : null;
@@ -581,7 +492,7 @@ export function RoutineBuilder() {
                   </h2>
                   <div className="space-y-4">
                     {swapExerciseOptions.map((alternative, index) => {
-                      const selected = selectedSwapAlternative === alternative;
+                      const selected = activeSwapAlternative === alternative;
                       const difficulty = Math.min(3, (index % 3) + 1);
                       const equivalence = Math.max(82, 95 - index * 6);
 
@@ -680,7 +591,7 @@ export function RoutineBuilder() {
                 <div>
                   <h5 className="font-display mb-1 text-lg font-bold">Nota del Coach</h5>
                   <p className="italic leading-relaxed text-[#424656]">
-                    &quot;Sustituir por {selectedSwapAlternative || swapExerciseOptions[0]} es una
+                    &quot;Sustituir por {activeSwapAlternative || swapExerciseOptions[0]} es una
                     opción táctica sólida si quieres mantener el estímulo del día sin
                     pagar más fatiga de la necesaria. Mantén una ejecución limpia y no
                     fuerces la carga si la alternativa te cambia el patrón dominante.&quot;
@@ -1106,13 +1017,7 @@ export function RoutineBuilder() {
 
           <FormFooter
             backLabel={step > 1 ? "Paso anterior" : undefined}
-            nextDisabled={isAnalyzing || isGenerating}
-            nextIcon={
-              isAnalyzing || isGenerating ? (
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              ) : undefined
-            }
-            nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
+            nextLabel={getNextLabel(step)}
             onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
             onNext={() => {
               if (step === 1) {
@@ -1146,27 +1051,46 @@ export function RoutineBuilder() {
         </section>
       </section>
 
-      {isAnalyzing || isGenerating ? (
-        <LoaderOverlay
-          title={isAnalyzing ? "Personalizando el formulario" : "Generando tu mesociclo"}
-          text={
-            isAnalyzing
-              ? "MyCoach está revisando contexto y material opcional para decidir qué preguntas merece la pena hacer."
-              : "MyCoach está construyendo la rutina final con toda la información guardada."
-          }
-        />
+      {isMaintenanceOpen ? (
+        <ModalShell onClose={() => setIsMaintenanceOpen(false)} title="Plataforma en mantenimiento">
+          <div className="space-y-6">
+            <p className="max-w-2xl text-base leading-8 text-slate-700">
+              La plataforma está temporalmente en mantenimiento. Hemos desactivado
+              momentáneamente la generación y personalización asistida mientras terminamos
+              ajustes internos.
+            </p>
+            <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-5">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
+                Estado
+              </div>
+              <p className="text-sm leading-7 text-slate-700">
+                El formulario visual sigue disponible, pero cualquier acción que requiera
+                procesamiento automático volverá a habilitarse cuando finalice el mantenimiento.
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <button
+                className="cta-button px-6 py-3 text-sm"
+                onClick={() => setIsMaintenanceOpen(false)}
+                type="button"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </ModalShell>
       ) : null}
     </main>
   );
 }
 
-function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean) {
+function getNextLabel(step: number) {
   if (step === 3) {
-    return isAnalyzing ? "Personalizando..." : "Personalizar formulario";
+    return "Personalizar formulario";
   }
 
   if (step === 6) {
-    return isGenerating ? "Generando..." : "Generar rutina";
+    return "Generar rutina";
   }
 
   return "Continuar";
@@ -1375,96 +1299,6 @@ function DetailBlock({
         {title}
       </div>
       <p className="text-sm leading-7 text-slate-700">{value}</p>
-    </div>
-  );
-}
-
-function LoaderOverlay({
-  title,
-  text,
-}: {
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-[#f9f9f7] px-6 text-[#1a1c1b]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-1/4 -top-1/4 h-[800px] w-[800px] rounded-full bg-[#0050cc]/5 blur-[120px]" />
-        <div className="absolute -bottom-1/4 -left-1/4 h-[600px] w-[600px] rounded-full bg-[#0266ff]/10 blur-[100px]" />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "radial-gradient(#0050cc 0.5px, transparent 0.5px)",
-            backgroundSize: "32px 32px",
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center">
-        <div className="animate-pulse-soft mb-20">
-          <BrandMark className="text-5xl font-black text-[#1b1b1b]" />
-        </div>
-
-        <div className="w-full max-w-2xl">
-          <div className="rounded-[2rem] bg-[#f4f4f2] p-12 backdrop-blur-sm">
-            <div className="mb-8 flex items-end justify-between">
-              <div className="flex flex-col">
-                <span className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#0050cc]">
-                  Motor de Análisis
-                </span>
-                <h1 className="font-display text-5xl font-extrabold leading-none tracking-[-0.05em]">
-                  Generando<span className="text-[#0050cc]">.</span>
-                </h1>
-              </div>
-              <div className="text-right">
-                <span className="font-display text-6xl font-black leading-none text-[#1a1c1b]/10">
-                  01
-                </span>
-              </div>
-            </div>
-
-            <div className="mb-12 space-y-6">
-              <div className="group flex items-center gap-4">
-                <div className="h-2 w-2 rounded-full bg-[#0050cc] ring-4 ring-[#0050cc]/20" />
-                <p className="text-lg font-medium text-[#1a1c1b]">{title}...</p>
-              </div>
-              <div className="ml-8 flex items-center gap-4 opacity-40">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#727687]" />
-                <p className="text-lg font-medium text-[#1a1c1b]">
-                  Generando tu mesociclo...
-                </p>
-              </div>
-              <div className="ml-16 flex items-center gap-4 opacity-40">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#727687]" />
-                <p className="text-lg font-medium text-[#1a1c1b]">
-                  Organizando prioridades, frecuencia y progresión
-                </p>
-              </div>
-            </div>
-
-            <div className="loading-shimmer relative h-[4px] w-full overflow-hidden rounded-full bg-[#e2e3e1]">
-              <div className="absolute left-0 top-0 h-full w-[40%] bg-[#0050cc] transition-all duration-1000 ease-out" />
-            </div>
-
-            <div className="mt-4 flex justify-between">
-              <span className="text-[10px] uppercase tracking-[0.22em] text-[#727687]">
-                Optimización Biomecánica
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.22em] text-[#727687]">
-                v2.4.0
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-16 ml-auto max-w-sm text-right opacity-60">
-            <p className="text-sm italic leading-relaxed text-[#424656]">
-              &quot;La excelencia no es un acto, es un hábito. Estamos calibrando
-              cada repetición para que tu hábito sea la victoria.&quot;
-            </p>
-          </div>
-          <p className="sr-only">{text}</p>
-        </div>
-      </div>
     </div>
   );
 }
