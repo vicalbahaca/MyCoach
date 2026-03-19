@@ -820,7 +820,7 @@ export function RoutineBuilder() {
                     {canLoadMoreDisciplines ? (
                       <button
                         aria-label="Mostrar 7 disciplinas más"
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--form-surface-high)] text-[var(--form-outline-strong)] transition hover:-translate-y-0.5 hover:bg-[var(--form-accent-soft)] hover:text-[var(--form-accent)]"
+                        className="form-ui-chip h-11 w-11 bg-transparent text-[var(--form-ink)]"
                         onClick={() =>
                           setVisibleDisciplineValues((current) => [
                             ...current,

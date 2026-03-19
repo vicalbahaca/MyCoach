@@ -380,7 +380,7 @@ export function FormFooter({
         {onBack ? (
           <button
             aria-label={backLabel || "Paso anterior"}
-            className="inline-flex min-h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border border-[var(--form-outline)] bg-white text-[var(--form-ink)] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(0,80,204,0.34)] hover:text-[var(--form-accent)]"
+            className="form-ui-cta min-h-[4.5rem] w-[4.5rem] flex-none px-0"
             onClick={onBack}
             type="button"
           >
