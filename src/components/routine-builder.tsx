@@ -1049,30 +1049,12 @@ export function RoutineBuilder() {
 
       {isMaintenanceOpen ? (
         <ModalShell onClose={() => setIsMaintenanceOpen(false)} title="Plataforma en mantenimiento">
-          <div className="space-y-6">
+          <div>
             <p className="max-w-2xl text-base leading-8 text-slate-700">
               La plataforma está temporalmente en mantenimiento. Hemos desactivado
               momentáneamente la generación y personalización asistida mientras terminamos
               ajustes internos.
             </p>
-            <div className="rounded-[24px] border border-slate-200 bg-white px-5 py-5">
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
-                Estado
-              </div>
-              <p className="text-sm leading-7 text-slate-700">
-                El formulario visual sigue disponible, pero cualquier acción que requiera
-                procesamiento automático volverá a habilitarse cuando finalice el mantenimiento.
-              </p>
-            </div>
-            <div className="flex justify-end">
-              <button
-                className="cta-button px-6 py-3 text-sm"
-                onClick={() => setIsMaintenanceOpen(false)}
-                type="button"
-              >
-                Entendido
-              </button>
-            </div>
           </div>
         </ModalShell>
       ) : null}
