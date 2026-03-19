@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 type BrandMarkProps = {
   className?: string;
+  href?: string;
 };
 
-export function BrandMark({ className = "" }: BrandMarkProps) {
+export function BrandMark({ className = "", href = "/" }: BrandMarkProps) {
   const classes = [
     "font-display italic tracking-[-0.05em] text-[#1a1c1b]",
     className,
@@ -10,5 +13,9 @@ export function BrandMark({ className = "" }: BrandMarkProps) {
     .filter(Boolean)
     .join(" ");
 
-  return <span className={classes}>MyCoach</span>;
+  return (
+    <Link aria-label="Ir a la landing de MyCoach" className={classes} href={href}>
+      MyCoach
+    </Link>
+  );
 }
