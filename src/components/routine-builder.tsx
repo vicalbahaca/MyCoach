@@ -805,12 +805,12 @@ export function RoutineBuilder() {
                 <section className="space-y-4">
                   <label className="form-ui-label block pl-1">Documentos adjuntos</label>
                   <FormUploadTile
-                    accept=".pdf,.xls,.xlsx,.txt,.csv,.md,.doc,.docx"
+                    accept=".pdf,.xls,.csv,.txt,.doc"
                     files={contextFiles}
-                    formatHint="PDF, XLS, XLSX, CSV, TXT, MD, DOC, DOCX"
+                    formatHint="Formatos admitidos: PDF, XLS, CSV, TXT, DOC"
                     onChange={(event) => updateFiles("context", event)}
                     onRemoveFile={(file) => removeFile("context", file)}
-                    subtitle="Sube tu rutina actual o documentación de contexto."
+                    subtitle="Añade tu rutina o un archivo de apoyo para entender mejor tu punto de partida."
                     title="Sube tu rutina actual"
                   />
                 </section>
