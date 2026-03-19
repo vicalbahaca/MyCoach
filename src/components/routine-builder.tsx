@@ -859,12 +859,12 @@ export function RoutineBuilder() {
 
                 <div className="space-y-6">
                   <FormUploadTile
-                    accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.bmp,.gif,.mp4,.mov,.webm,.m4v,.avi,.mkv"
+                    accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
                     files={visualFiles}
-                    formatHint="JPG, JPEG, PNG, WEBP, HEIC, HEIF, BMP, GIF, MP4, MOV, WEBM, M4V, AVI, MKV"
+                    formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
                     onChange={(event) => updateFiles("visual", event)}
                     onRemoveFile={(file) => removeFile("visual", file)}
-                    subtitle="Video máx 30s o hasta 10 imágenes (JPG, PNG)"
+                    subtitle="Sube hasta 10 imágenes o un vídeo corto para revisar tu punto de partida."
                     title="Subir Video o Fotos"
                   />
                 </div>
