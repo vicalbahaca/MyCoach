@@ -645,18 +645,14 @@ export function RoutineBuilder() {
               <div className="flex flex-col items-center gap-4 pt-4 md:flex-row-reverse">
                 <button
                   className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#1b1b1b] px-10 py-5 text-lg font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:bg-slate-300 md:w-auto"
-                  disabled={isRevising || !changeRequest.trim()}
+                  disabled={!changeRequest.trim()}
                   onClick={reviseCurrentPlan}
                   type="button"
                 >
-                  {isRevising ? (
-                    <LoaderCircle className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <span>Aplicar cambios</span>
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
+                  <>
+                    <span>Aplicar cambios</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </>
                 </button>
                 <button
                   className="w-full px-10 py-5 text-lg font-semibold text-[#424656] transition-colors hover:text-[#1a1c1b] md:w-auto"
