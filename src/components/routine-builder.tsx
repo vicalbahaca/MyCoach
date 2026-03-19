@@ -13,11 +13,14 @@ import {
   ArrowLeft,
   ArrowRight,
   BrainCircuit,
+  Bolt,
   CheckCircle2,
   ClipboardList,
+  Edit3,
   FileText,
   ImageUp,
   LoaderCircle,
+  PlusCircle,
   ScanEye,
   Sparkles,
   Target,
@@ -130,6 +133,7 @@ export function RoutineBuilder() {
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
     null
   );
+  const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [changeRequest, setChangeRequest] = useState("");
 
@@ -327,8 +331,25 @@ export function RoutineBuilder() {
           ?.exercises.find((exercise) => exercise.id === swapTarget.exerciseId) || null
       : null;
 
+  useEffect(() => {
+    if (!currentSwapExercise) {
+      setSelectedSwapAlternative("");
+      return;
+    }
+
+    if (
+      !selectedSwapAlternative ||
+      !currentSwapExercise.alternatives.includes(selectedSwapAlternative)
+    ) {
+      setSelectedSwapAlternative(currentSwapExercise.alternatives[0] || "");
+    }
+  }, [currentSwapExercise, selectedSwapAlternative]);
+
   if (routine) {
     const selectedVisual = selectedExercise ? getExerciseVisual(selectedExercise.pattern) : null;
+    const currentSwapVisual = currentSwapExercise
+      ? getExerciseVisual(currentSwapExercise.pattern)
+      : null;
 
     return (
       <>
@@ -414,26 +435,178 @@ export function RoutineBuilder() {
         ) : null}
 
         {currentSwapExercise ? (
-          <ModalShell onClose={() => setSwapTarget(null)} title={`Cambiar ${currentSwapExercise.name}`}>
-            <div className="space-y-4">
-              <p className="text-sm leading-7 text-slate-600">
-                Selecciona una alternativa para mantener el mismo hueco dentro del bloque
-                sin rehacer toda la sesión.
-              </p>
-              <div className="grid gap-3">
-                {swapExerciseOptions.map((alternative) => (
-                  <button
-                    className="rounded-[24px] border border-slate-200 bg-[#fafaf8] px-4 py-4 text-left transition hover:border-[rgba(66,108,255,0.28)] hover:bg-white"
-                    key={alternative}
-                    onClick={() => swapExercise(alternative)}
-                    type="button"
-                  >
-                    <div className="font-semibold text-slate-900">{alternative}</div>
-                    <div className="mt-1 text-sm leading-6 text-slate-500">
-                      Sustituye el ejercicio actual y conserva el resto de la estructura.
+          <ModalShell onClose={() => setSwapTarget(null)} title="Cambiar ejercicio">
+            <div className="space-y-10">
+              <div>
+                <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#424656]">
+                  <ArrowLeft className="h-4 w-4 text-[#0050cc]" />
+                  <span>Volver a {currentSwapExercise.name}</span>
+                </div>
+                <p className="max-w-md text-sm leading-7 text-slate-600">
+                  Selecciona una alternativa técnica equivalente para mantener la
+                  intensidad de tu sesión sin romper la lógica del bloque.
+                </p>
+              </div>
+
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="space-y-6">
+                  <h2 className="font-display text-xl font-bold uppercase tracking-tight text-[#1b1b1b]/40">
+                    Ejercicio actual
+                  </h2>
+                  <div className="rounded-[2rem] border-l-4 border-[#c2c6d8] bg-[#f4f4f2] p-8">
+                    <div className="mb-6 flex items-start justify-between">
+                      <div>
+                        <h3 className="font-display mb-1 text-2xl font-extrabold text-[#1b1b1b]">
+                          {currentSwapExercise.name}
+                        </h3>
+                        <span className="rounded-full bg-[#dae1ff] px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#003fa4]">
+                          {currentSwapExercise.category}
+                        </span>
+                      </div>
+                      <Bolt className="h-6 w-6 text-[#595959]" />
                     </div>
-                  </button>
-                ))}
+
+                    <div className="mb-6 aspect-video w-full overflow-hidden rounded-xl bg-[#e2e3e1]">
+                      {currentSwapVisual ? (
+                        <Image
+                          alt={currentSwapVisual.alt}
+                          className="h-full w-full object-cover grayscale opacity-80"
+                          height={960}
+                          src={currentSwapVisual.src}
+                          width={1280}
+                        />
+                      ) : (
+                        <div className="h-full w-full">
+                          <ExerciseIllustration
+                            name={currentSwapExercise.name}
+                            pattern={currentSwapExercise.pattern}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-[#424656]">
+                        {currentSwapExercise.sets} Series × {currentSwapExercise.reps}
+                      </p>
+                      <div className="h-1 w-full rounded-full bg-[#e2e3e1]">
+                        <div className="h-full w-1/4 rounded-full bg-[#c2c6d8]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h2 className="font-display text-xl font-bold uppercase tracking-tight text-[#1b1b1b]">
+                    Alternativas sugeridas
+                  </h2>
+                  <div className="space-y-4">
+                    {swapExerciseOptions.map((alternative, index) => {
+                      const selected = selectedSwapAlternative === alternative;
+                      const difficulty = Math.min(3, (index % 3) + 1);
+                      const equivalence = Math.max(82, 95 - index * 6);
+
+                      return (
+                        <button
+                          className={`group relative w-full rounded-[2rem] p-6 text-left transition-all ${
+                            selected
+                              ? "border-2 border-[#0050cc] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]"
+                              : "bg-[#f4f4f2] hover:bg-white"
+                          }`}
+                          key={alternative}
+                          onClick={() => setSelectedSwapAlternative(alternative)}
+                          type="button"
+                        >
+                          <div className="mb-4 flex items-center justify-between">
+                            <h4 className="font-display text-xl font-bold">{alternative}</h4>
+                            {selected ? (
+                              <div className="flex items-center gap-2 text-[#0050cc]">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em]">
+                                  Seleccionado
+                                </span>
+                                <CheckCircle2 className="h-5 w-5 fill-current" />
+                              </div>
+                            ) : (
+                              <PlusCircle />
+                            )}
+                          </div>
+
+                          <p className="mb-4 text-sm leading-relaxed text-[#424656]">
+                            {buildAlternativeExplanation(
+                              currentSwapExercise.name,
+                              alternative,
+                              index
+                            )}
+                          </p>
+
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#424656]/60">
+                              Dificultad técnica:
+                            </span>
+                            <div className="flex gap-1">
+                              {Array.from({ length: 3 }).map((_, markerIndex) => (
+                                <div
+                                  className={`h-1 w-3 rounded-full ${
+                                    markerIndex < difficulty
+                                      ? "bg-[#0050cc]"
+                                      : "bg-[#e2e3e1]"
+                                  }`}
+                                  key={`${alternative}-${markerIndex}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {selected ? (
+                            <>
+                              <div className="mt-6 flex items-center gap-4">
+                                <div className="flex -space-x-2">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#dae1ff]">
+                                    <Bolt className="h-4 w-4 text-[#003fa4]" />
+                                  </div>
+                                </div>
+                                <span className="text-xs font-semibold text-[#0266ff]">
+                                  Equivalencia Metabólica: {equivalence}%
+                                </span>
+                              </div>
+                              <button
+                                className="mt-6 w-full rounded-full bg-[linear-gradient(135deg,#0050cc_0%,#0266ff_100%)] py-3 text-xs font-bold uppercase tracking-[0.2em] text-white"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  swapExercise(alternative);
+                                }}
+                                type="button"
+                              >
+                                Confirmar selección
+                              </button>
+                            </>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-6 rounded-[2rem] border-t-2 border-[#0050cc]/10 bg-white p-8">
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#0050cc]">
+                  <Image
+                    alt="Avatar del coach"
+                    className="h-full w-full object-cover"
+                    height={320}
+                    src={landingPhotos[0].src}
+                    width={320}
+                  />
+                </div>
+                <div>
+                  <h5 className="font-display mb-1 text-lg font-bold">Nota del Coach</h5>
+                  <p className="italic leading-relaxed text-[#424656]">
+                    &quot;Sustituir por {selectedSwapAlternative || swapExerciseOptions[0]} es una
+                    opción táctica sólida si quieres mantener el estímulo del día sin
+                    pagar más fatiga de la necesaria. Mantén una ejecución limpia y no
+                    fuerces la carga si la alternativa te cambia el patrón dominante.&quot;
+                  </p>
+                </div>
               </div>
             </div>
           </ModalShell>
@@ -441,37 +614,66 @@ export function RoutineBuilder() {
 
         {isModifyOpen ? (
           <ModalShell onClose={() => setIsModifyOpen(false)} title="Modificar rutina">
-            <div className="space-y-4">
-              <p className="text-sm leading-7 text-slate-600">
-                Escribe qué quieres cambiar. Cuanto más concreto seas, más fino quedará
-                el reajuste.
-              </p>
-              <textarea
-                className={`${fieldClassName()} min-h-36 resize-none`}
-                onChange={(event) => setChangeRequest(event.target.value)}
-                placeholder="Ej: baja a 4 días, más prioridad a dorsal y tríceps, menos bisagra y sesiones de 75 min."
-                value={changeRequest}
-              />
-              <div className="flex justify-end gap-3">
+            <div className="relative space-y-10 overflow-hidden">
+              <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#0050cc]/5 blur-3xl" />
+
+              <div className="relative space-y-3">
+                <div className="flex items-center gap-2 text-[#0050cc]">
+                  <Edit3 className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-[0.22em]">
+                    Ajuste Inteligente
+                  </span>
+                </div>
+                <h2 className="font-display text-4xl font-black leading-tight tracking-[-0.05em] text-[#1a1c1b]">
+                  ¿Qué deseas modificar?
+                </h2>
+              </div>
+
+              <div className="space-y-6">
+                <div className="relative">
+                  <label className="mb-3 block text-xs font-bold uppercase tracking-[0.18em] text-[#424656]">
+                    Tus ajustes
+                  </label>
+                  <textarea
+                    className="min-h-[160px] w-full resize-none border-0 border-b-2 border-[#c2c6d8] bg-transparent px-0 py-2 text-xl font-medium text-[#1a1c1b] transition-all placeholder:text-[#424656]/30 focus:border-[#0050cc] focus:outline-none focus:ring-0"
+                    onChange={(event) => setChangeRequest(event.target.value)}
+                    placeholder="Escribe aquí tus ajustes (ej: quiero priorizar hombros o cambiar el día 3 por HIIT)"
+                    value={changeRequest}
+                  />
+                </div>
+
+                <div className="flex items-start gap-4 rounded-xl bg-[#f4f4f2] p-5">
+                  <Sparkles className="h-5 w-5 text-[#3e4853]" />
+                  <p className="text-sm leading-relaxed text-[#3e4853]">
+                    <span className="font-bold">Pro Tip:</span> Puedes ser específico con
+                    ejercicios, tiempos de descanso o grupos musculares que quieras
+                    enfatizar hoy.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center gap-4 pt-4 md:flex-row-reverse">
                 <button
-                  className="ghost-button px-4 py-3 text-sm"
-                  onClick={() => setIsModifyOpen(false)}
-                  type="button"
-                >
-                  Cerrar
-                </button>
-                <button
-                  className="black-button px-5 py-3 text-sm disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#1b1b1b] px-10 py-5 text-lg font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:bg-slate-300 md:w-auto"
                   disabled={isRevising || !changeRequest.trim()}
                   onClick={reviseCurrentPlan}
                   type="button"
                 >
                   {isRevising ? (
-                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <LoaderCircle className="h-5 w-5 animate-spin" />
                   ) : (
-                    <Sparkles className="h-4 w-4" />
+                    <>
+                      <span>Aplicar cambios</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </>
                   )}
-                  Aplicar cambios
+                </button>
+                <button
+                  className="w-full px-10 py-5 text-lg font-semibold text-[#424656] transition-colors hover:text-[#1a1c1b] md:w-auto"
+                  onClick={() => setIsModifyOpen(false)}
+                  type="button"
+                >
+                  Cerrar
                 </button>
               </div>
             </div>
@@ -1517,23 +1719,101 @@ function LoaderOverlay({
   text: string;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/42 px-4 backdrop-blur-md">
-      <div className="soft-card w-full max-w-md p-7 text-center">
-        <div className="mx-auto w-28">
-          <Image
-            alt="Loader de MyCoach"
-            className="h-auto w-full"
-            height={240}
-            priority
-            src={generatedVisuals.loader}
-            width={240}
-          />
+    <div className="fixed inset-0 z-50 overflow-hidden bg-[#f9f9f7] px-6 text-[#1a1c1b]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-1/4 -top-1/4 h-[800px] w-[800px] rounded-full bg-[#0050cc]/5 blur-[120px]" />
+        <div className="absolute -bottom-1/4 -left-1/4 h-[600px] w-[600px] rounded-full bg-[#0266ff]/10 blur-[100px]" />
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "radial-gradient(#0050cc 0.5px, transparent 0.5px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+      </div>
+
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center">
+        <div className="animate-pulse-soft mb-20">
+          <span className="font-display flex items-center gap-2 text-4xl font-black tracking-[-0.06em] text-[#1b1b1b]">
+            <Bolt className="h-12 w-12 fill-[#0050cc] text-[#0050cc]" />
+            MyCoach
+          </span>
         </div>
-        <h3 className="mt-4 font-display text-2xl font-semibold tracking-tight text-slate-950">
-          {title}
-        </h3>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{text}</p>
+
+        <div className="w-full max-w-2xl">
+          <div className="rounded-[2rem] bg-[#f4f4f2] p-12 backdrop-blur-sm">
+            <div className="mb-8 flex items-end justify-between">
+              <div className="flex flex-col">
+                <span className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#0050cc]">
+                  Motor de Análisis
+                </span>
+                <h1 className="font-display text-5xl font-extrabold leading-none tracking-[-0.05em]">
+                  Generando<span className="text-[#0050cc]">.</span>
+                </h1>
+              </div>
+              <div className="text-right">
+                <span className="font-display text-6xl font-black leading-none text-[#1a1c1b]/10">
+                  01
+                </span>
+              </div>
+            </div>
+
+            <div className="mb-12 space-y-6">
+              <div className="group flex items-center gap-4">
+                <div className="h-2 w-2 rounded-full bg-[#0050cc] ring-4 ring-[#0050cc]/20" />
+                <p className="text-lg font-medium text-[#1a1c1b]">{title}...</p>
+              </div>
+              <div className="ml-8 flex items-center gap-4 opacity-40">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#727687]" />
+                <p className="text-lg font-medium text-[#1a1c1b]">
+                  Generando tu mesociclo...
+                </p>
+              </div>
+              <div className="ml-16 flex items-center gap-4 opacity-40">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#727687]" />
+                <p className="text-lg font-medium text-[#1a1c1b]">
+                  Organizando prioridades, frecuencia y progresión
+                </p>
+              </div>
+            </div>
+
+            <div className="loading-shimmer relative h-[4px] w-full overflow-hidden rounded-full bg-[#e2e3e1]">
+              <div className="absolute left-0 top-0 h-full w-[40%] bg-[#0050cc] transition-all duration-1000 ease-out" />
+            </div>
+
+            <div className="mt-4 flex justify-between">
+              <span className="text-[10px] uppercase tracking-[0.22em] text-[#727687]">
+                Optimización Biomecánica
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.22em] text-[#727687]">
+                v2.4.0
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-16 ml-auto max-w-sm text-right opacity-60">
+            <p className="text-sm italic leading-relaxed text-[#424656]">
+              &quot;La excelencia no es un acto, es un hábito. Estamos calibrando
+              cada repetición para que tu hábito sea la victoria.&quot;
+            </p>
+          </div>
+          <p className="sr-only">{text}</p>
+        </div>
       </div>
     </div>
   );
+}
+
+function buildAlternativeExplanation(
+  currentExercise: string,
+  alternative: string,
+  index: number
+) {
+  const patterns = [
+    `Mantiene el hueco de ${currentExercise} con una ejecución más estable y un estímulo fácil de medir.`,
+    `Reduce el coste técnico respecto a ${currentExercise} y permite seguir apretando sin romper la sesión.`,
+    `Aporta una variante útil para mantener intensidad local, repartir fatiga y sostener la progresión del bloque.`,
+  ];
+
+  return `${alternative}. ${patterns[index % patterns.length]}`;
 }

@@ -1,8 +1,19 @@
 import Image from "next/image";
-import { Download, PencilLine, RefreshCcw, Sparkles } from "lucide-react";
+import {
+  Bell,
+  Bolt,
+  CircleUserRound,
+  Download,
+  Grid2x2,
+  History,
+  LineChart,
+  Lock,
+  Search,
+  TableProperties,
+  Video,
+} from "lucide-react";
 
-import { InfoTooltip } from "@/components/info-tooltip";
-import { generatedVisuals } from "@/lib/visual-assets";
+import { getExerciseVisual } from "@/lib/visual-assets";
 import type { ExercisePlan, RoutinePlan } from "@/lib/types";
 
 type Props = {
@@ -24,372 +35,390 @@ export function RoutineWorkspace({
   onOpenModify,
   onExport,
 }: Props) {
+  const activeRotation = routine.rotationLabels[rotationIndex] || routine.rotationLabels[0];
+  const heroTitle = replaceMesociclo(routine.headline || "Rutina principal");
+  const heroBadge = replaceMesociclo(routine.mesocycleLabel || "Rutina principal");
+  const rationale = routine.structureRationale[0] || routine.subtitle;
+  const objectiveHint = routine.athleteSnapshot[0] || routine.subtitle;
+  const progressWidth = `${Math.min(100, ((rotationIndex + 1) / Math.max(routine.rotationLabels.length, 1)) * 100)}%`;
+
   return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <article className="soft-card p-6 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
-                <Sparkles className="h-4 w-4" />
-                {routine.mesocycleLabel}
+    <>
+      <section className="mx-auto max-w-[1440px] px-6 pb-32 pt-4">
+        <TopUtilityBar />
+
+        <section className="mb-16">
+          <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <div>
+              <div className="mb-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-[#dae1ff] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#003fa4]">
+                  {routine.priorityTargets[0] || "Rutina premium"}
+                </span>
+                <span className="rounded-full bg-[#e2e3e1] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#424656]">
+                  {heroBadge}
+                </span>
               </div>
-              <div className="space-y-3">
-                <h1 className="font-display text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-5xl">
-                  {routine.headline}
-                </h1>
-                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  {routine.subtitle}
-                </p>
-              </div>
+              <h1 className="font-display mb-4 text-5xl font-black leading-none tracking-[-0.05em] text-[#1a1c1b] lg:text-7xl">
+                {heroTitle}
+              </h1>
+              <p className="max-w-2xl text-xl font-medium text-[#424656]">
+                {routine.subtitle}
+              </p>
             </div>
 
-            <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
-              <button className="black-button px-5 py-3 text-sm" onClick={onOpenModify} type="button">
-                <PencilLine className="h-4 w-4" />
-                Modificar
+            <div className="flex gap-3">
+              <button
+                className="rounded-2xl border-2 border-[#1b1b1b] px-6 py-3 font-bold transition-all hover:bg-[#1b1b1b] hover:text-white"
+                onClick={onOpenModify}
+                type="button"
+              >
+                Modificar rutina
               </button>
-              <button className="ghost-button px-5 py-3 text-sm" onClick={onExport} type="button">
+              <button
+                className="flex items-center gap-2 rounded-2xl bg-[#1b1b1b] px-6 py-3 font-bold text-white"
+                onClick={onExport}
+                type="button"
+              >
                 <Download className="h-4 w-4" />
                 Exportar a Excel
               </button>
             </div>
           </div>
+        </section>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-4">
-            <OverviewCard
-              label="Objetivo"
-              tooltip="Qué es este objetivo"
-              tooltipContent="Resume el criterio central del bloque y condiciona la selección de ejercicios, frecuencia y margen de fatiga."
-              value={routine.objective}
-            />
-            <OverviewCard label="Split" value={routine.split} />
-            <OverviewCard
-              label="Mesociclo"
-              tooltip="Qué es un mesociclo"
-              tooltipContent={routine.glossary.mesocycle}
-              value="Bloque estructurado"
-            />
-            <OverviewCard label="Rotación activa" value={routine.rotationLabels[rotationIndex] || routine.rotationLabels[0]} />
+        <section className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="flex flex-col justify-between rounded-[2rem] bg-white p-8 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
+            <div>
+              <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#424656]">
+                Rationale
+              </h3>
+              <p className="text-lg font-medium italic leading-relaxed text-[#1a1c1b]">
+                &quot;{rationale}&quot;
+              </p>
+            </div>
+            <div className="mt-8 flex items-center gap-2 text-[#0050cc]">
+              <Bolt className="h-5 w-5" />
+              <span className="text-sm font-bold uppercase tracking-tight">Nota del Coach</span>
+            </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {routine.priorityTargets.map((target) => (
-              <span
-                className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
-                key={target}
-              >
-                {target}
+          <div className="flex flex-col justify-between rounded-[2rem] bg-[#f4f4f2] p-8">
+            <div>
+              <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#424656]">
+                Objetivo Principal
+              </h3>
+              <span className="font-display text-5xl font-extrabold text-[#1a1c1b]">
+                {routine.objective}
               </span>
-            ))}
-          </div>
-        </article>
-
-        <article className="soft-card overflow-hidden p-4 sm:p-5">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,0.58fr)_minmax(0,0.42fr)]">
-            <div className="rounded-[28px] border border-slate-200 bg-[#faf9f4] p-3">
-              <Image
-                alt="Visualización editorial de la progresión del mesociclo"
-                className="h-auto w-full"
-                height={760}
-                src={generatedVisuals.mesocycleGraph}
-                width={1200}
-              />
-            </div>
-            <div className="grid gap-4">
-              <SummaryList title="Lectura del atleta" values={routine.athleteSnapshot} />
-              <SummaryList title="Por qué está construido así" values={routine.structureRationale} />
+              <p className="mt-3 font-medium text-[#424656]">{objectiveHint}</p>
             </div>
           </div>
-        </article>
-      </div>
 
-      <article className="soft-card p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-              Rotaciones del bloque
-            </h2>
-            <p className="mt-1 text-sm leading-7 text-slate-600">
-              Cambia entre rotaciones para ver la progresión de repeticiones, carga y margen real.
-            </p>
+          <div className="flex flex-col justify-between rounded-[2rem] bg-[#0050cc] p-8 text-white">
+            <div>
+              <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-white/60">
+                Rotación Activa
+              </h3>
+              <h4 className="text-3xl font-bold">{activeRotation}</h4>
+              <p className="mt-2 text-white/80">
+                Bloque {rotationIndex + 1} de {routine.rotationLabels.length}
+              </p>
+            </div>
+            <div className="mt-8 h-1 w-full overflow-hidden rounded-full bg-white/20">
+              <div className="h-full bg-white" style={{ width: progressWidth }} />
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+        </section>
+
+        <section className="mb-12">
+          <div className="no-scrollbar flex items-center gap-4 overflow-x-auto pb-4">
             {routine.rotationLabels.map((label, index) => (
               <button
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`whitespace-nowrap rounded-full px-8 py-3 font-bold transition-all ${
                   index === rotationIndex
-                    ? "bg-slate-950 text-white"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-[rgba(66,108,255,0.3)] hover:text-slate-950"
+                    ? "bg-[#1b1b1b] text-white shadow-sm"
+                    : "bg-[#f4f4f2] text-[#424656] hover:bg-[#e8e8e6]"
                 }`}
                 key={label}
                 onClick={() => onRotationChange(index)}
                 type="button"
               >
-                {label}
+                {replaceMesociclo(label)}
               </button>
             ))}
           </div>
-        </div>
-      </article>
+        </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-6">
-          {routine.sessions.map((session) => (
-            <article className="soft-card overflow-hidden" key={session.id}>
-              <div className="border-b border-slate-200/80 bg-white/80 px-5 py-5 sm:px-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
-                      {session.dayLabel}
-                    </div>
-                    <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      {session.name}
-                    </h3>
-                    <p className="max-w-2xl text-sm leading-7 text-slate-600">{session.focus}</p>
-                  </div>
-                  <div className="grid gap-2 text-sm text-slate-500 sm:grid-cols-2 lg:max-w-md">
-                    <div className="rounded-[20px] border border-slate-200 bg-white px-4 py-3">
-                      {session.duration}
-                    </div>
-                    <div className="rounded-[20px] border border-slate-200 bg-white px-4 py-3">
-                      {session.recoveryTip}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="hidden overflow-x-auto md:block">
-                <table className="min-w-full divide-y divide-slate-200 text-left">
-                  <thead>
-                    <tr className="text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                      <th className="px-6 py-4 font-bold">Ejercicio</th>
-                      <th className="px-6 py-4 font-bold">Series</th>
-                      <th className="px-6 py-4 font-bold">Reps</th>
-                      <th className="px-6 py-4 font-bold">RIR</th>
-                      <th className="px-6 py-4 font-bold">Descanso</th>
-                      <th className="px-6 py-4 font-bold">Rotación activa</th>
-                      <th className="px-6 py-4 font-bold">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 text-sm text-slate-700">
-                    {session.exercises.map((exercise) => {
-                      const rotation = exercise.rotations[rotationIndex] || exercise.rotations[0];
-
-                      return (
-                        <tr key={exercise.id}>
-                          <td className="px-6 py-5 align-top">
-                            <button
-                              className="max-w-md text-left transition hover:text-[var(--primary)]"
-                              onClick={() => onOpenExercise(exercise)}
-                              type="button"
-                            >
-                              <div className="font-semibold text-slate-950">{exercise.name}</div>
-                              <div className="mt-1 text-xs leading-5 text-slate-500">
-                                {exercise.whyThisExercise}
-                              </div>
-                            </button>
-                          </td>
-                          <td className="px-6 py-5 align-top">{exercise.sets}</td>
-                          <td className="px-6 py-5 align-top">{exercise.reps}</td>
-                          <td className="px-6 py-5 align-top">{exercise.rir}</td>
-                          <td className="px-6 py-5 align-top">{exercise.rest}</td>
-                          <td className="px-6 py-5 align-top">
-                            <div className="space-y-1">
-                              <div className="font-semibold text-slate-950">{rotation.label}</div>
-                              <div className="text-xs leading-5 text-slate-500">
-                                {rotation.protocol}
-                              </div>
-                              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--primary)]">
-                                {rotation.loadReference}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-5 align-top">
-                            <ActionButtons
-                              exercise={exercise}
-                              onOpenExercise={onOpenExercise}
-                              onOpenSwap={() => onOpenSwap(session.id, exercise.id)}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="grid gap-4 p-4 md:hidden">
-                {session.exercises.map((exercise) => {
-                  const rotation = exercise.rotations[rotationIndex] || exercise.rotations[0];
-
-                  return (
-                    <article className="rounded-[28px] border border-slate-200 bg-white p-4" key={exercise.id}>
-                      <button
-                        className="w-full text-left"
-                        onClick={() => onOpenExercise(exercise)}
-                        type="button"
-                      >
-                        <div className="font-display text-xl font-semibold tracking-tight text-slate-950">
-                          {exercise.name}
-                        </div>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">{exercise.whyThisExercise}</p>
-                      </button>
-
-                      <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-700">
-                        <DataPill label="Series" value={String(exercise.sets)} />
-                        <DataPill label="Reps" value={exercise.reps} />
-                        <DataPill label="RIR" value={exercise.rir} />
-                        <DataPill label="Descanso" value={exercise.rest} />
-                      </div>
-
-                      <div className="mt-4 rounded-[22px] bg-[#f7f8fc] p-4">
-                        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
-                          {rotation.label}
-                        </div>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{rotation.protocol}</p>
-                        <div className="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                          {rotation.loadReference}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <ActionButtons
-                          exercise={exercise}
-                          onOpenExercise={onOpenExercise}
-                          onOpenSwap={() => onOpenSwap(session.id, exercise.id)}
-                        />
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </article>
+        <section className="space-y-12">
+          {routine.sessions.map((session, sessionIndex) => (
+            <SessionCard
+              activeRotation={activeRotation}
+              exerciseCount={session.exercises.length}
+              key={session.id}
+              locked={sessionIndex > 0 && sessionIndex > 1}
+              onOpenExercise={onOpenExercise}
+              onOpenSwap={onOpenSwap}
+              session={session}
+              sessionIndex={sessionIndex}
+            />
           ))}
+        </section>
+      </section>
+
+      <BottomMobileBar />
+    </>
+  );
+}
+
+function TopUtilityBar() {
+  return (
+    <header className="sticky top-20 z-30 mb-10 rounded-[2rem] bg-[#f9f9f7]/70 backdrop-blur-xl">
+      <nav className="flex w-full items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-8">
+          <span className="font-display text-2xl font-black tracking-[-0.05em] text-[#1b1b1b]">
+            MyCoach
+          </span>
+          <div className="hidden items-center gap-6 lg:flex">
+            <a className="border-b-2 border-[#0050cc] font-bold text-[#0050cc]" href="#">
+              Dashboard
+            </a>
+            <a className="font-medium text-[#1b1b1b]/60 hover:text-[#0050cc]" href="#">
+              Training
+            </a>
+            <a className="font-medium text-[#1b1b1b]/60 hover:text-[#0050cc]" href="#">
+              Performance
+            </a>
+            <a className="font-medium text-[#1b1b1b]/60 hover:text-[#0050cc]" href="#">
+              Coach
+            </a>
+          </div>
         </div>
 
-        <aside className="space-y-6">
-          <article className="soft-card p-5">
-            <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#faf9f4]">
-              <Image
-                alt="Mockup móvil del resultado de rutina de MyCoach"
-                className="h-auto w-full"
-                height={980}
-                src={generatedVisuals.phoneRoutine}
-                width={520}
-              />
-            </div>
-          </article>
-
-          <article className="soft-card p-5">
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-              Ajustes rápidos
-            </div>
-            <div className="mt-4 grid gap-3">
-              {routine.modificationHints.map((hint) => (
-                <div className="rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-sm leading-7 text-slate-700" key={hint}>
-                  {hint}
-                </div>
-              ))}
-            </div>
-          </article>
-        </aside>
-      </div>
-    </section>
-  );
-}
-
-function OverviewCard({
-  label,
-  value,
-  tooltip,
-  tooltipContent,
-}: {
-  label: string;
-  value: string;
-  tooltip?: string;
-  tooltipContent?: string;
-}) {
-  return (
-    <div className="rounded-[28px] border border-slate-200 bg-white px-4 py-4">
-      <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-        {label}
-        {tooltip && tooltipContent ? (
-          <InfoTooltip label={tooltip}>{tooltipContent}</InfoTooltip>
-        ) : null}
-      </div>
-      <div className="text-sm leading-7 text-slate-800">{value}</div>
-    </div>
-  );
-}
-
-function SummaryList({
-  title,
-  values,
-}: {
-  title: string;
-  values: string[];
-}) {
-  return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-5">
-      <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-        {title}
-      </div>
-      <div className="mt-4 grid gap-3">
-        {values.map((value) => (
-          <div className="rounded-[20px] bg-[#f7f8fc] px-4 py-3 text-sm leading-7 text-slate-700" key={value}>
-            {value}
+        <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-2 rounded-full bg-[#f4f4f2] px-4 py-2 md:flex">
+            <Search className="h-4 w-4 text-[#424656]" />
+            <input
+              className="border-none bg-transparent text-sm focus:outline-none"
+              placeholder="Buscar rutina..."
+              type="text"
+            />
           </div>
-        ))}
-      </div>
-    </div>
+          <Bell className="h-5 w-5 cursor-pointer text-[#424656]" />
+          <CircleUserRound className="h-6 w-6 cursor-pointer text-[#424656]" />
+        </div>
+      </nav>
+    </header>
   );
 }
 
-function DataPill({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-[18px] bg-[#f7f8fc] px-4 py-3">
-      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-        {label}
-      </div>
-      <div className="mt-1 font-semibold text-slate-900">{value}</div>
-    </div>
-  );
-}
-
-function ActionButtons({
-  exercise,
+function SessionCard({
+  session,
+  sessionIndex,
+  exerciseCount,
+  locked,
+  activeRotation,
   onOpenExercise,
   onOpenSwap,
 }: {
-  exercise: ExercisePlan;
+  session: RoutinePlan["sessions"][number];
+  sessionIndex: number;
+  exerciseCount: number;
+  locked: boolean;
+  activeRotation: string;
   onOpenExercise: (exercise: ExercisePlan) => void;
-  onOpenSwap: () => void;
+  onOpenSwap: (sessionId: string, exerciseId: string) => void;
 }) {
+  if (locked) {
+    return (
+      <div className="overflow-hidden rounded-[2rem] bg-[#f4f4f2]/40 opacity-80 grayscale">
+        <div className="flex flex-col justify-between gap-6 p-8 lg:flex-row lg:items-center lg:p-10">
+          <div>
+            <div className="mb-2 flex items-center gap-3">
+              <span className="text-xl font-black text-[#424656]">
+                {String(sessionIndex + 1).padStart(2, "0")}
+              </span>
+              <h2 className="font-display text-3xl font-black uppercase tracking-[-0.04em]">
+                {session.name}
+              </h2>
+            </div>
+            <p className="font-medium text-[#424656]/70">{session.focus}</p>
+          </div>
+          <Lock className="h-8 w-8 text-[#424656]/20" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-[rgba(66,108,255,0.32)] hover:text-slate-950"
-        onClick={() => onOpenExercise(exercise)}
-        type="button"
-      >
-        Ver técnica
-      </button>
-      <button
-        aria-label="Cambiar ejercicio"
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-[rgba(66,108,255,0.32)] hover:text-slate-950"
-        onClick={onOpenSwap}
-        type="button"
-      >
-        <RefreshCcw className="h-3.5 w-3.5" />
-        Cambiar
-      </button>
+    <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
+      <div className="flex flex-col justify-between gap-6 border-b border-slate-200/40 p-8 lg:flex-row lg:items-center lg:p-10">
+        <div>
+          <div className="mb-2 flex items-center gap-3">
+            <span className="text-xl font-black text-[#0050cc]">
+              {String(sessionIndex + 1).padStart(2, "0")}
+            </span>
+            <h2 className="font-display text-3xl font-black uppercase tracking-[-0.04em]">
+              {session.name}
+            </h2>
+          </div>
+          <p className="flex flex-wrap items-center gap-4 font-medium text-[#424656]">
+            <span className="flex items-center gap-1">
+              <History className="h-4 w-4" /> {session.duration}
+            </span>
+            <span className="flex items-center gap-1">
+              <TableProperties className="h-4 w-4" /> {exerciseCount} Ejercicios
+            </span>
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            className="rounded-full bg-[#f4f4f2] p-3 transition-all hover:bg-[#dae1ff]"
+            type="button"
+          >
+            <History className="h-5 w-5 text-[#1a1c1b]" />
+          </button>
+          <button className="rounded-full bg-[#0050cc] px-6 py-3 font-bold text-white transition-all hover:bg-[#0266ff]" type="button">
+            Iniciar Sesión
+          </button>
+        </div>
+      </div>
+
+      <div className="px-8 pb-10 lg:px-10">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[880px] text-left">
+            <thead>
+              <tr className="border-b border-slate-200/40 text-[10px] uppercase tracking-[0.2em] text-[#424656]/60">
+                <th className="py-6 font-bold">Ejercicio</th>
+                <th className="py-6 text-center font-bold">Series</th>
+                <th className="py-6 text-center font-bold">Reps</th>
+                <th className="py-6 text-center font-bold">RIR</th>
+                <th className="py-6 text-center font-bold">Descanso</th>
+                <th className="py-6 text-center font-bold">Rotación</th>
+                <th className="py-6 text-right font-bold">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200/20">
+              {session.exercises.map((exercise) => {
+                const visual = getExerciseVisual(exercise.pattern);
+                const rotation = exercise.rotations.find((item) => item.label === activeRotation) || exercise.rotations[0];
+
+                return (
+                  <tr className="group" key={exercise.id}>
+                    <td className="py-8">
+                      <button
+                        className="flex items-center gap-4 text-left"
+                        onClick={() => onOpenExercise(exercise)}
+                        type="button"
+                      >
+                        <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-[#f4f4f2]">
+                          {visual ? (
+                            <Image
+                              alt={visual.alt}
+                              className="h-full w-full object-cover"
+                              height={320}
+                              src={visual.src}
+                              width={320}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-[#dae1ff] text-[#0050cc]">
+                              <Bolt className="h-5 w-5" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-[#1a1c1b]">{exercise.name}</p>
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0050cc]">
+                            {exercise.category}
+                          </p>
+                        </div>
+                      </button>
+                    </td>
+                    <td className="py-8 text-center text-xl font-black">{exercise.sets}</td>
+                    <td className="py-8 text-center font-bold text-[#424656]">{exercise.reps}</td>
+                    <td className="py-8 text-center">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          exercise.rir.includes("1") || exercise.rir.includes("0")
+                            ? "bg-[#ffdad6] text-[#93000a]"
+                            : "bg-[#e2e3e1] text-[#424656]"
+                        }`}
+                      >
+                        {exercise.rir}
+                      </span>
+                    </td>
+                    <td className="py-8 text-center font-medium text-[#424656]">{exercise.rest}</td>
+                    <td className="py-8 text-center">
+                      <span className="rounded-full bg-[#f4f4f2] px-3 py-1 text-xs font-bold text-[#424656]">
+                        {replaceMesociclo(rotation?.label || activeRotation)}
+                      </span>
+                    </td>
+                    <td className="py-8">
+                      <div className="flex justify-end gap-4">
+                        <button
+                          className="text-[#424656] transition-colors hover:text-[#0050cc]"
+                          onClick={() => onOpenExercise(exercise)}
+                          type="button"
+                        >
+                          <Video className="h-5 w-5" />
+                        </button>
+                        <button
+                          aria-label="Cambiar ejercicio"
+                          className="text-[#424656] transition-colors hover:text-[#0050cc]"
+                          onClick={() => onOpenSwap(session.id, exercise.id)}
+                          type="button"
+                        >
+                          <History className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
+}
+
+function BottomMobileBar() {
+  return (
+    <div className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[3rem] border-t border-[#c2c6d8]/15 bg-white/80 px-6 pb-8 pt-4 shadow-[0_-20px_40px_-10px_rgba(26,28,27,0.06)] backdrop-blur-md lg:hidden">
+      <BottomNavItem icon={<Grid2x2 className="h-5 w-5" />} label="Feed" />
+      <BottomNavItem icon={<TableProperties className="h-5 w-5" />} label="Plan" />
+      <BottomNavItem active icon={<Bolt className="h-5 w-5 fill-current" />} label="Train" />
+      <BottomNavItem icon={<LineChart className="h-5 w-5" />} label="Metrics" />
+      <BottomNavItem icon={<CircleUserRound className="h-5 w-5" />} label="Profile" />
+    </div>
+  );
+}
+
+function BottomNavItem({
+  icon,
+  label,
+  active = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <a
+      className={`flex flex-col items-center justify-center ${
+        active ? "scale-110 text-[#0050cc]" : "text-[#1b1b1b]/40"
+      }`}
+      href="#"
+    >
+      {icon}
+      <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
+        {label}
+      </span>
+    </a>
+  );
+}
+
+function replaceMesociclo(value: string) {
+  return value.replace(/mesociclo/gi, "Rutina");
 }

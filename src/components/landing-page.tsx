@@ -1,391 +1,393 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight,
-  CheckCircle2,
+  Bell,
+  Bolt,
+  CalendarRange,
   ChevronRight,
+  CircleUserRound,
   Dumbbell,
-  FileSpreadsheet,
-  ScanEye,
-  Sparkles,
+  Grid2x2,
+  Image as ImageIcon,
+  LineChart,
+  TableProperties,
 } from "lucide-react";
 
 import { generatedVisuals, landingPhotos } from "@/lib/visual-assets";
 
 const pillars = [
   {
-    icon: ScanEye,
-    title: "Formulario que cambia según el caso",
-    text: "MyCoach lee contexto, rutina actual y material visual opcional antes de decidir qué preguntas merece la pena hacer.",
-  },
-  {
     icon: Dumbbell,
-    title: "Rutinas pensadas para culturismo, fuerza e híbrido",
-    text: "Musculación, pesas, Hyrox y CrossFit dentro de una misma plataforma, pero con una lógica distinta para cada perfil.",
+    title: "Routine Specificity",
+    text: "Entrenamientos adaptados a tu biomecánica, material disponible y objetivos específicos de rendimiento o competición.",
   },
   {
-    icon: FileSpreadsheet,
-    title: "Exportación a Excel con estructura real",
-    text: "Mesociclos listos para editar, registrar cargas, modificar sesiones y seguir la progresión sin romper el bloque.",
+    icon: ImageIcon,
+    title: "Physical Analysis",
+    text: "Monitorización visual opcional y lectura técnica para decidir prioridades musculares, sesgos y reajustes del bloque.",
+  },
+  {
+    icon: TableProperties,
+    title: "Excel Export",
+    text: "Exporta el mesociclo en un formato editable y profesional para seguir cargas, RIR, sesiones y progresión real.",
   },
 ] as const;
 
-const process = [
+const steps = [
   {
     step: "01",
-    title: "Contexto y rutina actual",
-    text: "Texto libre o adjuntos para partir desde lo que el atleta ya hace, no desde una hoja en blanco genérica.",
+    title: "Context",
+    text: "Analizamos tu punto de partida, historial, molestias y objetivo del bloque antes de pedir nada más.",
   },
   {
     step: "02",
-    title: "Visual opcional",
-    text: "Vídeo o imágenes del físico para ajustar prioridades musculares, estabilidad, torso-pierna y sesgos del patrón.",
+    title: "Visual",
+    text: "Vídeo o imágenes opcionales para detectar asimetrías, dominancias y posibles sesgos del planteamiento.",
   },
   {
     step: "03",
-    title: "Preguntas dinámicas",
-    text: "La plataforma no repite el mismo onboarding a todo el mundo: adapta bloques, foco muscular y logística semanal.",
+    title: "Custom Form",
+    text: "Formulario corto y técnico con preguntas que sí cambian la estructura, el volumen y la selección de ejercicios.",
   },
   {
     step: "04",
-    title: "Rutina editable y exportable",
-    text: "Vista clara en tarjetas y tablas, modales de técnica, cambio de ejercicio y exportación al Excel del mesociclo.",
+    title: "Editable Routine",
+    text: "Recibe tu mesociclo dinámico, revísalo, cambia ejercicios y expórtalo a Excel cuando lo necesites.",
   },
 ] as const;
 
-const proofPoints = [
-  "Rutinas personalizadas para hipertrofia, preparación híbrida, recomposición y rendimiento específico.",
-  "Registro técnico de ejercicios, prioridades musculares, RIR, rotaciones y cambios por sesión.",
-  "Lectura visual opcional para decidir si conviene especializar torso, bajar frecuencia o reajustar patrones.",
-] as const;
+const footerLinks = ["Privacidad", "Términos", "Cookies"] as const;
 
 export function LandingPage() {
   return (
-    <main className="page-haze overflow-hidden pb-16">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between py-6">
-          <Link
-            className="font-display text-2xl font-semibold tracking-tight text-slate-950"
-            href="/"
-          >
+    <>
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/30 bg-[#f9f9f7]/75 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 py-4">
+          <div className="font-display text-2xl font-extrabold tracking-[-0.05em] text-[#1b1b1b]">
             MyCoach
-          </Link>
-          <div className="flex items-center gap-3">
+          </div>
+
+          <div className="hidden items-center space-x-8 md:flex">
             <a
-              className="hidden rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-white sm:inline-flex"
-              href="#proceso"
+              className="border-b-2 border-[#0050cc] py-1 text-sm font-bold tracking-tight text-[#0050cc]"
+              href="#inicio"
             >
-              Cómo funciona
+              Inicio
             </a>
-            <Link className="black-button px-5 py-3 text-sm" href="/plan">
-              Empezar
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <a
+              className="py-1 text-sm font-medium tracking-tight text-[#1b1b1b]/60 transition-all hover:text-[#0050cc]"
+              href="#programa"
+            >
+              Programa
+            </a>
+            <a
+              className="py-1 text-sm font-medium tracking-tight text-[#1b1b1b]/60 transition-all hover:text-[#0050cc]"
+              href="#elite"
+            >
+              Élite
+            </a>
           </div>
-        </header>
 
-        <section className="grid gap-10 pt-6 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-center lg:pt-12">
-          <div className="max-w-3xl space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-strong)] bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-700 shadow-[var(--shadow-soft)]">
-              <Sparkles className="h-4 w-4 text-[var(--primary)]" />
-              Planificación premium para atletas y coaches
-            </div>
+          <div className="flex items-center gap-4 text-slate-500">
+            <Bell className="h-5 w-5 cursor-pointer" />
+            <CircleUserRound className="h-6 w-6 cursor-pointer" />
+          </div>
+        </div>
+      </nav>
 
-            <div className="space-y-5">
-              <h1 className="font-display text-5xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-6xl lg:text-7xl">
-                Crea mesociclos visuales, técnicos y exportables sin encerrar todo en un chat.
+      <main className="overflow-x-hidden bg-[#f9f9f7] pb-32 pt-24 text-[#1a1c1b] lg:pb-0">
+        <section className="relative mx-auto max-w-[1440px] px-6 py-12 lg:py-24" id="inicio">
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <div className="z-10 lg:col-span-6">
+              <h1 className="mb-8 font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.05em] text-[#1b1b1b] md:text-7xl lg:text-8xl">
+                Entrena como la <span className="italic text-[#0050cc]">élite</span> con
+                mesociclos de alto rendimiento
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-                MyCoach es una plataforma para crear rutinas personalizadas de musculación,
-                pesas, Hyrox y CrossFit con análisis de contexto, lectura visual opcional
-                del físico y exportación inmediata a Excel editable.
-              </p>
-            </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link className="black-button px-6 py-4 text-sm" href="/plan">
-                Iniciar el proceso
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                className="ghost-button px-6 py-4 text-sm"
-                href="#seo"
-              >
-                Ver el flujo completo
-              </a>
-            </div>
+              <div className="flex flex-col items-start gap-4 sm:flex-row">
+                <Link
+                  className="rounded-2xl bg-[#1b1b1b] px-8 py-4 font-display text-lg font-bold text-white transition-transform active:scale-95"
+                  href="/plan"
+                >
+                  Iniciar proceso
+                </Link>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <StatCard label="Paso a rutina" value="5 bloques" />
-              <StatCard label="Exportación" value="Excel real" />
-              <StatCard label="Salida final" value="Tabla + modales" />
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -left-8 top-8 h-44 w-44 rounded-full bg-[rgba(66,108,255,0.15)] blur-3xl" />
-            <div className="absolute bottom-0 right-8 h-56 w-56 rounded-full bg-[rgba(162,191,255,0.22)] blur-3xl" />
-            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,0.24fr)]">
-              <article className="editorial-card overflow-hidden p-4 md:p-5">
-                <div className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-[#f8f7f2]">
-                  <Image
-                    alt="Mockup premium del dashboard de MyCoach"
-                    className="h-auto w-full"
-                    height={980}
-                    priority
-                    src={generatedVisuals.phoneHero}
-                    width={520}
-                  />
+                <div className="flex items-center gap-3 rounded-2xl bg-[#f1f3f8] px-4 py-3">
+                  <Bolt className="h-5 w-5 fill-[#0050cc] text-[#0050cc]" />
+                  <span className="text-sm font-medium">Resultados pro garantizados</span>
                 </div>
-              </article>
-
-              <div className="grid gap-5">
-                <article className="editorial-card p-4">
-                  <div className="overflow-hidden rounded-[26px] border border-slate-200 bg-[#f9fafc]">
-                    <Image
-                      alt="Máquina visual que convierte contexto en rutina editable"
-                      className="h-auto w-full"
-                      height={720}
-                      src={generatedVisuals.routineMachine}
-                      width={720}
-                    />
-                  </div>
-                </article>
-                <article className="editorial-card p-4">
-                  <div className="space-y-3">
-                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
-                      Panel editorial
-                    </div>
-                    <p className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                      Menos ruido, más decisiones útiles.
-                    </p>
-                    <p className="text-sm leading-7 text-slate-600">
-                      Cada paso recoge justo lo necesario para generar un bloque con
-                      contexto real y salida editable.
-                    </p>
-                  </div>
-                </article>
               </div>
             </div>
-          </div>
-        </section>
 
-        <section className="grid gap-6 py-16 lg:grid-cols-3">
-          {pillars.map((pillar) => {
-            const Icon = pillar.icon;
-
-            return (
-              <article className="editorial-card hover-lift p-7" key={pillar.title}>
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--primary-soft)] text-[var(--primary)]">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {pillar.title}
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{pillar.text}</p>
-              </article>
-            );
-          })}
-        </section>
-
-        <section className="grid gap-8 py-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
-          <div className="space-y-5">
-            <div className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-600">
-              Look & feel
-            </div>
-            <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              Interfaz de app premium con lectura técnica, no estética SaaS estándar.
-            </h2>
-            <p className="max-w-xl text-base leading-8 text-slate-600">
-              El sistema visual mezcla shells móviles, tarjetas limpias y ritmo editorial
-              para que el producto se sienta más cerca de una app de alto ticket que de
-              un formulario largo con botones genéricos.
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-[minmax(0,0.64fr)_minmax(0,0.36fr)]">
-            <article className="editorial-card overflow-hidden p-4">
-              <div className="relative overflow-hidden rounded-[28px]">
+            <div className="relative mt-12 lg:col-span-6 lg:mt-0">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] bg-[#eceeea] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
                 <Image
-                  alt={landingPhotos[0].alt}
-                  className="h-[480px] w-full object-cover"
-                  height={1201}
-                  src={landingPhotos[0].src}
+                  alt={landingPhotos[1].alt}
+                  className="h-full w-full object-cover grayscale brightness-90"
+                  height={1333}
+                  priority
+                  src={landingPhotos[1].src}
                   width={1800}
                 />
-                <div className="absolute inset-x-4 bottom-4 rounded-[28px] border border-white/50 bg-white/86 p-4 backdrop-blur">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
-                    Análisis opcional
+
+                <div className="absolute -right-3 top-10 w-[48%] rounded-[2rem] border-[6px] border-[#5b6371] bg-[#1a1c1b] p-2 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:-right-8">
+                  <div className="overflow-hidden rounded-[1.5rem] bg-white">
+                    <Image
+                      alt="Interfaz móvil premium de MyCoach"
+                      className="h-full w-full object-cover"
+                      height={980}
+                      src={generatedVisuals.phoneHero}
+                      width={520}
+                    />
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">
-                    Sube vídeo o imágenes del físico para personalizar el formulario y el
-                    foco del mesociclo antes de generar la rutina.
-                  </p>
+                </div>
+
+                <div className="absolute -left-6 bottom-10 hidden w-[46%] rounded-[2rem] border-[6px] border-[#5b6371] bg-[#1a1c1b] p-2 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:block">
+                  <div className="overflow-hidden rounded-[1.5rem] bg-white">
+                    <Image
+                      alt="Visual de progreso y métricas de MyCoach"
+                      className="h-full w-full object-cover"
+                      height={980}
+                      src={generatedVisuals.phoneRoutine}
+                      width={520}
+                    />
+                  </div>
                 </div>
               </div>
-            </article>
-
-            <div className="grid gap-5">
-              <article className="editorial-card overflow-hidden p-4">
-                <div className="overflow-hidden rounded-[26px] border border-slate-200 bg-[#f9fafc]">
-                  <Image
-                    alt="Mockup de onboarding mobile-first de MyCoach"
-                    className="h-auto w-full"
-                    height={980}
-                    src={generatedVisuals.phoneOnboarding}
-                    width={520}
-                  />
-                </div>
-              </article>
-              <article className="editorial-card overflow-hidden p-4">
-                <div className="overflow-hidden rounded-[26px]">
-                  <Image
-                    alt={landingPhotos[3].alt}
-                    className="h-[216px] w-full object-cover"
-                    height={1800}
-                    src={landingPhotos[3].src}
-                    width={1171}
-                  />
-                </div>
-              </article>
             </div>
           </div>
         </section>
 
-        <section
-          className="grid gap-8 py-16 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
-          id="proceso"
-        >
-          <div className="space-y-6">
-            <div className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-600">
-              Flujo MyCoach
+        <section className="bg-[#f2f3f1] px-6 py-24">
+          <div className="mx-auto max-w-[1440px]">
+            <div className="mb-16">
+              <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
+                Metodología Élite
+              </p>
+              <h2 className="font-display text-4xl font-bold tracking-[-0.04em] text-[#1a1c1b] md:text-5xl">
+                Tres pilares de rendimiento absoluto.
+              </h2>
             </div>
-            <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              Un proceso corto, visual y orientado a mesociclos que sí se pueden seguir.
-            </h2>
-            <p className="max-w-xl text-base leading-8 text-slate-600">
-              La landing atrae por SEO y claridad. El onboarding entra por móvil, el
-              formulario se adapta al caso y la salida final se enseña como un workspace
-              editable, no como un simple bloque de texto.
-            </p>
 
-            <div className="editorial-card overflow-hidden p-4">
-              <div className="grid gap-4 md:grid-cols-[minmax(0,0.54fr)_minmax(0,0.46fr)]">
-                <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#f9fafc]">
-                  <Image
-                    alt="Ilustración de escaneo corporal y personalización visual"
-                    className="h-auto w-full"
-                    height={900}
-                    src={generatedVisuals.bodyScan}
-                    width={760}
-                  />
-                </div>
-                <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#f9fafc]">
-                  <Image
-                    alt={landingPhotos[1].alt}
-                    className="h-full w-full object-cover"
-                    height={1333}
-                    src={landingPhotos[1].src}
-                    width={1800}
-                  />
+            <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
+              {pillars.map((pillar, index) => {
+                const Icon = pillar.icon;
+
+                return (
+                  <div
+                    className={`flex flex-col justify-between rounded-[2rem] bg-white p-10 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ${
+                      index === 1 ? "md:translate-y-8" : ""
+                    }`}
+                    key={pillar.title}
+                  >
+                    <div>
+                      <Icon className="mb-6 h-10 w-10 text-[#0050cc]" />
+                      <h3 className="mb-4 font-display text-2xl font-bold">{pillar.title}</h3>
+                      <p className="leading-relaxed text-[#424656]">{pillar.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1440px] overflow-hidden px-6 py-24" id="programa">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            <div className="order-2 relative lg:order-1">
+              <div className="relative aspect-square w-full overflow-hidden rounded-[2rem] bg-[#e8e8e6]">
+                <Image
+                  alt={landingPhotos[2].alt}
+                  className="h-full w-full object-cover grayscale"
+                  height={914}
+                  src={landingPhotos[2].src}
+                  width={762}
+                />
+              </div>
+
+              <div className="absolute -bottom-12 -right-6 hidden w-80 overflow-hidden rounded-[1.5rem] border-8 border-[#eeeeec] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:block md:-right-12">
+                <div className="bg-white p-6">
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#dae1ff]">
+                      <CircleUserRound className="h-6 w-6 text-[#0050cc]" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#424656]">
+                        Contexto
+                      </p>
+                      <p className="font-display font-bold">Perfil atleta pro</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="h-2 w-full rounded-full bg-[#e8e8e6]" />
+                    <div className="h-2 w-3/4 rounded-full bg-[#e8e8e6]" />
+                    <div className="flex gap-2">
+                      <div className="h-8 w-16 rounded-full bg-[#0050cc]" />
+                      <div className="h-8 w-24 rounded-full bg-[#e8e8e6]" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid gap-4">
-            {process.map((item) => (
-              <article className="editorial-card hover-lift p-6" key={item.step}>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
-                    Paso {item.step}
+            <div className="order-1 lg:order-2">
+              <h2 className="mb-8 font-display text-5xl font-extrabold tracking-[-0.05em] md:text-6xl">
+                El contexto lo es todo.
+              </h2>
+              <p className="mb-8 text-lg leading-relaxed text-[#424656]">
+                No creemos en plantillas genéricas. Nuestra lógica de contexto personal
+                analiza tu historial, el equipo disponible y la fatiga acumulada para
+                recalibrar tu mesociclo en tiempo real.
+              </p>
+              <ul className="space-y-6">
+                <li className="flex items-start gap-4">
+                  <span className="rounded-full bg-[#dae1ff] p-2 text-[#0050cc]">
+                    <ChevronRight className="h-4 w-4" />
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
-                </div>
-                <h3 className="font-display text-2xl font-semibold tracking-tight text-slate-950">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
-              </article>
-            ))}
+                  <span className="font-medium text-[#1a1c1b]">
+                    Adaptación biomecánica individualizada.
+                  </span>
+                </li>
+                <li className="flex items-start gap-4">
+                  <span className="rounded-full bg-[#dae1ff] p-2 text-[#0050cc]">
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                  <span className="font-medium text-[#1a1c1b]">
+                    Gestión de carga basada en datos reales.
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
 
-        <section className="grid gap-8 py-10 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-center" id="seo">
-          <div className="editorial-card overflow-hidden p-5">
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,0.52fr)_minmax(0,0.48fr)]">
-              <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#f9fafc]">
-                <Image
-                  alt="Gráfico editorial de progresión del mesociclo"
-                  className="h-auto w-full"
-                  height={760}
-                  src={generatedVisuals.mesocycleGraph}
-                  width={1200}
-                />
-              </div>
-              <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#f9fafc]">
-                <Image
-                  alt="Mockup del resultado final del mesociclo dentro de MyCoach"
-                  className="h-auto w-full"
-                  height={980}
-                  src={generatedVisuals.phoneRoutine}
-                  width={520}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="inline-flex rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-slate-600">
-              SEO y conversión
-            </div>
-            <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              Rutinas personalizadas instantáneas con registro técnico y salida editable.
+        <section className="border-y border-slate-200/40 bg-white px-6 py-24" id="elite">
+          <div className="mx-auto max-w-[1440px]">
+            <h2 className="mb-16 text-center font-display text-4xl font-extrabold">
+              Tu camino a la élite.
             </h2>
-            <p className="text-base leading-8 text-slate-600">
-              La página trabaja las búsquedas importantes: rutinas personalizadas,
-              mesociclos, musculación, Hyrox, CrossFit, lectura visual del físico y
-              exportación a Excel. El mensaje es claro para SEO y útil para conversión.
-            </p>
-
-            <div className="grid gap-3">
-              {proofPoints.map((point) => (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {steps.map((step, index) => (
                 <div
-                  className="flex items-start gap-3 rounded-[24px] border border-slate-200 bg-white/88 px-4 py-4"
-                  key={point}
+                  className="rounded-r-xl border-l-4 bg-[#f4f4f2] p-8"
+                  key={step.step}
+                  style={{
+                    borderLeftColor: index === 0 ? "#0050cc" : "rgba(0, 80, 204, 0.4)",
+                  }}
                 >
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary)]" />
-                  <p className="text-sm leading-7 text-slate-700">{point}</p>
+                  <p
+                    className="mb-4 font-display text-3xl font-black"
+                    style={{ color: index === 0 ? "#0050cc" : "rgba(0, 80, 204, 0.4)" }}
+                  >
+                    {step.step}
+                  </p>
+                  <h4 className="mb-2 text-xl font-bold">{step.title}</h4>
+                  <p className="text-sm text-[#424656]">{step.text}</p>
                 </div>
               ))}
             </div>
-
-            <Link className="black-button px-6 py-4 text-sm" href="/plan">
-              Abrir el constructor
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </section>
-      </div>
-    </main>
+
+        <section className="mx-auto max-w-[1440px] px-6 py-24">
+          <div className="grid items-end gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <h2 className="mb-8 font-display text-5xl font-bold leading-tight tracking-[-0.05em]">
+                Optimizado para <span className="text-[#0050cc]">hipertrofia</span> de
+                máximo nivel y <span className="text-[#0050cc]">rendimiento</span> híbrido
+                en disciplinas como <span className="text-[#0050cc]">Hyrox</span>.
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {["Strength", "Endurance", "Recovery"].map((tag) => (
+                  <span
+                    className="rounded-full bg-[#dae1ff] px-6 py-2 text-xs font-bold uppercase tracking-[0.24em] text-[#003fa4]"
+                    key={tag}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200/30 bg-[#f4f4f2] p-8">
+              <p className="text-sm leading-relaxed text-[#424656]">
+                La plataforma utiliza una lógica de periodización avanzada para asegurar
+                que la fatiga no comprometa tus ganancias en hipertrofia mientras escalas
+                el rendimiento cardiovascular y la calidad del bloque.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-[1440px] px-6 pb-24">
+          <div className="relative overflow-hidden rounded-[3rem] bg-white p-12 text-center shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] lg:p-24">
+            <div className="pointer-events-none absolute inset-0 opacity-5">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#0050cc,transparent)]" />
+            </div>
+            <h2 className="relative z-10 mb-12 font-display text-5xl font-extrabold tracking-[-0.05em] md:text-7xl">
+              ¿Listo para el siguiente nivel?
+            </h2>
+            <div className="relative z-10 flex flex-col items-center gap-6">
+              <Link
+                className="rounded-full bg-[#1b1b1b] px-12 py-6 font-display text-2xl font-bold text-white transition-transform hover:scale-105 active:scale-95"
+                href="/plan"
+              >
+                Iniciar proceso
+              </Link>
+              <p className="font-medium text-[#424656]">
+                Únete a la comunidad de atletas MyCoach.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-[#f4f4f2] px-6 py-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-8 md:flex-row">
+          <div className="font-display text-xl font-black italic text-[#1a1c1b]">MyCoach</div>
+          <div className="flex gap-8 text-sm text-[#424656]">
+            {footerLinks.map((item) => (
+              <a className="transition-colors hover:text-[#0050cc]" href="#" key={item}>
+                {item}
+              </a>
+            ))}
+          </div>
+          <p className="text-xs uppercase tracking-[0.24em] text-[#424656]/60">
+            © 2024 MyCoach Elite. All Rights Reserved.
+          </p>
+        </div>
+      </footer>
+
+      <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[3rem] border-t border-[#c2c6d8]/15 bg-white/80 px-6 pb-8 pt-4 shadow-[0_-20px_40px_-10px_rgba(26,28,27,0.06)] backdrop-blur-md lg:hidden">
+        <MobileNavItem active icon={<Grid2x2 className="h-5 w-5" />} label="Feed" />
+        <MobileNavItem icon={<CalendarRange className="h-5 w-5" />} label="Plan" />
+        <MobileNavItem icon={<Bolt className="h-5 w-5" />} label="Train" />
+        <MobileNavItem icon={<LineChart className="h-5 w-5" />} label="Metrics" />
+        <MobileNavItem icon={<CircleUserRound className="h-5 w-5" />} label="Profile" />
+      </nav>
+    </>
   );
 }
 
-function StatCard({
+function MobileNavItem({
+  icon,
   label,
-  value,
+  active = false,
 }: {
+  icon: React.ReactNode;
   label: string;
-  value: string;
+  active?: boolean;
 }) {
   return (
-    <div className="editorial-card p-5">
-      <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
+    <div
+      className={`flex flex-col items-center justify-center ${
+        active ? "scale-110 text-[#0050cc]" : "text-[#1b1b1b]/40"
+      }`}
+    >
+      {icon}
+      <span className="mt-1 font-display text-[10px] font-semibold uppercase tracking-[0.24em]">
         {label}
-      </div>
-      <div className="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-950">
-        {value}
-      </div>
+      </span>
     </div>
   );
 }
