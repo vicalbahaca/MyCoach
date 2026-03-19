@@ -16,8 +16,17 @@ type SportDisciplineFamily = {
   featuredRank?: number;
 };
 
-const INITIAL_VISIBLE_DISCIPLINES = 10;
-const DISCIPLINE_BATCH_SIZE = 10;
+const INITIAL_VISIBLE_DISCIPLINE_VALUES = [
+  "musculacion",
+  "hyrox",
+  "crossfit",
+  "powerlifting",
+  "calistenia",
+  "running",
+  "natacion",
+  "pilates",
+] as const;
+const DISCIPLINE_BATCH_SIZE = 7;
 
 const SPORT_DISCIPLINE_FAMILIES: SportDisciplineFamily[] = [
   {
@@ -84,10 +93,17 @@ const SPORT_DISCIPLINE_FAMILIES: SportDisciplineFamily[] = [
     variants: ["", "Aguas abiertas", "Velocidad", "Fondo"],
   },
   {
+    key: "pilates",
+    baseLabel: "Pilates",
+    tags: ["mobility", "control", "bodyweight"],
+    featuredRank: 10,
+    variants: ["", "Suelo", "Máquinas", "Contemporáneo"],
+  },
+  {
     key: "triatlon",
     baseLabel: "Triatlón",
     tags: ["endurance", "hybrid", "water", "outdoor"],
-    featuredRank: 10,
+    featuredRank: 11,
     variants: ["", "Sprint", "Olímpico", "Media distancia"],
   },
   {
@@ -251,26 +267,25 @@ function scoreDiscipline(option: SportDisciplineOption, selected: SportDisciplin
 
 export const SPORT_DISCIPLINE_OPTIONS = buildSportDisciplineOptions();
 export const SPORT_DISCIPLINE_BATCH_SIZE = DISCIPLINE_BATCH_SIZE;
-export const SPORT_DISCIPLINE_INITIAL_VISIBLE = INITIAL_VISIBLE_DISCIPLINES;
+export const SPORT_DISCIPLINE_INITIAL_VISIBLE = INITIAL_VISIBLE_DISCIPLINE_VALUES;
 
 export function getSportDisciplineLabel(value: string) {
   return SPORT_DISCIPLINE_OPTIONS.find((option) => option.value === value)?.label || value;
 }
 
-export function getVisibleSportDisciplines(
-  selectedValues: string[],
-  visibleCount: number
-): SportDisciplineOption[] {
-  const optionMap = new Map(
-    SPORT_DISCIPLINE_OPTIONS.map((option) => [option.value, option] as const)
-  );
+function getOptionMap() {
+  return new Map(SPORT_DISCIPLINE_OPTIONS.map((option) => [option.value, option] as const));
+}
+
+function getSortedRemainingDisciplines(selectedValues: string[], hiddenValues: string[]) {
+  const optionMap = getOptionMap();
 
   const selected = selectedValues
     .map((value) => optionMap.get(value))
     .filter((option): option is SportDisciplineOption => Boolean(option));
 
-  const selectedSet = new Set(selected.map((option) => option.value));
-  const remaining = SPORT_DISCIPLINE_OPTIONS.filter((option) => !selectedSet.has(option.value));
+  const hiddenSet = new Set(hiddenValues);
+  const remaining = SPORT_DISCIPLINE_OPTIONS.filter((option) => !hiddenSet.has(option.value));
 
   remaining.sort((left, right) => {
     const scoreDiff = scoreDiscipline(right, selected) - scoreDiscipline(left, selected);
@@ -285,6 +300,39 @@ export function getVisibleSportDisciplines(
     return left.sortRank - right.sortRank;
   });
 
-  const ordered = [...selected, ...remaining];
-  return ordered.slice(0, Math.min(Math.max(visibleCount, selected.length), ordered.length));
+  return remaining;
+}
+
+export function getInitialSportDisciplineOptions(): SportDisciplineOption[] {
+  const optionMap = getOptionMap();
+
+  return INITIAL_VISIBLE_DISCIPLINE_VALUES.map((value) => optionMap.get(value)).filter(
+    (option): option is SportDisciplineOption => Boolean(option)
+  );
+}
+
+export function getSportDisciplineOptionsByValues(values: string[]): SportDisciplineOption[] {
+  const optionMap = getOptionMap();
+
+  return values
+    .map((value) => optionMap.get(value))
+    .filter((option): option is SportDisciplineOption => Boolean(option));
+}
+
+export function getNextSportDisciplineBatch(
+  selectedValues: string[],
+  visibleValues: string[],
+  batchSize = DISCIPLINE_BATCH_SIZE
+): SportDisciplineOption[] {
+  return getSortedRemainingDisciplines(selectedValues, visibleValues).slice(0, batchSize);
+}
+
+export function getVisibleSportDisciplines(visibleValues: string[]): SportDisciplineOption[] {
+  const optionMap = new Map(
+    SPORT_DISCIPLINE_OPTIONS.map((option) => [option.value, option] as const)
+  );
+
+  return visibleValues
+    .map((value) => optionMap.get(value))
+    .filter((option): option is SportDisciplineOption => Boolean(option));
 }

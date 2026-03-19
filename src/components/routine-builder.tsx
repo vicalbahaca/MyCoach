@@ -20,6 +20,7 @@ import {
   FileText,
   ImageUp,
   LoaderCircle,
+  Plus,
   PlusCircle,
   Sparkles,
   Target,
@@ -65,11 +66,11 @@ import {
   landingPhotos,
 } from "@/lib/visual-assets";
 import {
+  getInitialSportDisciplineOptions,
+  getNextSportDisciplineBatch,
   getSportDisciplineLabel,
   getVisibleSportDisciplines,
   SPORT_DISCIPLINE_BATCH_SIZE,
-  SPORT_DISCIPLINE_INITIAL_VISIBLE,
-  SPORT_DISCIPLINE_OPTIONS,
 } from "@/lib/sport-disciplines";
 
 const STEP_META = [
@@ -167,8 +168,8 @@ export function RoutineBuilder() {
   const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [changeRequest, setChangeRequest] = useState("");
-  const [visibleDisciplineCount, setVisibleDisciplineCount] = useState(
-    SPORT_DISCIPLINE_INITIAL_VISIBLE
+  const [visibleDisciplineValues, setVisibleDisciplineValues] = useState<string[]>(
+    () => getInitialSportDisciplineOptions().map((option) => option.value)
   );
 
   const scrollToActiveStep = useEffectEvent(() => {
@@ -349,12 +350,13 @@ export function RoutineBuilder() {
   const personalizedCards = analysis
     ? analysis.personalizedSections.flatMap((section) => chunkQuestions(section))
     : [];
-  const visibleDisciplines = getVisibleSportDisciplines(
+  const visibleDisciplines = getVisibleSportDisciplines(visibleDisciplineValues);
+  const nextDisciplineBatch = getNextSportDisciplineBatch(
     profile.disciplines || [],
-    visibleDisciplineCount
+    visibleDisciplineValues,
+    SPORT_DISCIPLINE_BATCH_SIZE
   );
-  const canLoadMoreDisciplines =
-    visibleDisciplines.length < SPORT_DISCIPLINE_OPTIONS.length;
+  const canLoadMoreDisciplines = nextDisciplineBatch.length > 0;
 
   const swapExerciseOptions =
     swapTarget && routine
@@ -810,19 +812,17 @@ export function RoutineBuilder() {
                     })}
                     {canLoadMoreDisciplines ? (
                       <button
-                        aria-label="Mostrar 10 disciplinas más"
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--form-surface-high)] text-[var(--form-ink)] transition hover:-translate-y-0.5 hover:bg-[var(--form-accent-soft)] hover:text-[var(--form-accent)]"
+                        aria-label="Mostrar 7 disciplinas más"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--form-surface-high)] text-[var(--form-outline-strong)] transition hover:-translate-y-0.5 hover:bg-[var(--form-accent-soft)] hover:text-[var(--form-accent)]"
                         onClick={() =>
-                          setVisibleDisciplineCount((current) =>
-                            Math.min(
-                              current + SPORT_DISCIPLINE_BATCH_SIZE,
-                              SPORT_DISCIPLINE_OPTIONS.length
-                            )
-                          )
+                          setVisibleDisciplineValues((current) => [
+                            ...current,
+                            ...nextDisciplineBatch.map((option) => option.value),
+                          ])
                         }
                         type="button"
                       >
-                        <PlusCircle className="h-4 w-4" />
+                        <Plus className="h-4 w-4" strokeWidth={2.2} />
                       </button>
                     ) : null}
                   </div>
