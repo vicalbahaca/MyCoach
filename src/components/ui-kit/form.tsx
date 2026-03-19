@@ -302,11 +302,17 @@ export function FormUploadTile({
   subtitle,
   accept,
   onChange,
+  files = [],
+  onRemoveFile,
+  formatHint,
 }: {
   title: string;
   subtitle: string;
   accept: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  files?: File[];
+  onRemoveFile?: (file: File) => void;
+  formatHint?: string;
 }) {
   return (
     <label className="form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-dashed px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.36)] hover:bg-[rgba(218,225,255,0.12)]">
@@ -315,6 +321,37 @@ export function FormUploadTile({
       </span>
       <span className="font-display text-lg font-semibold text-[var(--form-ink)]">{title}</span>
       <span className="max-w-md text-sm leading-7 text-[var(--form-muted)]">{subtitle}</span>
+      {formatHint ? (
+        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-muted)]">
+          {formatHint}
+        </span>
+      ) : null}
+      {files.length ? (
+        <span className="mt-3 flex w-full flex-wrap justify-center gap-3">
+          {files.map((file) => (
+            <span
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--form-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--form-ink)]"
+              key={`${file.name}-${file.lastModified}`}
+            >
+              <span className="max-w-[12rem] truncate">{file.name}</span>
+              {onRemoveFile ? (
+                <button
+                  aria-label={`Eliminar ${file.name}`}
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[var(--form-muted)] transition hover:bg-[rgba(0,80,204,0.08)] hover:text-[var(--form-accent)]"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onRemoveFile(file);
+                  }}
+                  type="button"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+            </span>
+          ))}
+        </span>
+      ) : null}
       <input accept={accept} className="hidden" multiple onChange={onChange} type="file" />
     </label>
   );

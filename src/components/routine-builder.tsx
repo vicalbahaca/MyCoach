@@ -33,7 +33,6 @@ import { RoutineWorkspace } from "@/components/routine-workspace";
 import {
   FormChoiceCard,
   FormChipButton,
-  FormFilePills,
   FormFooter,
   FormLineInput,
   FormLineSelect,
@@ -221,6 +220,35 @@ export function RoutineBuilder() {
     }
 
     setVisualFiles(nextFiles.slice(0, 10));
+  }
+
+  function removeFile(type: "context" | "visual", target: File) {
+    invalidateAnalysis();
+
+    if (type === "context") {
+      setContextFiles((current) =>
+        current.filter(
+          (file) =>
+            !(
+              file.name === target.name &&
+              file.lastModified === target.lastModified &&
+              file.size === target.size
+            )
+        )
+      );
+      return;
+    }
+
+    setVisualFiles((current) =>
+      current.filter(
+        (file) =>
+          !(
+            file.name === target.name &&
+            file.lastModified === target.lastModified &&
+            file.size === target.size
+          )
+      )
+    );
   }
 
   function moveTo(nextStep: number) {
@@ -858,25 +886,15 @@ export function RoutineBuilder() {
 
                 <section className="space-y-4">
                   <label className="form-ui-label block pl-1">Documentos adjuntos</label>
-                  <label className="block cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed border-[rgba(194,198,216,0.9)] bg-white px-6 py-12 text-center shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] transition-all hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(255,255,255,0.96)]">
-                    <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(244,244,242,0.95)] text-[rgba(179,197,255,0.95)]">
-                      <FileText className="h-5 w-5" />
-                    </span>
-                    <span className="block font-display text-base font-bold text-[var(--form-ink)]">
-                      Sube tu rutina actual
-                    </span>
-                    <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--form-muted)]">
-                      PDF, Excel, TXT
-                    </span>
-                    <input
-                      accept=".pdf,.xls,.xlsx,.txt,.csv"
-                      className="hidden"
-                      multiple
-                      onChange={(event) => updateFiles("context", event)}
-                      type="file"
-                    />
-                  </label>
-                  <FormFilePills files={contextFiles} />
+                  <FormUploadTile
+                    accept=".pdf,.xls,.xlsx,.txt,.csv,.md,.doc,.docx"
+                    files={contextFiles}
+                    formatHint="PDF, XLS, XLSX, CSV, TXT, MD, DOC, DOCX"
+                    onChange={(event) => updateFiles("context", event)}
+                    onRemoveFile={(file) => removeFile("context", file)}
+                    subtitle="Sube tu rutina actual o documentación de contexto."
+                    title="Sube tu rutina actual"
+                  />
                 </section>
               </div>
             ) : null}
@@ -910,12 +928,14 @@ export function RoutineBuilder() {
 
                 <div className="space-y-6">
                   <FormUploadTile
-                    accept="image/*,video/mp4,video/quicktime,video/webm"
+                    accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.bmp,.gif,.mp4,.mov,.webm,.m4v,.avi,.mkv"
+                    files={visualFiles}
+                    formatHint="JPG, JPEG, PNG, WEBP, HEIC, HEIF, BMP, GIF, MP4, MOV, WEBM, M4V, AVI, MKV"
                     onChange={(event) => updateFiles("visual", event)}
+                    onRemoveFile={(file) => removeFile("visual", file)}
                     subtitle="Video máx 30s o hasta 10 imágenes (JPG, PNG)"
                     title="Subir Video o Fotos"
                   />
-                  <FormFilePills files={visualFiles} />
                 </div>
               </div>
             ) : null}
