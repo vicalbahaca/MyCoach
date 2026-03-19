@@ -28,6 +28,7 @@ import {
   X,
 } from "lucide-react";
 
+import { BrandMark } from "@/components/brand-mark";
 import { ExerciseIllustration } from "@/components/exercise-illustration";
 import { RoutineWorkspace } from "@/components/routine-workspace";
 import { exportRoutineWorkbook } from "@/lib/excel";
@@ -366,8 +367,8 @@ export function RoutineBuilder() {
       <>
         <main className="page-haze min-h-screen pb-12">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-            <Link className="font-display text-2xl font-semibold tracking-tight text-slate-950" href="/">
-              MyCoach
+            <Link className="text-slate-950" href="/">
+              <BrandMark className="text-2xl font-semibold" />
             </Link>
             <button
               className="ghost-button px-4 py-2 text-sm"
@@ -697,8 +698,8 @@ export function RoutineBuilder() {
   return (
     <main className="page-haze min-h-screen pb-12">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <Link className="font-display text-2xl font-semibold tracking-tight text-slate-950" href="/">
-          MyCoach
+        <Link className="text-slate-950" href="/">
+          <BrandMark className="text-2xl font-semibold" />
         </Link>
       </div>
 
@@ -1531,9 +1532,7 @@ function ModalShell({
       <div className="max-h-full w-full max-w-5xl overflow-auto rounded-[38px] border border-white/70 bg-[#fcfbf8] p-6 shadow-[0_48px_140px_-70px_rgba(18,25,45,0.48)]">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-              MyCoach
-            </div>
+            <BrandMark className="text-sm font-black text-slate-500" />
             <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
               {title}
             </h3>
@@ -1592,10 +1591,7 @@ function LoaderOverlay({
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center">
         <div className="animate-pulse-soft mb-20">
-          <span className="font-display flex items-center gap-2 text-4xl font-black tracking-[-0.06em] text-[#1b1b1b]">
-            <Bolt className="h-12 w-12 fill-[#0050cc] text-[#0050cc]" />
-            MyCoach
-          </span>
+          <BrandMark className="text-5xl font-black text-[#1b1b1b]" />
         </div>
 
         <div className="w-full max-w-2xl">

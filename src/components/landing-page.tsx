@@ -10,6 +10,7 @@ import {
   TableProperties,
 } from "lucide-react";
 
+import { BrandMark } from "@/components/brand-mark";
 import { landingPhotos } from "@/lib/visual-assets";
 
 const pillars = [
@@ -60,9 +61,7 @@ export function LandingPage() {
     <>
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/30 bg-[#f9f9f7]/75 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-6 py-4">
-          <div className="font-display text-2xl font-extrabold tracking-[-0.05em] text-[#1b1b1b]">
-            MyCoach
-          </div>
+          <BrandMark className="text-2xl font-extrabold" />
 
           <div className="hidden items-center space-x-8 md:flex">
             <a
@@ -294,7 +293,7 @@ export function LandingPage() {
 
       <footer className="bg-[#f4f4f2] px-6 py-12">
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-8 md:flex-row">
-          <div className="font-display text-xl font-black italic text-[#1a1c1b]">MyCoach</div>
+          <BrandMark className="text-xl font-black" />
           <div className="flex gap-8 text-sm text-[#424656]">
             {footerLinks.map((item) => (
               <a className="transition-colors hover:text-[#0050cc]" href="#" key={item}>

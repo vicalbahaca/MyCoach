@@ -11,6 +11,7 @@ import {
   Video,
 } from "lucide-react";
 
+import { BrandMark } from "@/components/brand-mark";
 import { getExerciseVisual } from "@/lib/visual-assets";
 import type { ExercisePlan, RoutinePlan } from "@/lib/types";
 
@@ -172,9 +173,7 @@ function TopUtilityBar() {
     <header className="sticky top-20 z-30 mb-10 rounded-[2rem] bg-[#f9f9f7]/70 backdrop-blur-xl">
       <nav className="flex w-full items-center justify-between px-6 py-4">
         <div className="flex items-center gap-8">
-          <span className="font-display text-2xl font-black tracking-[-0.05em] text-[#1b1b1b]">
-            MyCoach
-          </span>
+          <BrandMark className="text-2xl font-black" />
           <div className="hidden items-center gap-6 lg:flex">
             <a className="border-b-2 border-[#0050cc] font-bold text-[#0050cc]" href="#">
               Dashboard
