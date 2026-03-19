@@ -73,19 +73,19 @@ import {
 const STEP_META = [
   {
     id: 1,
-    title: "Perfil",
+    title: "Datos",
     blurb: "Base del caso: perfil del atleta, objetivo principal y disciplinas que hay que tener en cuenta.",
     icon: ClipboardList,
   },
   {
     id: 2,
-    title: "Rutina actual",
+    title: "Contexto",
     blurb: "Aqui entra el bloque actual: puedes escribirlo en texto plano o adjuntarlo en archivo.",
     icon: FileText,
   },
   {
     id: 3,
-    title: "Físico actual",
+    title: "Análisis",
     blurb: "Lectura del físico para personalizar prioridades y detectar sesgos del bloque.",
     icon: ImageUp,
   },
