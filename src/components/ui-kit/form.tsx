@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, Upload, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Upload, X } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
 
@@ -375,25 +375,28 @@ export function FormFooter({
   nextIcon?: React.ReactNode;
 }) {
   return (
-    <div className="mt-20 flex flex-col items-center gap-5">
-      {onBack ? (
+    <div className="mt-20 flex justify-center">
+      <div className="flex w-full max-w-md items-center gap-3">
+        {onBack ? (
+          <button
+            aria-label={backLabel || "Paso anterior"}
+            className="inline-flex min-h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border border-[var(--form-outline)] bg-white text-[var(--form-ink)] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(0,80,204,0.34)] hover:text-[var(--form-accent)]"
+            onClick={onBack}
+            type="button"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+        ) : null}
         <button
-          className="form-ui-muted-label text-[var(--form-outline-strong)] transition hover:text-[var(--form-accent)]"
-          onClick={onBack}
+          className="form-ui-cta min-h-[4.5rem] flex-1 px-10"
+          disabled={nextDisabled}
+          onClick={onNext}
           type="button"
         >
-          {backLabel}
+          {nextIcon}
+          {nextLabel}
         </button>
-      ) : null}
-      <button
-        className="form-ui-cta min-h-[4.5rem] w-full max-w-sm px-10"
-        disabled={nextDisabled}
-        onClick={onNext}
-        type="button"
-      >
-        {nextIcon}
-        {nextLabel}
-      </button>
+      </div>
     </div>
   );
 }
