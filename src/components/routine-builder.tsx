@@ -35,7 +35,6 @@ import {
   FormChipButton,
   FormFilePills,
   FormFooter,
-  FormInfoNotice,
   FormLineInput,
   FormLineSelect,
   FormQuestionCard,
@@ -61,7 +60,6 @@ import type {
   RoutinePlan,
 } from "@/lib/types";
 import {
-  generatedVisuals,
   getExerciseVisual,
   landingPhotos,
 } from "@/lib/visual-assets";
@@ -884,42 +882,59 @@ export function RoutineBuilder() {
             ) : null}
 
             {step === 3 ? (
-              <div className="space-y-10">
-                <FormStepIntro
-                  eyebrow="Paso opcional"
-                  text="Si subes material visual, MyCoach puede revisar el físico antes de personalizar el formulario dinámico."
-                  title="Añade una lectura visual del físico."
-                />
-
-                <FormInfoNotice title="Recomendación">
-                  Vídeo corto de 30 segundos o imágenes con buena iluminación, frente, lado
-                  y espalda. También puedes subir hasta 10 imágenes del físico.
-                </FormInfoNotice>
-
-                <div className="form-ui-panel overflow-hidden p-3">
-                  <div className="overflow-hidden rounded-[1.6rem] border border-[rgba(194,198,216,0.42)] bg-[#faf9f4]">
-                    <Image
-                      alt="Escaneo corporal opcional de MyCoach"
-                      className="h-auto w-full"
-                      height={900}
-                      src={generatedVisuals.bodyScan}
-                      width={760}
-                    />
-                  </div>
+              <div className="mx-auto max-w-xl space-y-10">
+                <div className="space-y-4 text-center">
+                  <h2 className="font-display text-4xl font-black tracking-[-0.05em] text-[var(--form-ink)] sm:text-5xl">
+                    Análisis Físico Visual.
+                  </h2>
+                  <p className="mx-auto max-w-md text-lg leading-relaxed text-[var(--form-muted)]">
+                    Este paso es opcional pero nos ayuda a optimizar tu plan
+                    biomecánico. Los datos son 100% privados.
+                  </p>
                 </div>
 
-                <FormSection
-                  description="Acepta imágenes y vídeo. El flujo continúa aunque no subas nada."
-                  label="Material visual"
-                >
+                <article className="form-ui-panel px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <div className="mb-8 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
+                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[rgba(0,80,204,0.16)]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--form-accent)]" />
+                    </span>
+                    Guía de captura técnica
+                  </div>
+                  <div className="space-y-8">
+                    {[
+                      "Iluminación frontal clara, evita sombras duras sobre el torso.",
+                      "Cuerpo completo visible desde los pies hasta la cabeza.",
+                      "Ángulos clave: frente, perfil izquierdo/derecho y espalda.",
+                    ].map((item, index) => (
+                      <div className="flex items-start gap-6" key={item}>
+                        <span className="font-display text-3xl font-black text-[rgba(114,118,135,0.22)]">
+                          {String(index + 1).padStart(2, "0")}.
+                        </span>
+                        <p className="pt-1 text-base font-medium leading-tight text-[var(--form-ink)]">
+                          {item}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+
+                <div className="space-y-6">
                   <FormUploadTile
                     accept="image/*,video/mp4,video/quicktime,video/webm"
                     onChange={(event) => updateFiles("visual", event)}
-                    subtitle="Vídeo o imágenes del físico. Máximo 10 imágenes."
-                    title="Subir recurso visual"
+                    subtitle="Video máx 30s o hasta 10 imágenes (JPG, PNG)"
+                    title="Subir Video o Fotos"
                   />
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <span className="inline-flex min-h-8 items-center justify-center rounded-full bg-[rgba(218,225,255,0.8)] px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--form-accent)]">
+                      Análisis dinámico
+                    </span>
+                    <span className="inline-flex min-h-8 items-center justify-center rounded-full bg-[rgba(226,227,225,0.9)] px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--form-muted)]">
+                      Privado
+                    </span>
+                  </div>
                   <FormFilePills files={visualFiles} />
-                </FormSection>
+                </div>
               </div>
             ) : null}
 
