@@ -79,7 +79,7 @@ const STEP_META = [
   },
   {
     id: 2,
-    title: "Contexto",
+    title: "Rutina",
     blurb: "Aqui entra el bloque actual: puedes escribirlo en texto plano o adjuntarlo en archivo.",
     icon: FileText,
   },
