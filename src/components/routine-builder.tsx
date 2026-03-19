@@ -127,6 +127,8 @@ const OBJECTIVE_OPTIONS: FormOption[] = [
   { value: "Salud general", label: "Salud general" },
 ];
 
+const VISIBLE_STEP_TOTAL = 4;
+
 function arrayValue(value: DynamicAnswerValue | undefined) {
   return Array.isArray(value) ? value : [];
 }
@@ -382,6 +384,7 @@ export function RoutineBuilder() {
   }
 
   const currentMeta = STEP_META[step - 1];
+  const visibleStep = Math.min(step, VISIBLE_STEP_TOTAL);
   const personalizedCards = analysis
     ? analysis.personalizedSections.flatMap((section) => chunkQuestions(section))
     : [];
@@ -771,7 +774,11 @@ export function RoutineBuilder() {
         ) : null}
 
         <section>
-          <FormProgress step={step} title={currentMeta.title} totalSteps={STEP_META.length} />
+          <FormProgress
+            step={visibleStep}
+            title={currentMeta.title}
+            totalSteps={VISIBLE_STEP_TOTAL}
+          />
 
           <div className="space-y-12">
             {step === 1 ? (
