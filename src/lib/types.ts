@@ -3,6 +3,12 @@ export type Discipline =
   | "hyrox"
   | "crossfit"
   | "strength"
+  | "powerlifting"
+  | "weightlifting"
+  | "running"
+  | "hybrid-endurance"
+  | "calisthenics"
+  | "general-fitness"
   | "recomposition";
 
 export type QuestionType =

@@ -3,13 +3,10 @@ import Link from "next/link";
 import {
   Bell,
   Bolt,
-  CalendarRange,
   ChevronRight,
   CircleUserRound,
   Dumbbell,
-  Grid2x2,
   Image as ImageIcon,
-  LineChart,
   TableProperties,
 } from "lucide-react";
 
@@ -130,73 +127,6 @@ export function LandingPage() {
                   width={1800}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1c1b]/18 via-transparent to-transparent" />
-
-                <div className="absolute -right-3 top-10 w-[54%] rounded-[2rem] border border-white/80 bg-[#f9f9f7]/92 p-5 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.12)] backdrop-blur md:-right-8 md:p-6">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-[#0050cc]">
-                        Rutina lista
-                      </p>
-                      <h3 className="mt-2 font-display text-2xl font-bold tracking-[-0.04em] text-[#1b1b1b]">
-                        Bloque superior
-                      </h3>
-                    </div>
-                    <div className="rounded-full bg-[#eef3ff] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#003fa4]">
-                      Excel editable
-                    </div>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {[
-                      { label: "sesiones", value: "4" },
-                      { label: "focos", value: "3" },
-                      { label: "ajustes", value: "RIR" },
-                    ].map((item) => (
-                      <div className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4" key={item.label}>
-                        <div className="font-display text-3xl font-extrabold tracking-[-0.05em] text-[#1b1b1b]">
-                          {item.value}
-                        </div>
-                        <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4">
-                    <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                      Ultima accion
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-700">
-                      Rutina exportada y lista para editar segun material, molestias o feedback.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="absolute -left-6 bottom-10 hidden w-[48%] rounded-[2rem] border border-white/80 bg-white/94 p-5 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.12)] backdrop-blur md:block">
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-[#eef3ff] text-[#0050cc]">
-                      <LineChart className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-500">
-                        Diagnostico
-                      </p>
-                      <h3 className="font-display text-xl font-bold tracking-[-0.04em] text-[#1b1b1b]">
-                        Lectura del caso
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="rounded-full bg-[#f2f3f6] px-4 py-3 text-sm font-semibold text-slate-700">
-                      Pecho clavicular y dorsales como prioridad.
-                    </div>
-                    <div className="rounded-full bg-[#f2f3f6] px-4 py-3 text-sm font-semibold text-slate-700">
-                      Frecuencia 4 y control de fatiga como base.
-                    </div>
-                    <div className="rounded-full bg-[#eef3ff] px-4 py-3 text-sm font-semibold text-[#003fa4]">
-                      Cambios de ejercicio y exportacion sin rehacer el bloque.
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -238,7 +168,7 @@ export function LandingPage() {
 
         <section className="mx-auto max-w-[1440px] overflow-hidden px-6 py-24" id="programa">
           <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div className="order-2 relative lg:order-1">
+            <div className="order-2 lg:order-1">
               <div className="relative aspect-square w-full overflow-hidden rounded-[2rem] bg-[#e8e8e6]">
                 <Image
                   alt={landingPhotos[2].alt}
@@ -247,30 +177,6 @@ export function LandingPage() {
                   src={landingPhotos[2].src}
                   width={762}
                 />
-              </div>
-
-              <div className="absolute -bottom-12 -right-6 hidden w-80 overflow-hidden rounded-[1.5rem] border-8 border-[#eeeeec] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:block md:-right-12">
-                <div className="bg-white p-6">
-                  <div className="mb-6 flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#dae1ff]">
-                      <CircleUserRound className="h-6 w-6 text-[#0050cc]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#424656]">
-                        Contexto
-                      </p>
-                      <p className="font-display font-bold">Perfil atleta pro</p>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="h-2 w-full rounded-full bg-[#e8e8e6]" />
-                    <div className="h-2 w-3/4 rounded-full bg-[#e8e8e6]" />
-                    <div className="flex gap-2">
-                      <div className="h-8 w-16 rounded-full bg-[#0050cc]" />
-                      <div className="h-8 w-24 rounded-full bg-[#e8e8e6]" />
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -402,36 +308,6 @@ export function LandingPage() {
         </div>
       </footer>
 
-      <nav className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[3rem] border-t border-[#c2c6d8]/15 bg-white/80 px-6 pb-8 pt-4 shadow-[0_-20px_40px_-10px_rgba(26,28,27,0.06)] backdrop-blur-md lg:hidden">
-        <MobileNavItem active icon={<Grid2x2 className="h-5 w-5" />} label="Feed" />
-        <MobileNavItem icon={<CalendarRange className="h-5 w-5" />} label="Plan" />
-        <MobileNavItem icon={<Bolt className="h-5 w-5" />} label="Train" />
-        <MobileNavItem icon={<LineChart className="h-5 w-5" />} label="Metrics" />
-        <MobileNavItem icon={<CircleUserRound className="h-5 w-5" />} label="Profile" />
-      </nav>
     </>
-  );
-}
-
-function MobileNavItem({
-  icon,
-  label,
-  active = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <div
-      className={`flex flex-col items-center justify-center ${
-        active ? "scale-110 text-[#0050cc]" : "text-[#1b1b1b]/40"
-      }`}
-    >
-      {icon}
-      <span className="mt-1 font-display text-[10px] font-semibold uppercase tracking-[0.24em]">
-        {label}
-      </span>
-    </div>
   );
 }

@@ -4,9 +4,7 @@ import {
   Bolt,
   CircleUserRound,
   Download,
-  Grid2x2,
   History,
-  LineChart,
   Lock,
   Search,
   TableProperties,
@@ -165,7 +163,6 @@ export function RoutineWorkspace({
         </section>
       </section>
 
-      <BottomMobileBar />
     </>
   );
 }
@@ -380,42 +377,6 @@ function SessionCard({
         </div>
       </div>
     </div>
-  );
-}
-
-function BottomMobileBar() {
-  return (
-    <div className="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-[3rem] border-t border-[#c2c6d8]/15 bg-white/80 px-6 pb-8 pt-4 shadow-[0_-20px_40px_-10px_rgba(26,28,27,0.06)] backdrop-blur-md lg:hidden">
-      <BottomNavItem icon={<Grid2x2 className="h-5 w-5" />} label="Feed" />
-      <BottomNavItem icon={<TableProperties className="h-5 w-5" />} label="Plan" />
-      <BottomNavItem active icon={<Bolt className="h-5 w-5 fill-current" />} label="Train" />
-      <BottomNavItem icon={<LineChart className="h-5 w-5" />} label="Metrics" />
-      <BottomNavItem icon={<CircleUserRound className="h-5 w-5" />} label="Profile" />
-    </div>
-  );
-}
-
-function BottomNavItem({
-  icon,
-  label,
-  active = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <a
-      className={`flex flex-col items-center justify-center ${
-        active ? "scale-110 text-[#0050cc]" : "text-[#1b1b1b]/40"
-      }`}
-      href="#"
-    >
-      {icon}
-      <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em]">
-        {label}
-      </span>
-    </a>
   );
 }
 

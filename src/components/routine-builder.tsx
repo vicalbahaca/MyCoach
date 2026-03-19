@@ -51,30 +51,36 @@ import {
 const STEP_META = [
   {
     id: 1,
-    title: "Perfil y contexto",
-    blurb: "Base del caso, rutina actual y datos útiles para arrancar con criterio.",
+    title: "Informacion personal",
+    blurb: "Base del caso: perfil del atleta, objetivo principal y disciplinas que hay que tener en cuenta.",
     icon: ClipboardList,
   },
   {
     id: 2,
+    title: "Rutina y contexto actual",
+    blurb: "Aqui entra el bloque actual: puedes escribirlo en texto plano o adjuntarlo en archivo.",
+    icon: FileText,
+  },
+  {
+    id: 3,
     title: "Visual opcional",
     blurb: "Lectura del físico para personalizar prioridades y detectar sesgos del bloque.",
     icon: ImageUp,
   },
   {
-    id: 3,
+    id: 4,
     title: "Formulario dinámico",
     blurb: "Preguntas adaptadas al caso. Nada de pedir lo mismo a todos.",
     icon: BrainCircuit,
   },
   {
-    id: 4,
+    id: 5,
     title: "Preferencias del bloque",
     blurb: "Logística, tiempo real, frecuencia y material disponible.",
     icon: Target,
   },
   {
-    id: 5,
+    id: 6,
     title: "Confirmar y generar",
     blurb: "Resumen final antes de lanzar la rutina editable y exportable.",
     icon: Sparkles,
@@ -86,6 +92,12 @@ const DISCIPLINE_OPTIONS = [
   { value: "hyrox", label: "Hyrox" },
   { value: "crossfit", label: "CrossFit" },
   { value: "strength", label: "Pesas / fuerza" },
+  { value: "powerlifting", label: "Powerlifting" },
+  { value: "weightlifting", label: "Halterofilia" },
+  { value: "running", label: "Running" },
+  { value: "hybrid-endurance", label: "Híbrido / endurance" },
+  { value: "calisthenics", label: "Calistenia" },
+  { value: "general-fitness", label: "Fitness general" },
   { value: "recomposition", label: "Recomposición" },
 ] as const;
 
@@ -205,7 +217,7 @@ export function RoutineBuilder() {
 
       const data = (await response.json()) as { analysis: IntakeAnalysis };
       setAnalysis(data.analysis);
-      moveTo(3);
+      moveTo(4);
     } catch {
       setErrorMessage("No se pudo personalizar el formulario. Vuelve a intentarlo.");
     } finally {
@@ -730,9 +742,9 @@ export function RoutineBuilder() {
                   {step === 1 ? (
                     <div className="space-y-6">
                       <StepIntro
-                        eyebrow="Contexto base"
+                        eyebrow="Informacion de la persona"
                         title="Empezamos por el caso real del atleta."
-                        text="Puedes escribir contexto, pegar la rutina actual o subir un archivo. Todo es opcional, pero cuanto mejor sea la base, más fino quedará el bloque."
+                        text="Todo es opcional, pero cuanto mejor sea la base, más fino quedará el bloque. Aqui solo recogemos perfil, objetivo y disciplinas."
                       />
 
                       <FieldGroup
@@ -800,32 +812,46 @@ export function RoutineBuilder() {
                           })}
                         </div>
                       </FieldGroup>
+                    </div>
+                  ) : null}
+
+                  {step === 2 ? (
+                    <div className="space-y-6">
+                      <StepIntro
+                        eyebrow="Contexto de entrenamiento"
+                        title="Rutina actual en texto o archivo."
+                        text="Puedes enviar la rutina actual en texto plano, explicar el caso del atleta o adjuntar un archivo Excel, TXT, PDF o similar."
+                      />
 
                       <FieldGroup
-                        description="Aquí es donde más valor suele entrar: rutina actual, problemas del bloque, contexto del atleta o feedback previo."
-                        title="Rutina actual y contexto"
+                        description="Escribe aqui como entrena ahora la persona: clases, full body, torso-pierna, Hyrox, CrossFit o cualquier mezcla real."
+                        title="Entrenamiento actual"
                       >
-                        <div className="grid gap-3">
-                          <TextAreaField
-                            label="Entrenamiento actual"
-                            onChange={(value) => updateProfile("currentTraining", value)}
-                            placeholder="Ej: clases, full body, Hyrox 3 días, rutina libre..."
-                            rows={4}
-                            value={profile.currentTraining || ""}
-                          />
-                          <TextAreaField
-                            label="Contexto libre o rutina pegada"
-                            onChange={(value) => updateProfile("currentRoutineText", value)}
-                            placeholder="Pega aquí la rutina, feedback del bloque, limitaciones o notas del atleta."
-                            rows={6}
-                            value={profile.currentRoutineText || ""}
-                          />
-                        </div>
+                        <TextAreaField
+                          label="Entrenamiento actual"
+                          onChange={(value) => updateProfile("currentTraining", value)}
+                          placeholder="Ej: clases, full body, Hyrox 3 dias, rutina libre..."
+                          rows={4}
+                          value={profile.currentTraining || ""}
+                        />
                       </FieldGroup>
 
                       <FieldGroup
-                        description="TXT, CSV, Excel, DOCX o PDF. La plataforma lo usa como contexto adicional."
-                        title="Adjuntar rutina actual"
+                        description="Pega la rutina, el feedback del bloque, limitaciones o cualquier contexto util para personalizar la estructura."
+                        title="Texto plano"
+                      >
+                        <TextAreaField
+                          label="Contexto libre o rutina pegada"
+                          onChange={(value) => updateProfile("currentRoutineText", value)}
+                          placeholder="Pega aqui la rutina, feedback del bloque, limitaciones o notas del atleta."
+                          rows={8}
+                          value={profile.currentRoutineText || ""}
+                        />
+                      </FieldGroup>
+
+                      <FieldGroup
+                        description="Puedes adjuntar la rutina o el contexto actual en TXT, CSV, Excel, DOCX, PDF o Markdown."
+                        title="Adjuntar archivo"
                       >
                         <UploadTile
                           accept=".txt,.csv,.xlsx,.xls,.docx,.pdf,.md"
@@ -839,7 +865,7 @@ export function RoutineBuilder() {
                     </div>
                   ) : null}
 
-                  {step === 2 ? (
+                  {step === 3 ? (
                     <div className="space-y-6">
                       <StepIntro
                         eyebrow="Paso opcional"
@@ -887,7 +913,7 @@ export function RoutineBuilder() {
                     </div>
                   ) : null}
 
-                  {step === 3 ? (
+                  {step === 4 ? (
                     <div className="space-y-6">
                       <StepIntro
                         eyebrow="Preguntas dinámicas"
@@ -927,7 +953,7 @@ export function RoutineBuilder() {
                     </div>
                   ) : null}
 
-                  {step === 4 ? (
+                  {step === 5 ? (
                     <div className="space-y-6">
                       <StepIntro
                         eyebrow="Cierre logístico"
@@ -997,7 +1023,7 @@ export function RoutineBuilder() {
                     </div>
                   ) : null}
 
-                  {step === 5 ? (
+                  {step === 6 ? (
                     <div className="space-y-6">
                       <StepIntro
                         eyebrow="Listo para generar"
@@ -1049,17 +1075,22 @@ export function RoutineBuilder() {
                 }
 
                 if (step === 2) {
-                  void personalizeForm();
+                  moveTo(3);
                   return;
                 }
 
                 if (step === 3) {
-                  moveTo(4);
+                  void personalizeForm();
                   return;
                 }
 
                 if (step === 4) {
                   moveTo(5);
+                  return;
+                }
+
+                if (step === 5) {
+                  moveTo(6);
                   return;
                 }
 
@@ -1085,11 +1116,11 @@ export function RoutineBuilder() {
 }
 
 function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean) {
-  if (step === 2) {
+  if (step === 3) {
     return isAnalyzing ? "Personalizando..." : "Personalizar formulario";
   }
 
-  if (step === 5) {
+  if (step === 6) {
     return isGenerating ? "Generando..." : "Generar rutina";
   }
 
