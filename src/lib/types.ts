@@ -58,7 +58,7 @@ export type IntakeProfile = {
   daysPerWeek?: string;
   sessionLength?: string;
   equipment?: string;
-  disciplines?: Discipline[];
+  disciplines?: string[];
   limitationNotes?: string;
 };
 

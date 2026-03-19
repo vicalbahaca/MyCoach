@@ -22,10 +22,33 @@ const ROTATION_LABELS = [
 ];
 
 function primaryDiscipline(profile: IntakeProfile): Discipline {
-  if (profile.disciplines?.includes("hyrox")) return "hyrox";
-  if (profile.disciplines?.includes("crossfit")) return "crossfit";
-  if (profile.disciplines?.includes("strength")) return "strength";
-  if (profile.disciplines?.includes("recomposition")) return "recomposition";
+  const disciplines = profile.disciplines?.map((item) => item.toLowerCase()) || [];
+
+  if (disciplines.some((item) => item.includes("hyrox"))) return "hyrox";
+  if (disciplines.some((item) => item.includes("crossfit"))) return "crossfit";
+  if (
+    disciplines.some(
+      (item) =>
+        item.includes("powerlifting") ||
+        item.includes("halterofilia") ||
+        item.includes("musculacion") ||
+        item.includes("calistenia")
+    )
+  ) {
+    return "strength";
+  }
+  if (
+    disciplines.some(
+      (item) =>
+        item.includes("running") ||
+        item.includes("ciclismo") ||
+        item.includes("natacion") ||
+        item.includes("triatlon") ||
+        item.includes("remo")
+    )
+  ) {
+    return "hybrid-endurance";
+  }
   return "bodybuilding";
 }
 

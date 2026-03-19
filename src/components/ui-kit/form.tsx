@@ -44,17 +44,19 @@ export function FormProgress({
   title: string;
 }) {
   return (
-    <div className="mb-14 space-y-4">
+    <div className="form-ui-panel mb-14 space-y-5 bg-white/70 px-6 py-6 backdrop-blur-xl sm:px-8">
       <div className="flex items-end justify-between gap-6">
-        <span className="form-ui-muted-label">Paso {step} de {totalSteps}</span>
+        <span className="font-display text-sm font-black uppercase tracking-[0.24em] text-[var(--form-outline-strong)] sm:text-base">
+          Paso {step} de {totalSteps}
+        </span>
         <span className="font-display text-3xl font-black uppercase tracking-[-0.04em] text-[var(--form-ink)] sm:text-4xl">
           {title}
         </span>
       </div>
-      <div className="h-px w-full overflow-hidden bg-[rgba(194,198,216,0.72)]">
+      <div className="overflow-hidden rounded-full border border-white/80 bg-[rgba(244,244,242,0.84)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
         <div
-          className="h-full bg-[var(--form-accent)] transition-all duration-300"
-          style={{ width: `${(step / totalSteps) * 100}%` }}
+          className="h-2 rounded-full bg-[linear-gradient(90deg,#0050cc_0%,#2f7bff_100%)] shadow-[0_10px_24px_-12px_rgba(0,80,204,0.95)] transition-all duration-300"
+          style={{ width: `${Math.max(8, (step / totalSteps) * 100)}%` }}
         />
       </div>
     </div>
@@ -392,9 +394,6 @@ export function FormFooter({
         {nextIcon}
         {nextLabel}
       </button>
-      <p className="form-ui-muted-label text-center text-[var(--form-outline-strong)]">
-        Datos encriptados bajo protocolos de élite
-      </p>
     </div>
   );
 }

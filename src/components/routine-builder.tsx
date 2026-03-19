@@ -64,6 +64,13 @@ import {
   getExerciseVisual,
   landingPhotos,
 } from "@/lib/visual-assets";
+import {
+  getSportDisciplineLabel,
+  getVisibleSportDisciplines,
+  SPORT_DISCIPLINE_BATCH_SIZE,
+  SPORT_DISCIPLINE_INITIAL_VISIBLE,
+  SPORT_DISCIPLINE_OPTIONS,
+} from "@/lib/sport-disciplines";
 
 const STEP_META = [
   {
@@ -102,20 +109,6 @@ const STEP_META = [
     blurb: "Resumen final antes de lanzar la rutina editable y exportable.",
     icon: Sparkles,
   },
-] as const;
-
-const DISCIPLINE_OPTIONS = [
-  { value: "bodybuilding", label: "Musculación" },
-  { value: "hyrox", label: "Hyrox" },
-  { value: "crossfit", label: "CrossFit" },
-  { value: "strength", label: "Pesas / fuerza" },
-  { value: "powerlifting", label: "Powerlifting" },
-  { value: "weightlifting", label: "Halterofilia" },
-  { value: "running", label: "Running" },
-  { value: "hybrid-endurance", label: "Híbrido / endurance" },
-  { value: "calisthenics", label: "Calistenia" },
-  { value: "general-fitness", label: "Fitness general" },
-  { value: "recomposition", label: "Recomposición" },
 ] as const;
 
 const SEX_OPTIONS = ["Hombre", "Mujer", "Otro"] as const;
@@ -174,6 +167,9 @@ export function RoutineBuilder() {
   const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [changeRequest, setChangeRequest] = useState("");
+  const [visibleDisciplineCount, setVisibleDisciplineCount] = useState(
+    SPORT_DISCIPLINE_INITIAL_VISIBLE
+  );
 
   const scrollToActiveStep = useEffectEvent(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -195,7 +191,7 @@ export function RoutineBuilder() {
     setProfile((current) => ({ ...current, [key]: value }));
   }
 
-  function toggleDiscipline(value: (typeof DISCIPLINE_OPTIONS)[number]["value"]) {
+  function toggleDiscipline(value: string) {
     invalidateAnalysis();
     setProfile((current) => {
       const disciplines = current.disciplines || [];
@@ -353,6 +349,12 @@ export function RoutineBuilder() {
   const personalizedCards = analysis
     ? analysis.personalizedSections.flatMap((section) => chunkQuestions(section))
     : [];
+  const visibleDisciplines = getVisibleSportDisciplines(
+    profile.disciplines || [],
+    visibleDisciplineCount
+  );
+  const canLoadMoreDisciplines =
+    visibleDisciplines.length < SPORT_DISCIPLINE_OPTIONS.length;
 
   const swapExerciseOptions =
     swapTarget && routine
@@ -792,9 +794,9 @@ export function RoutineBuilder() {
                   />
                 </div>
 
-                <FormSection label="Disciplinas de interés">
+                <FormSection label="Disciplinas deportivas">
                   <div className="flex flex-wrap gap-3">
-                    {DISCIPLINE_OPTIONS.map((option) => {
+                    {visibleDisciplines.map((option) => {
                       const selected = profile.disciplines?.includes(option.value) || false;
                       return (
                         <FormChipButton
@@ -806,6 +808,23 @@ export function RoutineBuilder() {
                         </FormChipButton>
                       );
                     })}
+                    {canLoadMoreDisciplines ? (
+                      <button
+                        aria-label="Mostrar 10 disciplinas más"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--form-surface-high)] text-[var(--form-ink)] transition hover:-translate-y-0.5 hover:bg-[var(--form-accent-soft)] hover:text-[var(--form-accent)]"
+                        onClick={() =>
+                          setVisibleDisciplineCount((current) =>
+                            Math.min(
+                              current + SPORT_DISCIPLINE_BATCH_SIZE,
+                              SPORT_DISCIPLINE_OPTIONS.length
+                            )
+                          )
+                        }
+                        type="button"
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </button>
+                    ) : null}
                   </div>
                 </FormSection>
               </div>
@@ -1113,7 +1132,7 @@ function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean)
 }
 
 function labelForDiscipline(value: string) {
-  return DISCIPLINE_OPTIONS.find((option) => option.value === value)?.label || value;
+  return getSportDisciplineLabel(value);
 }
 
 function LoaderBlock() {
