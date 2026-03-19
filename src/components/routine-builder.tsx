@@ -85,7 +85,7 @@ const STEP_META = [
   },
   {
     id: 3,
-    title: "Visual",
+    title: "Físico actual",
     blurb: "Lectura del físico para personalizar prioridades y detectar sesgos del bloque.",
     icon: ImageUp,
   },
