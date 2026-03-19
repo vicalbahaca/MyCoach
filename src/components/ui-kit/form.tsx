@@ -44,7 +44,7 @@ export function FormProgress({
   title: string;
 }) {
   return (
-    <div className="form-ui-panel mb-14 space-y-5 bg-white/70 px-6 py-6 backdrop-blur-xl sm:px-8">
+    <div className="mb-14 space-y-5">
       <div className="flex items-end justify-between gap-6">
         <span className="font-display text-sm font-black uppercase tracking-[0.24em] text-[var(--form-outline-strong)] sm:text-base">
           Paso {step} de {totalSteps}
