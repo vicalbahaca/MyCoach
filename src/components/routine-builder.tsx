@@ -684,59 +684,49 @@ export function RoutineBuilder() {
 
   return (
     <main className="page-haze min-h-screen pb-12">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
         <Link className="font-display text-2xl font-semibold tracking-tight text-slate-950" href="/">
           MyCoach
         </Link>
-        <Link className="ghost-button px-4 py-2 text-sm" href="/">
-          Ver landing
-        </Link>
       </div>
 
-      <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
         {errorMessage ? (
           <div className="mb-6 rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {errorMessage}
           </div>
         ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-start">
-          <section className="soft-card overflow-hidden">
-            <div className="border-b border-slate-200/80 px-5 py-5 sm:px-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <button
-                    className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition ${
-                      step === 1 ? "pointer-events-none opacity-30" : "hover:border-[rgba(66,108,255,0.3)]"
-                    }`}
-                    onClick={() => moveTo(Math.max(1, step - 1))}
-                    type="button"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </button>
-                  <div>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
-                      Paso {step} de {STEP_META.length}
-                    </div>
-                    <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.04em] text-slate-950">
-                      {currentMeta.title}
-                    </div>
-                    <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                      {currentMeta.blurb}
-                    </p>
+        <section>
+          <div className="mb-8">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <button
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition ${
+                    step === 1 ? "pointer-events-none opacity-30" : "hover:border-[rgba(66,108,255,0.3)]"
+                  }`}
+                  onClick={() => moveTo(Math.max(1, step - 1))}
+                  type="button"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <div>
+                  <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-600">
+                    Paso {step} de {STEP_META.length}
                   </div>
-                </div>
-                <div className="hidden rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 sm:block">
-                  Constructor
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{currentMeta.blurb}</p>
                 </div>
               </div>
-              <div className="mt-5 progress-rail">
-                <div className="progress-fill" style={{ width: progressWidth }} />
+              <div className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
+                i
               </div>
             </div>
+            <div className="mt-4 h-[6px] w-full overflow-hidden rounded-full bg-[#d9d9d5]">
+              <div className="h-full rounded-full bg-[var(--primary)]" style={{ width: progressWidth }} />
+            </div>
+          </div>
 
-            <div className="thin-scrollbar max-h-[calc(100vh-250px)] overflow-y-auto px-5 py-6 sm:px-6">
-              <div className="space-y-6">
+          <div className="space-y-8">
                   {step === 1 ? (
                     <div className="space-y-6">
                       <StepIntro
@@ -744,11 +734,6 @@ export function RoutineBuilder() {
                         title="Empezamos por el caso real del atleta."
                         text="Puedes escribir contexto, pegar la rutina actual o subir un archivo. Todo es opcional, pero cuanto mejor sea la base, más fino quedará el bloque."
                       />
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <MiniStat label="Inputs" value={`${contextFiles.length + Number(Boolean(profile.currentRoutineText?.trim()))}`} />
-                        <MiniStat label="Perfil" value={profile.level || "abierto"} />
-                      </div>
 
                       <FieldGroup
                         description="Datos básicos para contextualizar el caso. No frenan el flujo si no los rellenas."
@@ -1020,245 +1005,69 @@ export function RoutineBuilder() {
                         text="En el siguiente paso MyCoach crea la rutina final, activa el workspace editable y deja el bloque listo para exportar a Excel."
                       />
 
-                      <div className="rounded-[30px] border border-slate-200 bg-white p-5">
-                        <div className="mb-4 flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
-                              Resultado esperado
-                            </div>
-                            <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                              Rutina editable y exportable
-                            </div>
+                      <div className="space-y-4 border-t border-slate-200/80 pt-6">
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
+                            Resultado esperado
                           </div>
-                          <div className="rounded-full bg-[#eef3ff] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#003fa4]">
-                            Sin mockups
+                          <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                            Rutina editable y exportable
                           </div>
                         </div>
-                        <div className="grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
-                          <div className="rounded-[24px] border border-slate-200 bg-[#fafaf8] p-4">
-                            <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                              Estructura
-                            </div>
-                            <div className="space-y-3">
-                              {["Dia 1 · Upper A", "Dia 2 · Lower A", "Dia 3 · Upper B"].map((item) => (
-                                <div
-                                  className="rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800"
-                                  key={item}
-                                >
-                                  {item}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="rounded-[24px] border border-slate-200 bg-white p-4">
-                              <div className="font-display text-4xl font-extrabold tracking-[-0.05em] text-slate-950">
-                                4
-                              </div>
-                              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                sesiones listas
-                              </div>
-                            </div>
-                            <div className="rounded-[24px] border border-slate-200 bg-white p-4">
-                              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                                Incluye
-                              </div>
-                              <p className="mt-2 text-sm leading-6 text-slate-700">
-                                rotaciones, RIR, cambios de ejercicio, notas y exportacion a Excel.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-3">
-                        <SummaryCard
-                          icon={<FileText className="h-5 w-5" />}
-                          title="Contexto"
-                          value={
-                            profile.currentRoutineText?.trim()
-                              ? "Texto o rutina añadida"
-                              : "Sin texto específico"
-                          }
-                          extra={`${contextFiles.length} archivos adjuntos`}
-                        />
-                        <SummaryCard
-                          icon={<ImageUp className="h-5 w-5" />}
-                          title="Visual"
-                          value={
-                            visualFiles.length
-                              ? `${visualFiles.length} recursos visuales`
-                              : "Sin adjuntos visuales"
-                          }
-                          extra="Paso opcional completado o saltado"
-                        />
-                        <SummaryCard
-                          icon={<BrainCircuit className="h-5 w-5" />}
-                          title="Formulario"
-                          value={`${Object.values(answers).filter(Boolean).length} respuestas guardadas`}
-                          extra="Se usan para personalizar la estructura final"
-                        />
-                        <SummaryCard
-                          icon={<Target className="h-5 w-5" />}
-                          title="Logística"
-                          value={`${profile.daysPerWeek || "Auto"} días · ${profile.sessionLength || "Auto"} min`}
-                          extra={profile.equipment || "Sin material especificado"}
-                        />
-                      </div>
-
-                      <div className="rounded-[28px] border border-slate-200 bg-[#fafaf8] p-5">
-                        <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                          Resumen rápido
-                        </div>
-                        <div className="grid gap-3 text-sm text-slate-700">
+                        <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
+                          <div>Contexto: {profile.currentRoutineText?.trim() ? "Texto o rutina añadida" : "Sin texto especifico"}</div>
+                          <div>Archivos: {contextFiles.length} adjuntos</div>
+                          <div>Visual: {visualFiles.length ? `${visualFiles.length} recursos visuales` : "Sin adjuntos visuales"}</div>
+                          <div>Formulario: {Object.values(answers).filter(Boolean).length} respuestas guardadas</div>
                           <div>Objetivo: {profile.objective || "No indicado"}</div>
-                          <div>
-                            Disciplinas: {(profile.disciplines || []).join(", ") || "No indicadas"}
-                          </div>
+                          <div>Disciplinas: {(profile.disciplines || []).join(", ") || "No indicadas"}</div>
                           <div>Nivel: {profile.level || "No indicado"}</div>
                           <div>Material: {profile.equipment || "No indicado"}</div>
+                          <div>Frecuencia: {profile.daysPerWeek || "Auto"} dias</div>
+                          <div>Duracion: {profile.sessionLength || "Auto"} min</div>
                         </div>
                       </div>
                     </div>
                   ) : null}
-                </div>
-              </div>
+          </div>
 
-            <div className="border-t border-slate-200/90 bg-[linear-gradient(180deg,rgba(247,246,241,0),rgba(247,246,241,0.92)_24%,rgba(247,246,241,0.98)_100%)] px-5 pb-5 pt-5 sm:px-6">
-              <BuilderFooter
-                backLabel={step > 1 ? "Atrás" : undefined}
-                nextDisabled={isAnalyzing || isGenerating}
-                nextIcon={
-                  isAnalyzing || isGenerating ? (
-                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                  ) : undefined
+          <div className="mt-10 border-t border-slate-200/80 pt-5">
+            <BuilderFooter
+              backLabel={step > 1 ? "Atrás" : undefined}
+              nextDisabled={isAnalyzing || isGenerating}
+              nextIcon={
+                isAnalyzing || isGenerating ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : undefined
+              }
+              nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
+              onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
+              onNext={() => {
+                if (step === 1) {
+                  moveTo(2);
+                  return;
                 }
-                nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
-                onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
-                onNext={() => {
-                  if (step === 1) {
-                    moveTo(2);
-                    return;
-                  }
 
-                  if (step === 2) {
-                    void personalizeForm();
-                    return;
-                  }
+                if (step === 2) {
+                  void personalizeForm();
+                  return;
+                }
 
-                  if (step === 3) {
-                    moveTo(4);
-                    return;
-                  }
+                if (step === 3) {
+                  moveTo(4);
+                  return;
+                }
 
-                  if (step === 4) {
-                    moveTo(5);
-                    return;
-                  }
+                if (step === 4) {
+                  moveTo(5);
+                  return;
+                }
 
-                  void generatePlan();
-                }}
-              />
-            </div>
-          </section>
-
-          <aside className="space-y-5 lg:sticky lg:top-6">
-            <article className="soft-card p-5">
-              <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-                Estado del flujo
-              </div>
-              <div className="grid gap-3">
-                {STEP_META.map((item) => {
-                  const Icon = item.icon;
-                  const active = item.id === step;
-                  const done = item.id < step;
-
-                  return (
-                    <div
-                      className={`rounded-[26px] border px-4 py-4 transition ${
-                        active
-                          ? "border-[rgba(66,108,255,0.3)] bg-[rgba(66,108,255,0.08)]"
-                          : done
-                            ? "border-slate-200 bg-white"
-                            : "border-slate-200/70 bg-[#fafaf8]"
-                      }`}
-                      key={item.id}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${
-                            active
-                              ? "bg-white text-[var(--primary)]"
-                              : done
-                                ? "bg-slate-950 text-white"
-                                : "bg-white text-slate-400"
-                          }`}
-                        >
-                          {done ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                            Paso {item.id}
-                          </div>
-                          <div className="mt-1 font-display text-xl font-semibold tracking-tight text-slate-950">
-                            {item.title}
-                          </div>
-                          <p className="mt-2 text-sm leading-7 text-slate-600">{item.blurb}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </article>
-
-            <article className="soft-card p-5">
-              <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
-                Senales del proceso
-              </div>
-              <div className="grid gap-3">
-                {[
-                  "El contexto manda sobre la plantilla.",
-                  "El visual solo entra si aporta lectura real.",
-                  "La rutina sale editable, no cerrada.",
-                ].map((item, index) => (
-                  <div
-                    className={`rounded-[24px] border px-4 py-4 text-sm font-semibold leading-6 ${
-                      index === 2
-                        ? "border-[rgba(66,108,255,0.22)] bg-[rgba(66,108,255,0.08)] text-[#003fa4]"
-                        : "border-slate-200 bg-white text-slate-700"
-                    }`}
-                    key={item}
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 rounded-[24px] border border-slate-200 bg-[#fafaf8] p-4">
-                <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-                  Lo que construye MyCoach
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <MiniStat label="bloques" value="4-6 sem" />
-                  <MiniStat label="rotaciones" value="I-IV" />
-                  <MiniStat label="salida" value="Excel" />
-                </div>
-              </div>
-            </article>
-
-            <article className="soft-card overflow-hidden p-4">
-              <div className="overflow-hidden rounded-[28px]">
-                <Image
-                  alt={landingPhotos[Math.min(step - 1, landingPhotos.length - 1)].alt}
-                  className="h-[280px] w-full object-cover"
-                  height={1201}
-                  src={landingPhotos[Math.min(step - 1, landingPhotos.length - 1)].src}
-                  width={1800}
-                />
-              </div>
-            </article>
-          </aside>
-        </div>
+                void generatePlan();
+              }}
+            />
+          </div>
+        </section>
       </section>
 
       {isAnalyzing || isGenerating ? (
@@ -1309,25 +1118,6 @@ function StepIntro({
   );
 }
 
-function MiniStat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-[24px] border border-slate-200 bg-white px-4 py-4">
-      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-        {label}
-      </div>
-      <div className="mt-1 font-display text-2xl font-semibold tracking-tight text-slate-950">
-        {value}
-      </div>
-    </div>
-  );
-}
-
 function FieldGroup({
   title,
   description,
@@ -1338,7 +1128,7 @@ function FieldGroup({
   children: React.ReactNode;
 }) {
   return (
-    <article className="rounded-[30px] border border-slate-200 bg-white p-4">
+    <article className="space-y-4">
       <div className="mb-4">
         <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
           {title}
@@ -1477,31 +1267,6 @@ function ChoiceTile({
       <div className="font-semibold text-slate-950">{label}</div>
       <div className="mt-1 text-sm leading-6 text-slate-500">{sublabel}</div>
     </button>
-  );
-}
-
-function SummaryCard({
-  icon,
-  title,
-  value,
-  extra,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  extra: string;
-}) {
-  return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-4">
-      <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--primary-soft)] text-[var(--primary)]">
-        {icon}
-      </div>
-      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-        {title}
-      </div>
-      <div className="mt-2 text-base font-semibold text-slate-950">{value}</div>
-      <div className="mt-2 text-sm leading-6 text-slate-500">{extra}</div>
-    </div>
   );
 }
 
