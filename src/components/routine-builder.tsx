@@ -883,16 +883,6 @@ export function RoutineBuilder() {
 
             {step === 3 ? (
               <div className="mx-auto max-w-xl space-y-10">
-                <div className="space-y-4 text-center">
-                  <h2 className="font-display text-4xl font-black tracking-[-0.05em] text-[var(--form-ink)] sm:text-5xl">
-                    Análisis Físico Visual.
-                  </h2>
-                  <p className="mx-auto max-w-md text-lg leading-relaxed text-[var(--form-muted)]">
-                    Este paso es opcional pero nos ayuda a optimizar tu plan
-                    biomecánico. Los datos son 100% privados.
-                  </p>
-                </div>
-
                 <article className="form-ui-panel px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                   <div className="mb-8 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
                     <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[rgba(0,80,204,0.16)]">
@@ -925,14 +915,6 @@ export function RoutineBuilder() {
                     subtitle="Video máx 30s o hasta 10 imágenes (JPG, PNG)"
                     title="Subir Video o Fotos"
                   />
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <span className="inline-flex min-h-8 items-center justify-center rounded-full bg-[rgba(218,225,255,0.8)] px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--form-accent)]">
-                      Análisis dinámico
-                    </span>
-                    <span className="inline-flex min-h-8 items-center justify-center rounded-full bg-[rgba(226,227,225,0.9)] px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--form-muted)]">
-                      Privado
-                    </span>
-                  </div>
                   <FormFilePills files={visualFiles} />
                 </div>
               </div>
