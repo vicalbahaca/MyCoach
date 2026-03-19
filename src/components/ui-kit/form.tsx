@@ -1,0 +1,400 @@
+import Link from "next/link";
+import { ChevronDown, Upload, X } from "lucide-react";
+
+import { BrandMark } from "@/components/brand-mark";
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
+
+export type FormOption = {
+  label: string;
+  value: string;
+  description?: string;
+};
+
+export function FormTopBar({
+  closeHref = "/",
+}: {
+  closeHref?: string;
+}) {
+  return (
+    <header className="sticky top-0 z-40 border-b border-[rgba(194,198,216,0.38)] bg-[var(--form-bg)]/95 backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-5 sm:px-8">
+        <BrandMark className="text-2xl font-extrabold" />
+        <Link
+          aria-label="Cerrar formulario"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--form-outline-strong)] transition hover:bg-white hover:text-[var(--form-accent)]"
+          href={closeHref}
+        >
+          <X className="h-5 w-5" />
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+export function FormProgress({
+  step,
+  totalSteps,
+  title,
+}: {
+  step: number;
+  totalSteps: number;
+  title: string;
+}) {
+  return (
+    <div className="mb-14 space-y-4">
+      <div className="flex items-end justify-between gap-6">
+        <span className="form-ui-muted-label">Paso {step} de {totalSteps}</span>
+        <span className="font-display text-3xl font-black uppercase tracking-[-0.04em] text-[var(--form-ink)] sm:text-4xl">
+          {title}
+        </span>
+      </div>
+      <div className="h-px w-full overflow-hidden bg-[rgba(194,198,216,0.72)]">
+        <div
+          className="h-full bg-[var(--form-accent)] transition-all duration-300"
+          style={{ width: `${(step / totalSteps) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function FormStepIntro({
+  eyebrow,
+  title,
+  text,
+}: {
+  eyebrow: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="form-ui-muted-label">{eyebrow}</div>
+      <h2 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.04em] text-[var(--form-ink)]">
+        {title}
+      </h2>
+      <p className="max-w-2xl text-sm leading-7 text-[var(--form-muted)]">{text}</p>
+    </div>
+  );
+}
+
+export function FormSection({
+  label,
+  description,
+  children,
+}: {
+  label: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-5">
+      <div className="space-y-2">
+        <div className="form-ui-label">{label}</div>
+        {description ? (
+          <p className="max-w-2xl text-sm leading-7 text-[var(--form-muted)]">{description}</p>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function FormPillButton({
+  active,
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  active?: boolean;
+}) {
+  return (
+    <button
+      className={cx(
+        "form-ui-pill min-h-[4.125rem] px-6 text-lg",
+        active && "form-ui-pill-active",
+        className
+      )}
+      type="button"
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function FormChoiceCard({
+  active,
+  label,
+  sublabel,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  sublabel?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={cx(
+        "form-ui-panel px-5 py-5 text-left transition hover:-translate-y-0.5",
+        active && "border-[rgba(0,80,204,0.4)] bg-[rgba(218,225,255,0.32)] text-[var(--form-accent)]"
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      <div
+        className={cx(
+          "font-display text-lg font-semibold text-[var(--form-ink)]",
+          active && "text-[var(--form-accent)]"
+        )}
+      >
+        {label}
+      </div>
+      {sublabel ? (
+        <div className="mt-2 text-sm leading-6 text-[var(--form-muted)]">{sublabel}</div>
+      ) : null}
+    </button>
+  );
+}
+
+export function FormChipButton({
+  active,
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  active?: boolean;
+}) {
+  return (
+    <button
+      className={cx(
+        "form-ui-chip min-h-11 px-5 text-base",
+        active && "form-ui-chip-active",
+        className
+      )}
+      type="button"
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function FormLineInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  inputMode,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+}) {
+  return (
+    <label className="block">
+      <span className="form-ui-label mb-2 block">{label}</span>
+      <span className="form-ui-line-field block">
+        <input
+          className="form-ui-line-input"
+          inputMode={inputMode}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          type={type}
+          value={value}
+        />
+      </span>
+    </label>
+  );
+}
+
+export function FormLineSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: FormOption[];
+  placeholder: string;
+}) {
+  return (
+    <label className="block">
+      <span className="form-ui-label mb-2 block">{label}</span>
+      <span className="form-ui-line-field relative block">
+        <select
+          className="form-ui-line-input appearance-none cursor-pointer pr-10"
+          onChange={(event) => onChange(event.target.value)}
+          value={value}
+        >
+          <option value="">{placeholder}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-1 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--form-outline-strong)]" />
+      </span>
+    </label>
+  );
+}
+
+export function FormTextArea({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 5,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <label className="block">
+      <span className="form-ui-label mb-2 block">{label}</span>
+      <span className="form-ui-line-field block">
+        <textarea
+          className="form-ui-line-input form-ui-line-textarea"
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          value={value}
+        />
+      </span>
+    </label>
+  );
+}
+
+export function FormInfoNotice({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="form-ui-panel bg-[rgba(218,225,255,0.18)] px-5 py-5">
+      <div className="form-ui-muted-label mb-2 text-[var(--form-accent)]">{title}</div>
+      <div className="text-sm leading-7 text-[var(--form-muted)]">{children}</div>
+    </div>
+  );
+}
+
+export function FormUploadTile({
+  title,
+  subtitle,
+  accept,
+  onChange,
+}: {
+  title: string;
+  subtitle: string;
+  accept: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <label className="form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-dashed px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.36)] hover:bg-[rgba(218,225,255,0.12)]">
+      <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(218,225,255,0.5)] text-[var(--form-accent)]">
+        <Upload className="h-5 w-5" />
+      </span>
+      <span className="font-display text-lg font-semibold text-[var(--form-ink)]">{title}</span>
+      <span className="max-w-md text-sm leading-7 text-[var(--form-muted)]">{subtitle}</span>
+      <input accept={accept} className="hidden" multiple onChange={onChange} type="file" />
+    </label>
+  );
+}
+
+export function FormFilePills({ files }: { files: File[] }) {
+  if (!files.length) return null;
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {files.map((file) => (
+        <span
+          className="form-ui-chip min-h-10 px-4 text-sm"
+          key={`${file.name}-${file.lastModified}`}
+        >
+          {file.name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export function FormQuestionCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <article className="form-ui-panel px-5 py-5 sm:px-6 sm:py-6">
+      <div className="mb-5">
+        <div className="form-ui-label text-[var(--form-accent)]">{title}</div>
+        {description ? (
+          <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{description}</p>
+        ) : null}
+      </div>
+      <div className="space-y-5">{children}</div>
+    </article>
+  );
+}
+
+export function FormFooter({
+  backLabel,
+  nextLabel,
+  onBack,
+  onNext,
+  nextDisabled,
+  nextIcon,
+}: {
+  backLabel?: string;
+  nextLabel: string;
+  onBack?: () => void;
+  onNext: () => void;
+  nextDisabled?: boolean;
+  nextIcon?: React.ReactNode;
+}) {
+  return (
+    <div className="mt-20 flex flex-col items-center gap-5">
+      {onBack ? (
+        <button
+          className="form-ui-muted-label text-[var(--form-outline-strong)] transition hover:text-[var(--form-accent)]"
+          onClick={onBack}
+          type="button"
+        >
+          {backLabel}
+        </button>
+      ) : null}
+      <button
+        className="form-ui-cta min-h-[4.5rem] w-full max-w-sm px-10"
+        disabled={nextDisabled}
+        onClick={onNext}
+        type="button"
+      >
+        {nextIcon}
+        {nextLabel}
+      </button>
+      <p className="form-ui-muted-label text-center text-[var(--form-outline-strong)]">
+        Datos encriptados bajo protocolos de élite
+      </p>
+    </div>
+  );
+}

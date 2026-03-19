@@ -21,16 +21,32 @@ import {
   ImageUp,
   LoaderCircle,
   PlusCircle,
-  ScanEye,
   Sparkles,
   Target,
-  Video,
   X,
 } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
 import { ExerciseIllustration } from "@/components/exercise-illustration";
 import { RoutineWorkspace } from "@/components/routine-workspace";
+import {
+  FormChoiceCard,
+  FormChipButton,
+  FormFilePills,
+  FormFooter,
+  FormInfoNotice,
+  FormLineInput,
+  FormLineSelect,
+  FormQuestionCard,
+  FormSection,
+  FormStepIntro,
+  FormTextArea,
+  FormTopBar,
+  FormProgress,
+  FormPillButton,
+  FormUploadTile,
+  type FormOption,
+} from "@/components/ui-kit/form";
 import { exportRoutineWorkbook } from "@/lib/excel";
 import type {
   DynamicAnswerValue,
@@ -52,37 +68,37 @@ import {
 const STEP_META = [
   {
     id: 1,
-    title: "Informacion personal",
+    title: "Perfil",
     blurb: "Base del caso: perfil del atleta, objetivo principal y disciplinas que hay que tener en cuenta.",
     icon: ClipboardList,
   },
   {
     id: 2,
-    title: "Rutina y contexto actual",
+    title: "Contexto",
     blurb: "Aqui entra el bloque actual: puedes escribirlo en texto plano o adjuntarlo en archivo.",
     icon: FileText,
   },
   {
     id: 3,
-    title: "Visual opcional",
+    title: "Visual",
     blurb: "Lectura del físico para personalizar prioridades y detectar sesgos del bloque.",
     icon: ImageUp,
   },
   {
     id: 4,
-    title: "Formulario dinámico",
+    title: "Formulario",
     blurb: "Preguntas adaptadas al caso. Nada de pedir lo mismo a todos.",
     icon: BrainCircuit,
   },
   {
     id: 5,
-    title: "Preferencias del bloque",
+    title: "Preferencias",
     blurb: "Logística, tiempo real, frecuencia y material disponible.",
     icon: Target,
   },
   {
     id: 6,
-    title: "Confirmar y generar",
+    title: "Generar",
     blurb: "Resumen final antes de lanzar la rutina editable y exportable.",
     icon: Sparkles,
   },
@@ -102,13 +118,23 @@ const DISCIPLINE_OPTIONS = [
   { value: "recomposition", label: "Recomposición" },
 ] as const;
 
-function optionalLabel() {
-  return <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Opcional</span>;
-}
+const SEX_OPTIONS = ["Hombre", "Mujer", "Otro"] as const;
 
-function fieldClassName() {
-  return "w-full rounded-[24px] border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[rgba(66,108,255,0.35)] focus:ring-4 focus:ring-[rgba(66,108,255,0.08)]";
-}
+const DIET_OPTIONS: FormOption[] = [
+  { value: "Omnívora", label: "Omnívora" },
+  { value: "Vegetariana", label: "Vegetariana" },
+  { value: "Vegana", label: "Vegana" },
+  { value: "Keto", label: "Keto" },
+  { value: "Flexible / intuitiva", label: "Flexible / intuitiva" },
+];
+
+const OBJECTIVE_OPTIONS: FormOption[] = [
+  { value: "Ganar músculo", label: "Ganar músculo" },
+  { value: "Perder grasa", label: "Perder grasa" },
+  { value: "Rendimiento deportivo", label: "Rendimiento deportivo" },
+  { value: "Recomposición corporal", label: "Recomposición corporal" },
+  { value: "Salud general", label: "Salud general" },
+];
 
 function arrayValue(value: DynamicAnswerValue | undefined) {
   return Array.isArray(value) ? value : [];
@@ -324,7 +350,6 @@ export function RoutineBuilder() {
   }
 
   const currentMeta = STEP_META[step - 1];
-  const progressWidth = `${(step / STEP_META.length) * 100}%`;
   const personalizedCards = analysis
     ? analysis.personalizedSections.flatMap((section) => chunkQuestions(section))
     : [];
@@ -696,409 +721,368 @@ export function RoutineBuilder() {
   }
 
   return (
-    <main className="page-haze min-h-screen pb-12">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <Link className="text-slate-950" href="/">
-          <BrandMark className="text-2xl font-semibold" />
-        </Link>
-      </div>
+    <main className="min-h-screen bg-[var(--form-bg)] pb-12">
+      <FormTopBar closeHref="/" />
 
-      <section className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-3xl px-6 pb-20 pt-12 sm:px-8">
         {errorMessage ? (
-          <div className="mb-6 rounded-[24px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="form-ui-panel mb-8 border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
             {errorMessage}
           </div>
         ) : null}
 
         <section>
-          <div className="mb-8">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <button
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition ${
-                    step === 1 ? "pointer-events-none opacity-30" : "hover:border-[rgba(66,108,255,0.3)]"
-                  }`}
-                  onClick={() => moveTo(Math.max(1, step - 1))}
-                  type="button"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
-                <div>
-                  <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-600">
-                    Paso {step} de {STEP_META.length}
+          <FormProgress step={step} title={currentMeta.title} totalSteps={STEP_META.length} />
+
+          <div className="space-y-12">
+            {step === 1 ? (
+              <div className="space-y-10">
+                <FormSection label="Género">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {SEX_OPTIONS.map((option) => (
+                      <FormPillButton
+                        active={profile.sex === option}
+                        key={option}
+                        onClick={() => updateProfile("sex", option)}
+                      >
+                        {option}
+                      </FormPillButton>
+                    ))}
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{currentMeta.blurb}</p>
+                </FormSection>
+
+                <div className="grid gap-8 md:grid-cols-3">
+                  <FormLineInput
+                    inputMode="numeric"
+                    label="Altura (cm)"
+                    onChange={(value) => updateProfile("height", value)}
+                    placeholder="180"
+                    value={profile.height || ""}
+                  />
+                  <FormLineInput
+                    inputMode="decimal"
+                    label="Peso (kg)"
+                    onChange={(value) => updateProfile("weight", value)}
+                    placeholder="75"
+                    value={profile.weight || ""}
+                  />
+                  <FormLineInput
+                    inputMode="numeric"
+                    label="Años entrenando"
+                    onChange={(value) => updateProfile("yearsTraining", value)}
+                    placeholder="2"
+                    value={profile.yearsTraining || ""}
+                  />
                 </div>
+
+                <div className="space-y-8">
+                  <FormLineSelect
+                    label="Dieta"
+                    onChange={(value) => updateProfile("diet", value)}
+                    options={DIET_OPTIONS}
+                    placeholder="Selecciona tu preferencia"
+                    value={profile.diet || ""}
+                  />
+                  <FormLineSelect
+                    label="Objetivo principal"
+                    onChange={(value) => updateProfile("objective", value)}
+                    options={OBJECTIVE_OPTIONS}
+                    placeholder="¿Qué quieres lograr?"
+                    value={profile.objective || ""}
+                  />
+                </div>
+
+                <FormSection label="Disciplinas de interés">
+                  <div className="flex flex-wrap gap-3">
+                    {DISCIPLINE_OPTIONS.map((option) => {
+                      const selected = profile.disciplines?.includes(option.value) || false;
+                      return (
+                        <FormChipButton
+                          active={selected}
+                          key={option.value}
+                          onClick={() => toggleDiscipline(option.value)}
+                        >
+                          {option.label}
+                        </FormChipButton>
+                      );
+                    })}
+                  </div>
+                </FormSection>
               </div>
-              <div className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-500">
-                i
+            ) : null}
+
+            {step === 2 ? (
+              <div className="space-y-10">
+                <FormStepIntro
+                  eyebrow="Contexto de entrenamiento"
+                  text="Puedes escribir cómo entrena ahora el atleta, pegar la rutina completa o adjuntar el archivo actual para que el análisis parta de algo real."
+                  title="Rutina actual en texto o archivo."
+                />
+
+                <FormSection
+                  description="Resume el tipo de entrenamiento actual: división, clases, deporte, frecuencia o cualquier mezcla que esté haciendo ahora mismo."
+                  label="Entrenamiento actual"
+                >
+                  <FormTextArea
+                    label="Entrenamiento actual"
+                    onChange={(value) => updateProfile("currentTraining", value)}
+                    placeholder="Ej: torso-pierna 4 días, Hyrox 2 días y carrera 1 día..."
+                    rows={4}
+                    value={profile.currentTraining || ""}
+                  />
+                </FormSection>
+
+                <FormSection
+                  description="Añade feedback del bloque, limitaciones, contexto competitivo o cualquier nota que cambie la planificación."
+                  label="Texto libre"
+                >
+                  <FormTextArea
+                    label="Rutina o contexto pegado"
+                    onChange={(value) => updateProfile("currentRoutineText", value)}
+                    placeholder="Pega aquí la rutina actual, sensaciones, feedback del bloque o notas del atleta."
+                    rows={8}
+                    value={profile.currentRoutineText || ""}
+                  />
+                </FormSection>
+
+                <FormSection
+                  description="Acepta TXT, CSV, Excel, DOCX, PDF o Markdown."
+                  label="Adjuntar archivo"
+                >
+                  <FormUploadTile
+                    accept=".txt,.csv,.xlsx,.xls,.docx,.pdf,.md"
+                    onChange={(event) => updateFiles("context", event)}
+                    subtitle="Sube la rutina actual o cualquier documento útil para arrancar el análisis."
+                    title="Añadir archivo"
+                  />
+                  <FormFilePills files={contextFiles} />
+                </FormSection>
               </div>
-            </div>
-            <div className="mt-4 h-[6px] w-full overflow-hidden rounded-full bg-[#d9d9d5]">
-              <div className="h-full rounded-full bg-[var(--primary)]" style={{ width: progressWidth }} />
-            </div>
+            ) : null}
+
+            {step === 3 ? (
+              <div className="space-y-10">
+                <FormStepIntro
+                  eyebrow="Paso opcional"
+                  text="Si subes material visual, MyCoach puede revisar el físico antes de personalizar el formulario dinámico."
+                  title="Añade una lectura visual del físico."
+                />
+
+                <FormInfoNotice title="Recomendación">
+                  Vídeo corto de 30 segundos o imágenes con buena iluminación, frente, lado
+                  y espalda. También puedes subir hasta 10 imágenes del físico.
+                </FormInfoNotice>
+
+                <div className="form-ui-panel overflow-hidden p-3">
+                  <div className="overflow-hidden rounded-[1.6rem] border border-[rgba(194,198,216,0.42)] bg-[#faf9f4]">
+                    <Image
+                      alt="Escaneo corporal opcional de MyCoach"
+                      className="h-auto w-full"
+                      height={900}
+                      src={generatedVisuals.bodyScan}
+                      width={760}
+                    />
+                  </div>
+                </div>
+
+                <FormSection
+                  description="Acepta imágenes y vídeo. El flujo continúa aunque no subas nada."
+                  label="Material visual"
+                >
+                  <FormUploadTile
+                    accept="image/*,video/mp4,video/quicktime,video/webm"
+                    onChange={(event) => updateFiles("visual", event)}
+                    subtitle="Vídeo o imágenes del físico. Máximo 10 imágenes."
+                    title="Subir recurso visual"
+                  />
+                  <FormFilePills files={visualFiles} />
+                </FormSection>
+              </div>
+            ) : null}
+
+            {step === 4 ? (
+              <div className="space-y-10">
+                <FormStepIntro
+                  eyebrow="Preguntas dinámicas"
+                  text="Cada bloque contiene preguntas que sí cambian la estructura, el volumen o la selección de ejercicios."
+                  title="El formulario ya está ajustado al caso."
+                />
+
+                {analysis ? (
+                  <>
+                    {analysis.signalSummary.length ? (
+                      <FormSection label="Señales detectadas">
+                        <div className="flex flex-wrap gap-3">
+                          {analysis.signalSummary.map((signal) => (
+                            <span
+                              className="form-ui-chip min-h-10 px-4 text-sm"
+                              key={signal}
+                            >
+                              {signal}
+                            </span>
+                          ))}
+                        </div>
+                      </FormSection>
+                    ) : null}
+
+                    <div className="grid gap-4">
+                      {personalizedCards.map((section) => (
+                        <DynamicSectionCard
+                          answers={answers}
+                          key={section.id}
+                          onAnswer={updateAnswer}
+                          section={section}
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <LoaderBlock />
+                )}
+              </div>
+            ) : null}
+
+            {step === 5 ? (
+              <div className="space-y-10">
+                <FormStepIntro
+                  eyebrow="Cierre logístico"
+                  text="Estas decisiones terminan de definir adherencia, densidad de las sesiones y selección final de ejercicios."
+                  title="Ajustamos tiempo real, frecuencia y material."
+                />
+
+                <FormSection
+                  description="Escoge la frecuencia que tendría sentido para este bloque."
+                  label="Días por semana"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {["3", "4", "5", "6", "Auto"].map((value) => (
+                      <FormChoiceCard
+                        active={profile.daysPerWeek === (value === "Auto" ? "" : value)}
+                        key={value}
+                        label={value === "Auto" ? "Auto" : `${value} días`}
+                        onClick={() => updateProfile("daysPerWeek", value === "Auto" ? "" : value)}
+                        sublabel={value === "Auto" ? "Decidir más tarde" : "Sesiones por semana"}
+                      />
+                    ))}
+                  </div>
+                </FormSection>
+
+                <FormSection
+                  description="Importa para repartir patrones, descansos y número de ejercicios."
+                  label="Duración preferida"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {["45-60", "60-75", "75-90", "90+"].map((value) => (
+                      <FormChoiceCard
+                        active={profile.sessionLength === value}
+                        key={value}
+                        label={`${value} min`}
+                        onClick={() => updateProfile("sessionLength", value)}
+                        sublabel="Rango objetivo"
+                      />
+                    ))}
+                  </div>
+                </FormSection>
+
+                <FormSection
+                  description="Máquinas, racks, ergs o marcas concretas cambian bastante la selección."
+                  label="Material disponible"
+                >
+                  <FormTextArea
+                    label="Equipamiento"
+                    onChange={(value) => updateProfile("equipment", value)}
+                    placeholder="Technogym, Hammer, gym80, ergs, racks, mancuernas..."
+                    rows={4}
+                    value={profile.equipment || ""}
+                  />
+                </FormSection>
+
+                <FormSection
+                  description="Molestias, zonas a vigilar o patrones que prefieres evitar."
+                  label="Limitaciones"
+                >
+                  <FormTextArea
+                    label="Notas"
+                    onChange={(value) => updateProfile("limitationNotes", value)}
+                    placeholder="Hombro en press plano, ciática, rodilla, poca tolerancia al impacto..."
+                    rows={4}
+                    value={profile.limitationNotes || ""}
+                  />
+                </FormSection>
+              </div>
+            ) : null}
+
+            {step === 6 ? (
+              <div className="space-y-10">
+                <FormStepIntro
+                  eyebrow="Listo para generar"
+                  text="En el siguiente paso MyCoach genera la rutina final, abre el workspace editable y deja el bloque listo para exportar."
+                  title="Todo el contexto está preparado."
+                />
+
+                <FormQuestionCard
+                  description="Este es el resumen del contexto con el que se va a construir el mesociclo."
+                  title="Resultado esperado"
+                >
+                  <div className="font-display text-2xl font-semibold tracking-[-0.04em] text-[var(--form-ink)]">
+                    Rutina editable y exportable
+                  </div>
+                  <div className="grid gap-3 text-sm leading-7 text-[var(--form-muted)] md:grid-cols-2">
+                    <div>Contexto: {profile.currentRoutineText?.trim() ? "Texto o rutina añadida" : "Sin texto específico"}</div>
+                    <div>Archivos: {contextFiles.length} adjuntos</div>
+                    <div>Visual: {visualFiles.length ? `${visualFiles.length} recursos visuales` : "Sin adjuntos visuales"}</div>
+                    <div>Formulario: {Object.values(answers).filter(Boolean).length} respuestas guardadas</div>
+                    <div>Objetivo: {profile.objective || "No indicado"}</div>
+                    <div>Disciplinas: {(profile.disciplines || []).map(labelForDiscipline).join(", ") || "No indicadas"}</div>
+                    <div>Material: {profile.equipment || "No indicado"}</div>
+                    <div>Frecuencia: {profile.daysPerWeek || "Auto"} días</div>
+                    <div>Duración: {profile.sessionLength || "Auto"} min</div>
+                    <div>Altura / peso: {[profile.height, profile.weight].filter(Boolean).join(" · ") || "No indicado"}</div>
+                  </div>
+                </FormQuestionCard>
+              </div>
+            ) : null}
           </div>
 
-          <div className="space-y-8">
-                  {step === 1 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Informacion de la persona"
-                        title="Empezamos por el caso real del atleta."
-                        text="Todo es opcional, pero cuanto mejor sea la base, más fino quedará el bloque. Aqui solo recogemos perfil, objetivo y disciplinas."
-                      />
-
-                      <FieldGroup
-                        description="Datos básicos para contextualizar el caso. No frenan el flujo si no los rellenas."
-                        title="Perfil"
-                      >
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <TextField
-                            label="Sexo"
-                            onChange={(value) => updateProfile("sex", value)}
-                            value={profile.sex || ""}
-                          />
-                          <TextField
-                            label="Nivel"
-                            onChange={(value) => updateProfile("level", value)}
-                            value={profile.level || ""}
-                          />
-                          <TextField
-                            label="Años de entrenamiento"
-                            onChange={(value) => updateProfile("yearsTraining", value)}
-                            value={profile.yearsTraining || ""}
-                          />
-                          <TextField
-                            label="Peso y altura"
-                            onChange={(value) => updateProfile("weight", value)}
-                            placeholder="88 kg · 1.88 m"
-                            value={profile.weight || ""}
-                          />
-                          <TextField
-                            label="Dieta o contexto nutricional"
-                            onChange={(value) => updateProfile("diet", value)}
-                            placeholder="Mantenimiento, superávit, déficit..."
-                            value={profile.diet || ""}
-                          />
-                          <TextField
-                            label="Objetivo principal"
-                            onChange={(value) => updateProfile("objective", value)}
-                            placeholder="Hipertrofia, bajar peso, Hyrox..."
-                            value={profile.objective || ""}
-                          />
-                        </div>
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Selecciona los contextos de entrenamiento que quieres que el sistema tenga en cuenta."
-                        title="Disciplinas"
-                      >
-                        <div className="flex flex-wrap gap-2">
-                          {DISCIPLINE_OPTIONS.map((option) => {
-                            const selected = profile.disciplines?.includes(option.value) || false;
-                            return (
-                              <button
-                                className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                                  selected
-                                    ? "bg-slate-950 text-white"
-                                    : "border border-slate-200 bg-white text-slate-700 hover:border-[rgba(66,108,255,0.3)]"
-                                }`}
-                                key={option.value}
-                                onClick={() => toggleDiscipline(option.value)}
-                                type="button"
-                              >
-                                {option.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </FieldGroup>
-                    </div>
-                  ) : null}
-
-                  {step === 2 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Contexto de entrenamiento"
-                        title="Rutina actual en texto o archivo."
-                        text="Puedes enviar la rutina actual en texto plano, explicar el caso del atleta o adjuntar un archivo Excel, TXT, PDF o similar."
-                      />
-
-                      <FieldGroup
-                        description="Escribe aqui como entrena ahora la persona: clases, full body, torso-pierna, Hyrox, CrossFit o cualquier mezcla real."
-                        title="Entrenamiento actual"
-                      >
-                        <TextAreaField
-                          label="Entrenamiento actual"
-                          onChange={(value) => updateProfile("currentTraining", value)}
-                          placeholder="Ej: clases, full body, Hyrox 3 dias, rutina libre..."
-                          rows={4}
-                          value={profile.currentTraining || ""}
-                        />
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Pega la rutina, el feedback del bloque, limitaciones o cualquier contexto util para personalizar la estructura."
-                        title="Texto plano"
-                      >
-                        <TextAreaField
-                          label="Contexto libre o rutina pegada"
-                          onChange={(value) => updateProfile("currentRoutineText", value)}
-                          placeholder="Pega aqui la rutina, feedback del bloque, limitaciones o notas del atleta."
-                          rows={8}
-                          value={profile.currentRoutineText || ""}
-                        />
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Puedes adjuntar la rutina o el contexto actual en TXT, CSV, Excel, DOCX, PDF o Markdown."
-                        title="Adjuntar archivo"
-                      >
-                        <UploadTile
-                          accept=".txt,.csv,.xlsx,.xls,.docx,.pdf,.md"
-                          icon={<FileText className="h-6 w-6" />}
-                          onChange={(event) => updateFiles("context", event)}
-                          subtitle="Sube la rutina actual o cualquier documento útil para arrancar."
-                          title="Añadir archivo"
-                        />
-                        <FilePills files={contextFiles} />
-                      </FieldGroup>
-                    </div>
-                  ) : null}
-
-                  {step === 3 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Paso opcional"
-                        title="Si quieres, añade una lectura visual del físico."
-                        text="Este paso es totalmente opcional. Si subes material visual, MyCoach revisa el físico antes de personalizar el formulario."
-                      />
-
-                      <div className="rounded-[28px] border border-slate-200 bg-[#eef3ff] p-4">
-                        <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
-                          <ScanEye className="h-4 w-4" />
-                          Recomendación
-                        </div>
-                        <p className="text-sm leading-7 text-slate-700">
-                          Vídeo corto de unos 30 segundos, cuerpo completo, frente, lado y
-                          espalda, con buena iluminación. También puedes subir hasta 10
-                          imágenes del físico.
-                        </p>
-                      </div>
-
-                      <div className="rounded-[28px] border border-slate-200 bg-white p-3">
-                        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-[#faf9f4]">
-                          <Image
-                            alt="Escaneo corporal opcional de MyCoach"
-                            className="h-auto w-full"
-                            height={900}
-                            src={generatedVisuals.bodyScan}
-                            width={760}
-                          />
-                        </div>
-                      </div>
-
-                      <FieldGroup
-                        description="Acepta imágenes y vídeo. El flujo continúa aunque no subas nada."
-                        title="Material visual"
-                      >
-                        <UploadTile
-                          accept="image/*,video/mp4,video/quicktime,video/webm"
-                          icon={<Video className="h-6 w-6" />}
-                          onChange={(event) => updateFiles("visual", event)}
-                          subtitle="Vídeo o imágenes del físico. Máximo 10 imágenes."
-                          title="Subir recurso visual"
-                        />
-                        <FilePills files={visualFiles} />
-                      </FieldGroup>
-                    </div>
-                  ) : null}
-
-                  {step === 4 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Preguntas dinámicas"
-                        title="El formulario ya está ajustado al caso."
-                        text="Cada tarjeta contiene una o dos preguntas que sí cambian la programación. Todo sigue siendo opcional."
-                      />
-
-                      {analysis ? (
-                        <>
-                          {analysis.signalSummary.length ? (
-                            <div className="flex flex-wrap gap-2">
-                              {analysis.signalSummary.map((signal) => (
-                                <span
-                                  className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
-                                  key={signal}
-                                >
-                                  {signal}
-                                </span>
-                              ))}
-                            </div>
-                          ) : null}
-
-                          <div className="grid gap-4">
-                            {personalizedCards.map((section) => (
-                              <DynamicSectionCard
-                                answers={answers}
-                                key={section.id}
-                                onAnswer={updateAnswer}
-                                section={section}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <LoaderBlock />
-                      )}
-                    </div>
-                  ) : null}
-
-                  {step === 5 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Cierre logístico"
-                        title="Ajustamos tiempo real, frecuencia y material."
-                        text="Esto influye en adherencia, densidad de las sesiones y selección final de ejercicios."
-                      />
-
-                      <FieldGroup
-                        description="Escoge la frecuencia que tendría sentido para este bloque."
-                        title="Días por semana"
-                      >
-                        <ChoiceGrid>
-                          {["3", "4", "5", "6", "Auto"].map((value) => (
-                            <ChoiceTile
-                              active={profile.daysPerWeek === (value === "Auto" ? "" : value)}
-                              key={value}
-                              label={value}
-                              onClick={() =>
-                                updateProfile("daysPerWeek", value === "Auto" ? "" : value)
-                              }
-                              sublabel={value === "Auto" ? "Decidir más tarde" : "Sesiones por semana"}
-                            />
-                          ))}
-                        </ChoiceGrid>
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Importa para repartir patrones, descansos y número de ejercicios."
-                        title="Duración preferida"
-                      >
-                        <ChoiceGrid>
-                          {["45-60", "60-75", "75-90", "90+"].map((value) => (
-                            <ChoiceTile
-                              active={profile.sessionLength === value}
-                              key={value}
-                              label={`${value} min`}
-                              onClick={() => updateProfile("sessionLength", value)}
-                              sublabel="Rango objetivo"
-                            />
-                          ))}
-                        </ChoiceGrid>
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Máquinas, racks, ergs o marcas concretas cambian bastante la selección."
-                        title="Material disponible"
-                      >
-                        <TextField
-                          label="Equipamiento"
-                          onChange={(value) => updateProfile("equipment", value)}
-                          placeholder="Technogym, Hammer, gym80, ergs, racks..."
-                          value={profile.equipment || ""}
-                        />
-                      </FieldGroup>
-
-                      <FieldGroup
-                        description="Molestias, zonas a vigilar o patrones que prefieres evitar."
-                        title="Limitaciones"
-                      >
-                        <TextField
-                          label="Notas"
-                          onChange={(value) => updateProfile("limitationNotes", value)}
-                          placeholder="Hombro en press plano, ciática, rodilla..."
-                          value={profile.limitationNotes || ""}
-                        />
-                      </FieldGroup>
-                    </div>
-                  ) : null}
-
-                  {step === 6 ? (
-                    <div className="space-y-6">
-                      <StepIntro
-                        eyebrow="Listo para generar"
-                        title="Todo el contexto está preparado."
-                        text="En el siguiente paso MyCoach crea la rutina final, activa el workspace editable y deja el bloque listo para exportar a Excel."
-                      />
-
-                      <div className="space-y-4 border-t border-slate-200/80 pt-6">
-                        <div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
-                            Resultado esperado
-                          </div>
-                          <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                            Rutina editable y exportable
-                          </div>
-                        </div>
-                        <div className="grid gap-3 text-sm text-slate-700 md:grid-cols-2">
-                          <div>Contexto: {profile.currentRoutineText?.trim() ? "Texto o rutina añadida" : "Sin texto especifico"}</div>
-                          <div>Archivos: {contextFiles.length} adjuntos</div>
-                          <div>Visual: {visualFiles.length ? `${visualFiles.length} recursos visuales` : "Sin adjuntos visuales"}</div>
-                          <div>Formulario: {Object.values(answers).filter(Boolean).length} respuestas guardadas</div>
-                          <div>Objetivo: {profile.objective || "No indicado"}</div>
-                          <div>Disciplinas: {(profile.disciplines || []).join(", ") || "No indicadas"}</div>
-                          <div>Nivel: {profile.level || "No indicado"}</div>
-                          <div>Material: {profile.equipment || "No indicado"}</div>
-                          <div>Frecuencia: {profile.daysPerWeek || "Auto"} dias</div>
-                          <div>Duracion: {profile.sessionLength || "Auto"} min</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-          </div>
-
-          <div className="mt-10 border-t border-slate-200/80 pt-5">
-            <BuilderFooter
-              backLabel={step > 1 ? "Atrás" : undefined}
-              nextDisabled={isAnalyzing || isGenerating}
-              nextIcon={
-                isAnalyzing || isGenerating ? (
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
-                ) : undefined
+          <FormFooter
+            backLabel={step > 1 ? "Paso anterior" : undefined}
+            nextDisabled={isAnalyzing || isGenerating}
+            nextIcon={
+              isAnalyzing || isGenerating ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : undefined
+            }
+            nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
+            onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
+            onNext={() => {
+              if (step === 1) {
+                moveTo(2);
+                return;
               }
-              nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
-              onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
-              onNext={() => {
-                if (step === 1) {
-                  moveTo(2);
-                  return;
-                }
 
-                if (step === 2) {
-                  moveTo(3);
-                  return;
-                }
+              if (step === 2) {
+                moveTo(3);
+                return;
+              }
 
-                if (step === 3) {
-                  void personalizeForm();
-                  return;
-                }
+              if (step === 3) {
+                void personalizeForm();
+                return;
+              }
 
-                if (step === 4) {
-                  moveTo(5);
-                  return;
-                }
+              if (step === 4) {
+                moveTo(5);
+                return;
+              }
 
-                if (step === 5) {
-                  moveTo(6);
-                  return;
-                }
+              if (step === 5) {
+                moveTo(6);
+                return;
+              }
 
-                void generatePlan();
-              }}
-            />
-          </div>
+              void generatePlan();
+            }}
+          />
         </section>
       </section>
 
@@ -1128,186 +1112,16 @@ function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean)
   return "Continuar";
 }
 
-function StepIntro({
-  eyebrow,
-  title,
-  text,
-}: {
-  eyebrow: string;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="space-y-3">
-      <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
-        {eyebrow}
-      </div>
-      <h2 className="font-display text-[2rem] font-semibold leading-tight tracking-[-0.04em] text-slate-950">
-        {title}
-      </h2>
-      <p className="text-sm leading-7 text-slate-600">{text}</p>
-    </div>
-  );
-}
-
-function FieldGroup({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <article className="space-y-4">
-      <div className="mb-4">
-        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500">
-          {title}
-        </div>
-        <p className="mt-2 text-sm leading-7 text-slate-600">{description}</p>
-      </div>
-      {children}
-    </article>
-  );
-}
-
-function TextField({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <div>
-      <label className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-        <span>{label}</span>
-        {optionalLabel()}
-      </label>
-      <input
-        className={fieldClassName()}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        value={value}
-      />
-    </div>
-  );
-}
-
-function TextAreaField({
-  label,
-  value,
-  onChange,
-  placeholder,
-  rows,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  rows: number;
-}) {
-  return (
-    <div>
-      <label className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-        <span>{label}</span>
-        {optionalLabel()}
-      </label>
-      <textarea
-        className={`${fieldClassName()} resize-none`}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        value={value}
-      />
-    </div>
-  );
-}
-
-function UploadTile({
-  title,
-  subtitle,
-  accept,
-  icon,
-  onChange,
-}: {
-  title: string;
-  subtitle: string;
-  accept: string;
-  icon: React.ReactNode;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    <label className="flex cursor-pointer flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-[#fafaf8] px-5 py-8 text-center transition hover:border-[rgba(66,108,255,0.32)] hover:bg-white">
-      <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-[20px] bg-[var(--primary-soft)] text-[var(--primary)]">
-        {icon}
-      </div>
-      <div className="text-base font-semibold text-slate-900">{title}</div>
-      <div className="mt-2 max-w-xs text-sm leading-6 text-slate-500">{subtitle}</div>
-      <input accept={accept} className="hidden" multiple onChange={onChange} type="file" />
-    </label>
-  );
-}
-
-function FilePills({ files }: { files: File[] }) {
-  if (!files.length) return null;
-
-  return (
-    <div className="mt-3 flex flex-wrap gap-2">
-      {files.map((file) => (
-        <span
-          className="rounded-full border border-slate-200 bg-[#f7f8fc] px-3 py-2 text-xs font-semibold text-slate-700"
-          key={file.name}
-        >
-          {file.name}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function ChoiceGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
-}
-
-function ChoiceTile({
-  label,
-  sublabel,
-  active,
-  onClick,
-}: {
-  label: string;
-  sublabel: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={`rounded-[24px] border px-4 py-4 text-left transition ${
-        active
-          ? "border-[rgba(66,108,255,0.34)] bg-[rgba(66,108,255,0.08)]"
-          : "border-slate-200 bg-white hover:border-[rgba(66,108,255,0.24)]"
-      }`}
-      onClick={onClick}
-      type="button"
-    >
-      <div className="font-semibold text-slate-950">{label}</div>
-      <div className="mt-1 text-sm leading-6 text-slate-500">{sublabel}</div>
-    </button>
-  );
+function labelForDiscipline(value: string) {
+  return DISCIPLINE_OPTIONS.find((option) => option.value === value)?.label || value;
 }
 
 function LoaderBlock() {
   return (
-    <div className="rounded-[28px] border border-slate-200 bg-white p-6">
+    <div className="form-ui-panel p-6">
       <div className="flex items-center gap-3">
         <LoaderCircle className="h-5 w-5 animate-spin text-[var(--primary)]" />
-        <span className="text-sm font-semibold text-slate-600">
+        <span className="text-sm font-semibold text-[var(--form-muted)]">
           Cargando formulario personalizado...
         </span>
       </div>
@@ -1325,13 +1139,7 @@ function DynamicSectionCard({
   onAnswer: (questionId: string, value: DynamicAnswerValue) => void;
 }) {
   return (
-    <article className="rounded-[30px] border border-slate-200 bg-white p-4">
-      <div className="mb-5">
-        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
-          {section.title}
-        </div>
-        <p className="mt-2 text-sm leading-7 text-slate-600">{section.description}</p>
-      </div>
+    <FormQuestionCard description={section.description} title={section.title}>
       <div className="grid gap-5">
         {section.questions.map((question) => (
           <QuestionField
@@ -1342,7 +1150,7 @@ function DynamicSectionCard({
           />
         ))}
       </div>
-    </article>
+    </FormQuestionCard>
   );
 }
 
@@ -1357,23 +1165,20 @@ function QuestionField({
 }) {
   if (question.type === "textarea" || question.type === "text") {
     return (
-      <div>
-        <label className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-          <span>{question.label}</span>
-          {optionalLabel()}
-        </label>
-        <p className="mb-3 text-sm leading-6 text-slate-500">{question.help}</p>
+      <div className="space-y-3">
+        <p className="text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
         {question.type === "textarea" ? (
-          <textarea
-            className={`${fieldClassName()} min-h-28 resize-none`}
-            onChange={(event) => onAnswer(question.id, event.target.value)}
+          <FormTextArea
+            label={question.label}
+            onChange={(value) => onAnswer(question.id, value)}
             placeholder={question.placeholder}
+            rows={5}
             value={typeof answer === "string" ? answer : ""}
           />
         ) : (
-          <input
-            className={fieldClassName()}
-            onChange={(event) => onAnswer(question.id, event.target.value)}
+          <FormLineInput
+            label={question.label}
+            onChange={(value) => onAnswer(question.id, value)}
             placeholder={question.placeholder}
             value={typeof answer === "string" ? answer : ""}
           />
@@ -1386,14 +1191,14 @@ function QuestionField({
     const currentValue = typeof answer === "number" ? answer : question.min || 1;
 
     return (
-      <div className="rounded-[24px] border border-slate-200 bg-[#fafaf8] p-4">
+      <div className="form-ui-panel bg-[rgba(244,244,242,0.72)] p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
-          <div className="text-sm font-semibold text-slate-800">{question.label}</div>
-          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[var(--primary)]">
+          <div className="form-ui-label">{question.label}</div>
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[var(--form-accent)]">
             {currentValue}
           </span>
         </div>
-        <p className="mb-4 text-sm leading-6 text-slate-500">{question.help}</p>
+        <p className="mb-4 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
         <input
           className="slider-accent h-2 w-full appearance-none rounded-full bg-[rgba(66,108,255,0.16)]"
           max={question.max}
@@ -1409,34 +1214,23 @@ function QuestionField({
 
   if (question.type === "radio") {
     return (
-      <div>
-        <label className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-          <span>{question.label}</span>
-          {optionalLabel()}
-        </label>
-        <p className="mb-3 text-sm leading-6 text-slate-500">{question.help}</p>
+      <div className="space-y-4">
+        <div>
+          <div className="form-ui-label">{question.label}</div>
+          <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
+        </div>
         <div className="grid gap-3">
           {question.options?.map((option) => {
             const selected = answer === option.value;
 
             return (
-              <button
-                className={`rounded-[24px] border px-4 py-4 text-left transition ${
-                  selected
-                    ? "border-[rgba(66,108,255,0.34)] bg-[rgba(66,108,255,0.08)]"
-                    : "border-slate-200 bg-white hover:border-[rgba(66,108,255,0.24)]"
-                }`}
+              <FormChoiceCard
+                active={selected}
                 key={option.value}
                 onClick={() => onAnswer(question.id, option.value)}
-                type="button"
-              >
-                <div className="font-semibold text-slate-900">{option.label}</div>
-                {option.description ? (
-                  <div className="mt-1 text-sm leading-6 text-slate-500">
-                    {option.description}
-                  </div>
-                ) : null}
-              </button>
+                label={option.label}
+                sublabel={option.description}
+              />
             );
           })}
         </div>
@@ -1445,24 +1239,19 @@ function QuestionField({
   }
 
   return (
-    <div>
-      <label className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-700">
-        <span>{question.label}</span>
-        {optionalLabel()}
-      </label>
-      <p className="mb-3 text-sm leading-6 text-slate-500">{question.help}</p>
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-4">
+      <div>
+        <div className="form-ui-label">{question.label}</div>
+        <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
+      </div>
+      <div className="flex flex-wrap gap-3">
         {question.options?.map((option) => {
           const values = arrayValue(answer);
           const selected = values.includes(option.value);
 
           return (
-            <button
-              className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                selected
-                  ? "bg-slate-950 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:border-[rgba(66,108,255,0.24)]"
-              }`}
+            <FormChipButton
+              active={selected}
               key={option.value}
               onClick={() => {
                 const next = selected
@@ -1470,50 +1259,12 @@ function QuestionField({
                   : [...values, option.value];
                 onAnswer(question.id, next);
               }}
-              type="button"
             >
               {option.label}
-            </button>
+            </FormChipButton>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function BuilderFooter({
-  backLabel,
-  nextLabel,
-  onBack,
-  onNext,
-  nextDisabled,
-  nextIcon,
-}: {
-  backLabel?: string;
-  nextLabel: string;
-  onBack?: () => void;
-  onNext: () => void;
-  nextDisabled?: boolean;
-  nextIcon?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      {onBack ? (
-        <button className="ghost-button h-14 shrink-0 px-4 text-sm" onClick={onBack} type="button">
-          <ArrowLeft className="h-4 w-4" />
-          {backLabel}
-        </button>
-      ) : null}
-      <button
-        className="black-button h-14 flex-1 px-5 text-sm disabled:cursor-not-allowed disabled:bg-slate-300"
-        disabled={nextDisabled}
-        onClick={onNext}
-        type="button"
-      >
-        {nextIcon}
-        {nextLabel}
-        {!nextIcon ? <ArrowRight className="h-4 w-4" /> : null}
-      </button>
     </div>
   );
 }
