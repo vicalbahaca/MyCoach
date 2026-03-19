@@ -43,7 +43,6 @@ import type {
   RoutinePlan,
 } from "@/lib/types";
 import {
-  editorialMockups,
   generatedVisuals,
   getExerciseVisual,
   landingPhotos,
@@ -701,40 +700,43 @@ export function RoutineBuilder() {
           </div>
         ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:items-start">
-          <div className="mx-auto w-full max-w-[440px] lg:mx-0">
-            <div className="phone-shell">
-              <div className="phone-screen">
-                <div className="px-4 pt-4">
-                  <div className="phone-status" />
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <button
-                      className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition ${
-                        step === 1 ? "pointer-events-none opacity-30" : "hover:border-[rgba(66,108,255,0.3)]"
-                      }`}
-                      onClick={() => moveTo(Math.max(1, step - 1))}
-                      type="button"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </button>
-                    <div className="text-center">
-                      <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
-                        Paso {step} de {STEP_META.length}
-                      </div>
-                      <div className="font-display text-xl font-semibold tracking-tight text-slate-950">
-                        {currentMeta.title}
-                      </div>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:items-start">
+          <section className="soft-card overflow-hidden">
+            <div className="border-b border-slate-200/80 px-5 py-5 sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <button
+                    className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition ${
+                      step === 1 ? "pointer-events-none opacity-30" : "hover:border-[rgba(66,108,255,0.3)]"
+                    }`}
+                    onClick={() => moveTo(Math.max(1, step - 1))}
+                    type="button"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-500">
+                      Paso {step} de {STEP_META.length}
                     </div>
-                    <div className="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
-                      móvil
+                    <div className="mt-2 font-display text-[2rem] font-semibold tracking-[-0.04em] text-slate-950">
+                      {currentMeta.title}
                     </div>
-                  </div>
-                  <div className="mt-4 progress-rail">
-                    <div className="progress-fill" style={{ width: progressWidth }} />
+                    <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                      {currentMeta.blurb}
+                    </p>
                   </div>
                 </div>
+                <div className="hidden rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 sm:block">
+                  Constructor
+                </div>
+              </div>
+              <div className="mt-5 progress-rail">
+                <div className="progress-fill" style={{ width: progressWidth }} />
+              </div>
+            </div>
 
-                <div className="phone-scroll thin-scrollbar pt-5">
+            <div className="thin-scrollbar max-h-[calc(100vh-250px)] overflow-y-auto px-5 py-6 sm:px-6">
+              <div className="space-y-6">
                   {step === 1 ? (
                     <div className="space-y-6">
                       <StepIntro
@@ -1018,15 +1020,54 @@ export function RoutineBuilder() {
                         text="En el siguiente paso MyCoach crea la rutina final, activa el workspace editable y deja el bloque listo para exportar a Excel."
                       />
 
-                      <div className="rounded-[30px] border border-slate-200 bg-white p-4">
-                        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-[#faf9f4]">
-                          <Image
-                            alt="Vista previa del resultado final de la rutina"
-                            className="h-auto w-full"
-                            height={980}
-                            src={generatedVisuals.phoneRoutine}
-                            width={520}
-                          />
+                      <div className="rounded-[30px] border border-slate-200 bg-white p-5">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]">
+                              Resultado esperado
+                            </div>
+                            <div className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                              Rutina editable y exportable
+                            </div>
+                          </div>
+                          <div className="rounded-full bg-[#eef3ff] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#003fa4]">
+                            Sin mockups
+                          </div>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
+                          <div className="rounded-[24px] border border-slate-200 bg-[#fafaf8] p-4">
+                            <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                              Estructura
+                            </div>
+                            <div className="space-y-3">
+                              {["Dia 1 · Upper A", "Dia 2 · Lower A", "Dia 3 · Upper B"].map((item) => (
+                                <div
+                                  className="rounded-[18px] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800"
+                                  key={item}
+                                >
+                                  {item}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="rounded-[24px] border border-slate-200 bg-white p-4">
+                              <div className="font-display text-4xl font-extrabold tracking-[-0.05em] text-slate-950">
+                                4
+                              </div>
+                              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                sesiones listas
+                              </div>
+                            </div>
+                            <div className="rounded-[24px] border border-slate-200 bg-white p-4">
+                              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                                Incluye
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-slate-700">
+                                rotaciones, RIR, cambios de ejercicio, notas y exportacion a Excel.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1081,46 +1122,45 @@ export function RoutineBuilder() {
                     </div>
                   ) : null}
                 </div>
-
-                <div className="absolute inset-x-0 bottom-0 border-t border-slate-200/90 bg-[linear-gradient(180deg,rgba(247,246,241,0),rgba(247,246,241,0.95)_24%,rgba(247,246,241,0.98)_100%)] px-4 pb-4 pt-5">
-                  <PhoneFooter
-                    backLabel={step > 1 ? "Atrás" : undefined}
-                    nextDisabled={isAnalyzing || isGenerating}
-                    nextIcon={
-                      isAnalyzing || isGenerating ? (
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                      ) : undefined
-                    }
-                    nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
-                    onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
-                    onNext={() => {
-                      if (step === 1) {
-                        moveTo(2);
-                        return;
-                      }
-
-                      if (step === 2) {
-                        void personalizeForm();
-                        return;
-                      }
-
-                      if (step === 3) {
-                        moveTo(4);
-                        return;
-                      }
-
-                      if (step === 4) {
-                        moveTo(5);
-                        return;
-                      }
-
-                      void generatePlan();
-                    }}
-                  />
-                </div>
               </div>
+
+            <div className="border-t border-slate-200/90 bg-[linear-gradient(180deg,rgba(247,246,241,0),rgba(247,246,241,0.92)_24%,rgba(247,246,241,0.98)_100%)] px-5 pb-5 pt-5 sm:px-6">
+              <BuilderFooter
+                backLabel={step > 1 ? "Atrás" : undefined}
+                nextDisabled={isAnalyzing || isGenerating}
+                nextIcon={
+                  isAnalyzing || isGenerating ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : undefined
+                }
+                nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
+                onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
+                onNext={() => {
+                  if (step === 1) {
+                    moveTo(2);
+                    return;
+                  }
+
+                  if (step === 2) {
+                    void personalizeForm();
+                    return;
+                  }
+
+                  if (step === 3) {
+                    moveTo(4);
+                    return;
+                  }
+
+                  if (step === 4) {
+                    moveTo(5);
+                    return;
+                  }
+
+                  void generatePlan();
+                }}
+              />
             </div>
-          </div>
+          </section>
 
           <aside className="space-y-5 lg:sticky lg:top-6">
             <article className="soft-card p-5">
@@ -1172,15 +1212,37 @@ export function RoutineBuilder() {
               </div>
             </article>
 
-            <article className="soft-card overflow-hidden p-4">
-              <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-[#faf9f4]">
-                <Image
-                  alt="Mockup editorial del producto MyCoach"
-                  className="h-auto w-full"
-                  height={980}
-                  src={editorialMockups[Math.min(step - 1, editorialMockups.length - 1)]}
-                  width={520}
-                />
+            <article className="soft-card p-5">
+              <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
+                Senales del proceso
+              </div>
+              <div className="grid gap-3">
+                {[
+                  "El contexto manda sobre la plantilla.",
+                  "El visual solo entra si aporta lectura real.",
+                  "La rutina sale editable, no cerrada.",
+                ].map((item, index) => (
+                  <div
+                    className={`rounded-[24px] border px-4 py-4 text-sm font-semibold leading-6 ${
+                      index === 2
+                        ? "border-[rgba(66,108,255,0.22)] bg-[rgba(66,108,255,0.08)] text-[#003fa4]"
+                        : "border-slate-200 bg-white text-slate-700"
+                    }`}
+                    key={item}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 rounded-[24px] border border-slate-200 bg-[#fafaf8] p-4">
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                  Lo que construye MyCoach
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MiniStat label="bloques" value="4-6 sem" />
+                  <MiniStat label="rotaciones" value="I-IV" />
+                  <MiniStat label="salida" value="Excel" />
+                </div>
               </div>
             </article>
 
@@ -1622,7 +1684,7 @@ function QuestionField({
   );
 }
 
-function PhoneFooter({
+function BuilderFooter({
   backLabel,
   nextLabel,
   onBack,

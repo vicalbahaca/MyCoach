@@ -4,9 +4,6 @@ export const generatedVisuals = {
   routineMachine: "/generated/routine-export-machine.svg",
   bodyScan: "/generated/body-scan-analysis.svg",
   mesocycleGraph: "/generated/mesocycle-progress.svg",
-  phoneHero: "/generated/phone-hero-overview.svg",
-  phoneOnboarding: "/generated/phone-onboarding.svg",
-  phoneRoutine: "/generated/phone-routine.svg",
   loader: "/generated/loader-orbit.svg",
 } as const;
 
@@ -38,12 +35,6 @@ export const landingPhotos = [
   photoLibrary.bodybuilder,
   photoLibrary.crossfit,
   photoLibrary.workoutRoom,
-] as const;
-
-export const editorialMockups = [
-  generatedVisuals.phoneHero,
-  generatedVisuals.phoneOnboarding,
-  generatedVisuals.phoneRoutine,
 ] as const;
 
 const exerciseMediaByPattern: Partial<

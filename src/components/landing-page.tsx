@@ -13,7 +13,7 @@ import {
   TableProperties,
 } from "lucide-react";
 
-import { generatedVisuals, landingPhotos } from "@/lib/visual-assets";
+import { landingPhotos } from "@/lib/visual-assets";
 
 const pillars = [
   {
@@ -129,28 +129,72 @@ export function LandingPage() {
                   src={landingPhotos[1].src}
                   width={1800}
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1c1b]/18 via-transparent to-transparent" />
 
-                <div className="absolute -right-3 top-10 w-[48%] rounded-[2rem] border-[6px] border-[#5b6371] bg-[#1a1c1b] p-2 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:-right-8">
-                  <div className="overflow-hidden rounded-[1.5rem] bg-white">
-                    <Image
-                      alt="Interfaz móvil premium de MyCoach"
-                      className="h-full w-full object-cover"
-                      height={980}
-                      src={generatedVisuals.phoneHero}
-                      width={520}
-                    />
+                <div className="absolute -right-3 top-10 w-[54%] rounded-[2rem] border border-white/80 bg-[#f9f9f7]/92 p-5 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.12)] backdrop-blur md:-right-8 md:p-6">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-[#0050cc]">
+                        Rutina lista
+                      </p>
+                      <h3 className="mt-2 font-display text-2xl font-bold tracking-[-0.04em] text-[#1b1b1b]">
+                        Bloque superior
+                      </h3>
+                    </div>
+                    <div className="rounded-full bg-[#eef3ff] px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#003fa4]">
+                      Excel editable
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      { label: "sesiones", value: "4" },
+                      { label: "focos", value: "3" },
+                      { label: "ajustes", value: "RIR" },
+                    ].map((item) => (
+                      <div className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4" key={item.label}>
+                        <div className="font-display text-3xl font-extrabold tracking-[-0.05em] text-[#1b1b1b]">
+                          {item.value}
+                        </div>
+                        <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          {item.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-4">
+                    <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                      Ultima accion
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      Rutina exportada y lista para editar segun material, molestias o feedback.
+                    </p>
                   </div>
                 </div>
 
-                <div className="absolute -left-6 bottom-10 hidden w-[46%] rounded-[2rem] border-[6px] border-[#5b6371] bg-[#1a1c1b] p-2 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] md:block">
-                  <div className="overflow-hidden rounded-[1.5rem] bg-white">
-                    <Image
-                      alt="Visual de progreso y métricas de MyCoach"
-                      className="h-full w-full object-cover"
-                      height={980}
-                      src={generatedVisuals.phoneRoutine}
-                      width={520}
-                    />
+                <div className="absolute -left-6 bottom-10 hidden w-[48%] rounded-[2rem] border border-white/80 bg-white/94 p-5 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.12)] backdrop-blur md:block">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-[#eef3ff] text-[#0050cc]">
+                      <LineChart className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-500">
+                        Diagnostico
+                      </p>
+                      <h3 className="font-display text-xl font-bold tracking-[-0.04em] text-[#1b1b1b]">
+                        Lectura del caso
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="rounded-full bg-[#f2f3f6] px-4 py-3 text-sm font-semibold text-slate-700">
+                      Pecho clavicular y dorsales como prioridad.
+                    </div>
+                    <div className="rounded-full bg-[#f2f3f6] px-4 py-3 text-sm font-semibold text-slate-700">
+                      Frecuencia 4 y control de fatiga como base.
+                    </div>
+                    <div className="rounded-full bg-[#eef3ff] px-4 py-3 text-sm font-semibold text-[#003fa4]">
+                      Cambios de ejercicio y exportacion sin rehacer el bloque.
+                    </div>
                   </div>
                 </div>
               </div>
