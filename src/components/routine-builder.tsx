@@ -687,6 +687,12 @@ export function RoutineBuilder() {
             totalSteps={VISIBLE_STEP_TOTAL}
           />
 
+          {step === 2 ? (
+            <p className="mb-10 max-w-xl text-[11px] font-medium italic leading-relaxed text-[var(--form-muted)]/80">
+              Este paso es opcional pero nos ayuda a entender tu punto de partida.
+            </p>
+          ) : null}
+
           <div className="space-y-12">
             {step === 1 ? (
               <div className="space-y-10">
@@ -793,9 +799,6 @@ export function RoutineBuilder() {
                       value={profile.currentRoutineText || profile.currentTraining || ""}
                     />
                   </div>
-                  <p className="pl-1 text-[11px] font-medium italic leading-relaxed text-[var(--form-muted)]/80">
-                    Este paso es opcional pero nos ayuda a entender tu punto de partida.
-                  </p>
                 </section>
 
                 <section className="space-y-4">
