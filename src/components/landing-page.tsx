@@ -53,7 +53,11 @@ const steps = [
   },
 ] as const;
 
-const footerLinks = ["Privacidad", "Términos", "Cookies"] as const;
+const footerLinks = [
+  { label: "Privacidad", href: "/privacidad" },
+  { label: "Términos", href: "/terminos" },
+  { label: "Cookies", href: "/cookies" },
+] as const;
 
 function ScrollReveal({
   children,
@@ -363,9 +367,13 @@ export function LandingPage() {
           <BrandMark className="text-xl font-black" />
           <div className="flex gap-8 text-sm text-[#424656]">
             {footerLinks.map((item) => (
-              <a className="transition-colors hover:text-[#0050cc]" href="#" key={item}>
-                {item}
-              </a>
+              <Link
+                className="transition-colors hover:text-[#0050cc]"
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
             ))}
           </div>
           <p className="text-xs uppercase tracking-[0.24em] text-[#424656]/60">
