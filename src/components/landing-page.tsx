@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   Dumbbell,
   Image as ImageIcon,
@@ -52,6 +55,54 @@ const steps = [
 
 const footerLinks = ["Privacidad", "Términos", "Cookies"] as const;
 
+function ScrollReveal({
+  children,
+  className = "",
+  delay = 0,
+  style,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  style?: React.CSSProperties;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setIsVisible(true);
+        observer.disconnect();
+      },
+      {
+        threshold: 0.16,
+        rootMargin: "0px 0px -10% 0px",
+      }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      className={`landing-reveal ${isVisible ? "landing-reveal-visible" : ""} ${className}`.trim()}
+      onFocusCapture={() => setIsVisible(true)}
+      ref={ref}
+      style={{ ...style, transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function LandingPage() {
   return (
     <>
@@ -64,7 +115,7 @@ export function LandingPage() {
       <main className="overflow-x-hidden bg-[#f9f9f7] pb-32 pt-24 text-[#1a1c1b] lg:pb-0">
         <section className="relative mx-auto max-w-[1440px] px-6 py-16" id="inicio">
           <div className="grid items-center gap-12 lg:grid-cols-12">
-            <div className="z-10 lg:col-span-6">
+            <ScrollReveal className="z-10 lg:col-span-6">
               <h1 className="mb-8 font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.05em] text-[#1b1b1b] md:text-7xl lg:text-8xl">
                 Entrena como la <span className="italic text-[#0050cc]">élite</span> con
                 rutinas personalizadas
@@ -84,9 +135,9 @@ export function LandingPage() {
                   Iniciar proceso
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="relative mt-12 lg:col-span-6 lg:mt-0">
+            <ScrollReveal className="relative mt-12 lg:col-span-6 lg:mt-0" delay={80}>
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] bg-[#eceeea] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
                 <Image
                   alt={landingPhotos[1].alt}
@@ -98,30 +149,31 @@ export function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1a1c1b]/18 via-transparent to-transparent" />
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section className="bg-[#f2f3f1] px-6 py-24">
           <div className="mx-auto max-w-[1440px]">
-            <div className="mb-16">
+            <ScrollReveal className="mb-16">
               <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
                 Metodología Élite
               </p>
               <h2 className="font-display text-4xl font-bold tracking-[-0.04em] text-[#1a1c1b] md:text-5xl">
                 Tres pilares para construir tu rutina.
               </h2>
-            </div>
+            </ScrollReveal>
 
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
               {pillars.map((pillar, index) => {
                 const Icon = pillar.icon;
 
                 return (
-                  <div
+                  <ScrollReveal
                     className={`flex flex-col justify-between rounded-[2rem] bg-white p-10 shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ${
                       index === 1 ? "md:translate-y-8" : ""
                     }`}
+                    delay={index * 70}
                     key={pillar.title}
                   >
                     <div>
@@ -129,7 +181,7 @@ export function LandingPage() {
                       <h3 className="mb-4 font-display text-2xl font-bold">{pillar.title}</h3>
                       <p className="leading-relaxed text-[#424656]">{pillar.text}</p>
                     </div>
-                  </div>
+                  </ScrollReveal>
                 );
               })}
             </div>
@@ -138,7 +190,7 @@ export function LandingPage() {
 
         <section className="mx-auto max-w-[1440px] overflow-hidden px-6 py-24" id="programa">
           <div className="grid items-center gap-16 lg:grid-cols-2">
-            <div className="order-2 lg:order-1">
+            <ScrollReveal className="order-2 lg:order-1">
               <div className="relative aspect-square w-full overflow-hidden rounded-[2rem] bg-[#e8e8e6]">
                 <Image
                   alt={landingPhotos[2].alt}
@@ -148,9 +200,9 @@ export function LandingPage() {
                   width={762}
                 />
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="order-1 lg:order-2">
+            <ScrollReveal className="order-1 lg:order-2" delay={60}>
               <h2 className="mb-8 font-display text-5xl font-extrabold tracking-[-0.05em] md:text-6xl">
                 El contexto lo es todo.
               </h2>
@@ -159,22 +211,25 @@ export function LandingPage() {
                 analiza tu físico, tu historial, tus sensaciones, la fatiga acumulada y
                 el equipo disponible para construir la mejor rutina posible para ti.
               </p>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section className="border-y border-slate-200/40 bg-white px-6 py-24" id="elite">
           <div className="mx-auto max-w-[1440px]">
-            <h2 className="mb-16 text-center font-display text-4xl font-extrabold">
-              Tu camino a la élite.
-            </h2>
-            <p className="-mt-10 mb-16 text-center text-lg text-[#424656]">
-              Genera tu rutina personalizada en sencillos pasos.
-            </p>
+            <ScrollReveal>
+              <h2 className="mb-16 text-center font-display text-4xl font-extrabold">
+                Tu camino a la élite.
+              </h2>
+              <p className="-mt-10 mb-16 text-center text-lg text-[#424656]">
+                Genera tu rutina personalizada en sencillos pasos.
+              </p>
+            </ScrollReveal>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {steps.map((step, index) => (
-                <div
+                <ScrollReveal
                   className="rounded-r-xl border-l-4 bg-[#f4f4f2] p-8"
+                  delay={index * 65}
                   key={step.step}
                   style={{
                     borderLeftColor: index === 0 ? "#0050cc" : "rgba(0, 80, 204, 0.4)",
@@ -188,7 +243,7 @@ export function LandingPage() {
                   </p>
                   <h4 className="mb-2 text-xl font-bold">{step.title}</h4>
                   <p className="text-sm text-[#424656]">{step.text}</p>
-                </div>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -196,7 +251,7 @@ export function LandingPage() {
 
         <section className="mx-auto max-w-[1440px] px-6 py-24">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-            <div>
+            <ScrollReveal>
               <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
                 La disciplina es clave
               </p>
@@ -208,9 +263,12 @@ export function LandingPage() {
                 semanas con progresión real, objetivos claros y una estructura pensada
                 para que notes mejoras significativas bloque a bloque.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className="rounded-[2.5rem] border border-slate-200/40 bg-white p-10 shadow-[0_24px_50px_-18px_rgba(26,28,27,0.08)]">
+            <ScrollReveal
+              className="rounded-[2.5rem] border border-slate-200/40 bg-white p-10 shadow-[0_24px_50px_-18px_rgba(26,28,27,0.08)]"
+              delay={70}
+            >
               <div className="mb-10">
                 <h3 className="max-w-xs font-display text-4xl font-black leading-[0.92] tracking-[-0.05em] text-[#1a1c1b]">
                   Evolución inteligente de ciclo
@@ -251,13 +309,13 @@ export function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section className="mx-auto max-w-[1440px] px-6 py-24">
           <div className="grid items-end gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-3">
+            <ScrollReveal className="lg:col-span-3">
               <p className="mb-4 text-sm font-extrabold uppercase tracking-[0.28em] text-[#0050cc]">
                 Optimización avanzada
               </p>
@@ -273,12 +331,12 @@ export function LandingPage() {
                 que la fatiga no comprometa tus ganancias de hipertrofia mientras escalas
                 en rendimiento cardiovascular.
               </p>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section className="mx-auto max-w-[1440px] px-6 pb-24">
-          <div className="relative overflow-hidden rounded-[3rem] bg-white p-12 text-center shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] lg:p-24">
+          <ScrollReveal className="relative overflow-hidden rounded-[3rem] bg-white p-12 text-center shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] lg:p-24">
             <div className="pointer-events-none absolute inset-0 opacity-5">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#0050cc,transparent)]" />
             </div>
@@ -296,7 +354,7 @@ export function LandingPage() {
                 Únete a la comunidad de atletas MyCoach.
               </p>
             </div>
-          </div>
+          </ScrollReveal>
         </section>
       </main>
 
