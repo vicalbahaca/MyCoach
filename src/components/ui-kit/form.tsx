@@ -46,7 +46,7 @@ export function FormProgress({
   return (
     <div className="mb-14 space-y-5">
       <div className="flex items-end justify-between gap-6">
-        <span className="font-display text-sm font-black uppercase tracking-[0.24em] text-[var(--form-outline-strong)] sm:text-base">
+        <span className="font-display text-xs font-bold uppercase tracking-[0.22em] text-[var(--form-outline-strong)] sm:text-sm">
           Paso {step} de {totalSteps}
         </span>
         <span className="font-display text-3xl font-black uppercase tracking-[-0.04em] text-[var(--form-ink)] sm:text-4xl">
