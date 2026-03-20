@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope, Sora } from "next/font/google";
 
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
+
 import "./globals.css";
 
 const display = Sora({
@@ -27,7 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+      <body className="min-h-full bg-background text-foreground">
+        {children}
+        <CookieConsentBanner />
+      </body>
     </html>
   );
 }
