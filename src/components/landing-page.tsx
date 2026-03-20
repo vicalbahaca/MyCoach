@@ -211,13 +211,10 @@ export function LandingPage() {
             </div>
 
             <div className="rounded-[2.5rem] border border-slate-200/40 bg-white p-10 shadow-[0_24px_50px_-18px_rgba(26,28,27,0.08)]">
-              <div className="mb-10 flex items-start justify-between gap-4">
+              <div className="mb-10">
                 <h3 className="max-w-xs font-display text-4xl font-black leading-[0.92] tracking-[-0.05em] text-[#1a1c1b]">
                   Evolución inteligente de ciclo
                 </h3>
-                <div className="rounded-full border border-[#cfe0ff] bg-[#f4f8ff] px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#0050cc]">
-                  Performance
-                </div>
               </div>
 
               <p className="max-w-md text-lg leading-relaxed text-[#5a6171]">
@@ -226,53 +223,31 @@ export function LandingPage() {
                 evolución diaria.
               </p>
 
-              <div className="mt-10 space-y-5">
-                {[
-                  "Ajuste de carga dinámico",
-                  "Optimización metabólica",
-                  "Prevención biomecánica",
-                ].map((item) => (
-                  <div className="flex items-center gap-4" key={item}>
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#edf4ff]">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#0050cc]" />
-                    </span>
-                    <span className="text-sm font-black uppercase tracking-[0.18em] text-[#1f2530]">
-                      {item}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
               <div className="mt-12 border-t border-slate-200/70 pt-8">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex -space-x-3">
-                      {landingPhotos.slice(0, 3).map((photo) => (
-                        <div
-                          className="h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-[#dfe6f7]"
-                          key={photo.src}
-                        >
-                          <Image
-                            alt={photo.alt}
-                            className="h-full w-full object-cover"
-                            height={80}
-                            src={photo.src}
-                            width={80}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div>
-                      <div className="text-lg font-black tracking-[-0.03em] text-[#1a1c1b]">
-                        +2.4K atletas
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-3">
+                    {landingPhotos.slice(0, 3).map((photo) => (
+                      <div
+                        className="h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-[#dfe6f7]"
+                        key={photo.src}
+                      >
+                        <Image
+                          alt={photo.alt}
+                          className="h-full w-full object-cover"
+                          height={80}
+                          src={photo.src}
+                          width={80}
+                        />
                       </div>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c8393]">
-                        Comunidad elite
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                  <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#c1c5d0]">
-                    80% CalAI / 20% Mercer
+                  <div>
+                    <div className="text-lg font-black tracking-[-0.03em] text-[#1a1c1b]">
+                      +2.4K atletas
+                    </div>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#7c8393]">
+                      Comunidad elite
+                    </div>
                   </div>
                 </div>
               </div>
