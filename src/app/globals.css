@@ -222,7 +222,7 @@ body {
 }
 
 .form-ui-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -230,7 +230,7 @@ body {
 }
 
 .form-ui-muted-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.28em;
   text-transform: uppercase;
