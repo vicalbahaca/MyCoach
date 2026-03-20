@@ -377,7 +377,7 @@ export function LandingPage() {
             ))}
           </div>
           <p className="text-xs uppercase tracking-[0.24em] text-[#424656]/60">
-            © 2024 MyCoach Elite. All Rights Reserved.
+            © 2026 MyCoach Elite. All Rights Reserved.
           </p>
         </div>
       </footer>
