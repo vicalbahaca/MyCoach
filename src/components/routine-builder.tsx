@@ -856,56 +856,66 @@ export function RoutineBuilder() {
             ) : null}
 
             {step === 3 ? (
-              <div className="mx-auto max-w-xl space-y-10">
-                <article className="form-ui-panel px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-                  <div className="mb-8 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
-                    <span className="inline-flex h-4 w-4 items-center justify-center">
-                      <svg
-                        aria-hidden="true"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clipRule="evenodd"
-                          d="M10.0512 15.75L9.51642 14.2768L9.18821 14.0137C8.15637 13.1865 7.5 11.9204 7.5 10.5C7.5 8.01472 9.51472 6 12 6C14.4853 6 16.5 8.01472 16.5 10.5C16.5 11.9204 15.8436 13.1865 14.8118 14.0137L14.4836 14.2768L13.9488 15.75H10.0512ZM9 17.25H15L15.75 15.184C17.1217 14.0844 18 12.3948 18 10.5C18 7.18629 15.3137 4.5 12 4.5C8.68629 4.5 6 7.18629 6 10.5C6 12.3948 6.87831 14.0844 8.25 15.184L9 17.25ZM14.25 19.5V18H9.75V19.5H14.25Z"
-                          fill="#080341"
-                          fillRule="evenodd"
-                        />
-                      </svg>
-                    </span>
-                    Guía de material audiovisual
-                  </div>
+              <div className="mx-auto max-w-5xl">
+                <article className="form-ui-panel grid gap-10 px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
                   <div className="space-y-8">
-                    {[
-                      "Iluminación frontal clara, evita sombras duras sobre el torso.",
-                      "Cuerpo completo visible desde los pies hasta la cabeza.",
-                      "Ángulos clave: frente, perfil izquierdo/derecho y espalda.",
-                    ].map((item, index) => (
-                      <div className="flex items-start gap-6" key={item}>
-                        <span className="font-display text-3xl font-black text-[rgba(114,118,135,0.22)]">
-                          {String(index + 1).padStart(2, "0")}.
-                        </span>
-                        <p className="pt-1 text-base font-medium leading-tight text-[var(--form-ink)]">
-                          {item}
-                        </p>
-                      </div>
-                    ))}
+                    <div className="mb-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
+                      <span className="inline-flex h-8 w-8 items-center justify-center">
+                        <svg
+                          aria-hidden="true"
+                          className="h-7 w-7"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            clipRule="evenodd"
+                            d="M10.0512 15.75L9.51642 14.2768L9.18821 14.0137C8.15637 13.1865 7.5 11.9204 7.5 10.5C7.5 8.01472 9.51472 6 12 6C14.4853 6 16.5 8.01472 16.5 10.5C16.5 11.9204 15.8436 13.1865 14.8118 14.0137L14.4836 14.2768L13.9488 15.75H10.0512ZM9 17.25H15L15.75 15.184C17.1217 14.0844 18 12.3948 18 10.5C18 7.18629 15.3137 4.5 12 4.5C8.68629 4.5 6 7.18629 6 10.5C6 12.3948 6.87831 14.0844 8.25 15.184L9 17.25ZM14.25 19.5V18H9.75V19.5H14.25Z"
+                            fill="#080341"
+                            fillRule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                      Guía del contenido para el análisis
+                    </div>
+
+                    <p className="max-w-xl text-[15px] leading-7 text-[var(--form-muted)]">
+                      A continuación te mostramos algunas recomendaciones para que el
+                      material que subas nos permita revisar tu físico con más claridad y
+                      sacar mejores conclusiones del análisis.
+                    </p>
+
+                    <div className="space-y-8">
+                      {[
+                        "Iluminación frontal clara, evita sombras duras sobre el torso.",
+                        "Cuerpo completo visible desde los pies hasta la cabeza.",
+                        "Ángulos clave: frente, perfil izquierdo/derecho y espalda.",
+                      ].map((item, index) => (
+                        <div className="flex items-start gap-6" key={item}>
+                          <span className="font-display text-3xl font-black text-[rgba(114,118,135,0.22)]">
+                            {String(index + 1).padStart(2, "0")}.
+                          </span>
+                          <p className="pt-1 text-base font-medium leading-tight text-[var(--form-ink)]">
+                            {item}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="form-ui-label block pl-1">Archivos para el análisis</label>
+                    <FormUploadTile
+                      accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
+                      files={visualFiles}
+                      formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
+                      onChange={(event) => updateFiles("visual", event)}
+                      onRemoveFile={(file) => removeFile("visual", file)}
+                      subtitle="Sube hasta 10 imágenes o un vídeo corto para revisar tu punto de partida."
+                      title="Subir Video o Fotos"
+                    />
                   </div>
                 </article>
-
-                <div className="space-y-6">
-                  <FormUploadTile
-                    accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
-                    files={visualFiles}
-                    formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
-                    onChange={(event) => updateFiles("visual", event)}
-                    onRemoveFile={(file) => removeFile("visual", file)}
-                    subtitle="Sube hasta 10 imágenes o un vídeo corto para revisar tu punto de partida."
-                    title="Subir Video o Fotos"
-                  />
-                </div>
               </div>
             ) : null}
 
