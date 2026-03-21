@@ -156,6 +156,7 @@ export function RoutineBuilder() {
   const [answers, setAnswers] = useState<DynamicAnswers>({});
   const [routine, setRoutine] = useState<RoutinePlan | null>(null);
   const [rotationIndex, setRotationIndex] = useState(0);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<ExercisePlan | null>(null);
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
@@ -273,8 +274,33 @@ export function RoutineBuilder() {
     setIsMaintenanceOpen(true);
   }
 
-  function personalizeForm() {
-    openMaintenanceModal();
+  async function personalizeForm() {
+    setIsAnalyzing(true);
+    setErrorMessage("");
+
+    try {
+      const formData = new FormData();
+      formData.append("payload", JSON.stringify({ profile }));
+      contextFiles.forEach((file) => formData.append("contextFiles", file));
+      visualFiles.forEach((file) => formData.append("visualFiles", file));
+
+      const response = await fetch("/api/intake/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo preparar el formulario.");
+      }
+
+      const data = (await response.json()) as { analysis: IntakeAnalysis };
+      setAnalysis(data.analysis);
+      moveTo(4);
+    } catch {
+      setErrorMessage("No se pudo personalizar el formulario. Vuelve a intentarlo.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   function updateAnswer(questionId: string, value: DynamicAnswerValue) {
@@ -1065,7 +1091,9 @@ export function RoutineBuilder() {
 
           <FormFooter
             backLabel={step > 1 ? "Paso anterior" : undefined}
-            nextLabel={getNextLabel(step)}
+            nextDisabled={isAnalyzing}
+            nextIcon={isAnalyzing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : undefined}
+            nextLabel={getNextLabel(step, isAnalyzing)}
             onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
             onNext={() => {
               if (step === 1) {
@@ -1118,13 +1146,33 @@ export function RoutineBuilder() {
           </div>
         </ModalShell>
       ) : null}
+
+      {isAnalyzing ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f9f9f7]/78 px-6 backdrop-blur-md">
+          <div className="w-full max-w-xl rounded-[2rem] border border-white/70 bg-white/92 p-8 shadow-[0_30px_80px_-30px_rgba(18,25,45,0.32)]">
+            <div className="mb-4 flex items-center gap-3 text-[#0050cc]">
+              <LoaderCircle className="h-5 w-5 animate-spin" />
+              <span className="text-xs font-bold uppercase tracking-[0.22em]">
+                Analizando contexto
+              </span>
+            </div>
+            <h3 className="font-display text-3xl font-black tracking-[-0.04em] text-[#1a1c1b]">
+              Personalizando el formulario
+            </h3>
+            <p className="mt-4 text-base leading-8 text-[#424656]">
+              Estamos revisando tu contexto y el material visual para construir las
+              preguntas que realmente merecen la pena en tu caso.
+            </p>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
 
-function getNextLabel(step: number) {
+function getNextLabel(step: number, isAnalyzing: boolean) {
   if (step === 3) {
-    return "Personalizar formulario";
+    return isAnalyzing ? "Personalizando..." : "Personalizar formulario";
   }
 
   if (step === 6) {
