@@ -1136,13 +1136,13 @@ export function RoutineBuilder() {
             {step === 2 ? (
               <div className="relative left-1/2 w-screen max-w-[72rem] -translate-x-1/2 px-6 sm:px-8">
                 <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2 lg:items-stretch">
-                  <section className="flex min-h-[340px] flex-col space-y-4">
+                  <section className="grid min-h-[395px] grid-rows-[auto_1fr] gap-4">
                     <label className="form-ui-label block pl-1">
                       Descripción del entrenamiento (Opcional)
                     </label>
                     <div className="flex-1 overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ring-1 ring-transparent transition-all focus-within:ring-2 focus-within:ring-[rgba(0,80,204,0.12)]">
                       <textarea
-                        className="h-full min-h-[340px] w-full resize-none border-0 bg-transparent px-6 py-6 text-[15px] font-medium leading-7 text-[var(--form-ink)] outline-none placeholder:font-normal placeholder:text-[rgba(114,118,135,0.55)]"
+                        className="h-full min-h-[347px] w-full resize-none border-0 bg-transparent px-6 py-6 text-[15px] font-medium leading-7 text-[var(--form-ink)] outline-none placeholder:font-normal placeholder:text-[rgba(114,118,135,0.55)]"
                         onChange={(event) => updateTrainingDescription(event.target.value)}
                         placeholder="Pega aquí tu rutina actual o describe cómo entrenas hoy (ej: 4 días de fuerza, foco en tren inferior...)"
                         value={profile.currentRoutineText || profile.currentTraining || ""}
@@ -1150,14 +1150,14 @@ export function RoutineBuilder() {
                     </div>
                   </section>
 
-                  <section className="flex min-h-[340px] flex-col space-y-4">
+                  <section className="grid min-h-[395px] grid-rows-[auto_1fr] gap-4">
                     <FormLabelWithTooltip
                       label="Documentos adjuntos"
                       tooltip="Lo más útil es subir la rutina que hayas seguido durante las últimas semanas, o el último documento real con el que hayas entrenado. Así entendemos mejor volumen, frecuencia y estructura."
                     />
                     <FormUploadTile
                       accept=".pdf,.xls,.csv,.txt,.doc"
-                      className="h-full min-h-[340px]"
+                      className="h-full min-h-[347px]"
                       files={contextFiles}
                       formatHint="Formatos admitidos: PDF, XLS, CSV, TXT, DOC"
                       onChange={(event) => updateFiles("context", event)}
@@ -1173,7 +1173,7 @@ export function RoutineBuilder() {
               <div className="relative left-1/2 w-screen max-w-[72rem] -translate-x-1/2 px-6 sm:px-8">
                 <div className="mx-auto max-w-6xl">
                   <article className="form-ui-panel grid gap-8 px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:grid-cols-2 lg:items-stretch">
-                    <div className="flex min-h-[360px] flex-col justify-between space-y-8">
+                    <div className="grid min-h-[395px] grid-rows-[auto_1fr] gap-8">
                       <div className="space-y-8">
                         <div className="mb-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
                           <span className="inline-flex h-8 w-8 items-center justify-center">
@@ -1202,7 +1202,7 @@ export function RoutineBuilder() {
                         </p>
                       </div>
 
-                      <div className="space-y-8">
+                      <div className="space-y-8 self-end">
                         {[
                           "Iluminación frontal clara, evita sombras duras sobre el torso.",
                           "Cuerpo completo visible desde los pies hasta la cabeza.",
@@ -1220,14 +1220,14 @@ export function RoutineBuilder() {
                       </div>
                     </div>
 
-                    <section className="flex min-h-[360px] flex-col space-y-4">
+                    <section className="grid min-h-[395px] grid-rows-[auto_1fr] gap-4">
                       <FormLabelWithTooltip
                         label="Archivos para el análisis"
                         tooltip="Lo más recomendable es compartir fotos limpias de frente, perfil y espalda, o un vídeo corto donde se vea el cuerpo completo con buena luz. Así el análisis visual sale con más contexto útil."
                       />
                       <FormUploadTile
                         accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
-                        className="h-full min-h-[360px]"
+                        className="h-full min-h-[347px]"
                         files={visualFiles}
                         formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
                         onChange={(event) => updateFiles("visual", event)}

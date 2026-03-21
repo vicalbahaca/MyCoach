@@ -431,7 +431,7 @@ export function FormUploadTile({
   return (
     <label
       className={cx(
-        "form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.9)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.36)] hover:bg-[rgba(218,225,255,0.12)]",
+        "form-ui-panel form-ui-dashed-panel flex cursor-pointer flex-col items-center justify-center gap-3 px-6 py-10 text-center transition hover:bg-[rgba(218,225,255,0.12)]",
         className
       )}
     >
