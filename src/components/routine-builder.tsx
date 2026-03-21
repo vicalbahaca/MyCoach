@@ -1248,7 +1248,7 @@ export function RoutineBuilder() {
                         onChange={(event) => updateFiles("visual", event)}
                         onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}
-                        title="Sube fotos o vídeo"
+                        title="Sube fotos o vídeo de tu físico"
                       />
                     </section>
                   </article>
