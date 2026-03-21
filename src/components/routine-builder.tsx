@@ -19,6 +19,7 @@ import {
   Edit3,
   FileText,
   ImageUp,
+  Info,
   LoaderCircle,
   Plus,
   PlusCircle,
@@ -163,6 +164,7 @@ export function RoutineBuilder() {
   const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [changeRequest, setChangeRequest] = useState("");
+  const [isDocsTooltipOpen, setIsDocsTooltipOpen] = useState(false);
   const [isMaintenanceOpen, setIsMaintenanceOpen] = useState(false);
   const [visibleDisciplineValues, setVisibleDisciplineValues] = useState<string[]>(
     () => getInitialSportDisciplineOptions().map((option) => option.value)
@@ -700,8 +702,10 @@ export function RoutineBuilder() {
           />
 
           {step === 2 ? (
-            <p className="mb-10 max-w-xl text-[11px] font-medium italic leading-relaxed text-[var(--form-muted)]/80">
-              Este paso es opcional pero nos ayuda a entender tu punto de partida.
+            <p className="mb-10 max-w-3xl text-base leading-8 text-[var(--form-muted)]">
+              Este paso es opcional. Si compartes una breve descripción de cómo estás
+              entrenando ahora o adjuntas tu rutina más reciente, podremos entender mejor
+              tu punto de partida y el tipo de bloque desde el que vienes.
             </p>
           ) : null}
 
@@ -798,14 +802,14 @@ export function RoutineBuilder() {
             ) : null}
 
             {step === 2 ? (
-              <div className="mx-auto max-w-xl space-y-12">
+              <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
                 <section className="space-y-4">
                   <label className="form-ui-label block pl-1">
-                    Descripción del entrenamiento
+                    Descripción del entrenamiento (Opcional)
                   </label>
                   <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ring-1 ring-transparent transition-all focus-within:ring-2 focus-within:ring-[rgba(0,80,204,0.12)]">
                     <textarea
-                      className="min-h-[240px] w-full resize-none border-0 bg-transparent px-6 py-6 font-display text-sm font-semibold text-[var(--form-ink)] outline-none placeholder:text-[rgba(114,118,135,0.45)]"
+                      className="min-h-[320px] w-full resize-none border-0 bg-transparent px-6 py-6 text-[15px] font-medium leading-7 text-[var(--form-ink)] outline-none placeholder:font-medium placeholder:text-[rgba(114,118,135,0.55)]"
                       onChange={(event) => updateTrainingDescription(event.target.value)}
                       placeholder="Pega aquí tu rutina actual o describe cómo entrenas hoy (ej: 4 días de fuerza, foco en tren inferior...)"
                       value={profile.currentRoutineText || profile.currentTraining || ""}
@@ -814,14 +818,37 @@ export function RoutineBuilder() {
                 </section>
 
                 <section className="space-y-4">
-                  <label className="form-ui-label block pl-1">Documentos adjuntos</label>
+                  <div className="flex items-center gap-3 pl-1">
+                    <label className="form-ui-label block">Documentos adjuntos</label>
+                    <div className="relative">
+                      <button
+                        aria-expanded={isDocsTooltipOpen}
+                        aria-label="Información sobre documentos adjuntos"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--form-outline)] bg-white text-[var(--form-muted)] transition hover:border-[var(--form-accent)] hover:text-[var(--form-accent)]"
+                        onBlur={() => setIsDocsTooltipOpen(false)}
+                        onClick={() => setIsDocsTooltipOpen((current) => !current)}
+                        type="button"
+                      >
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                      <div
+                        className={`absolute left-0 top-full z-20 mt-3 w-[280px] rounded-[1.25rem] border border-slate-200 bg-white p-4 text-sm leading-6 text-[#424656] shadow-[0_20px_40px_-18px_rgba(26,28,27,0.22)] ${
+                          isDocsTooltipOpen ? "block" : "hidden"
+                        }`}
+                      >
+                        Lo más útil es subir la rutina que hayas seguido durante las
+                        últimas semanas, o el último documento real con el que hayas
+                        entrenado. Así entendemos mejor volumen, frecuencia y estructura.
+                      </div>
+                    </div>
+                  </div>
                   <FormUploadTile
                     accept=".pdf,.xls,.csv,.txt,.doc"
                     files={contextFiles}
                     formatHint="Formatos admitidos: PDF, XLS, CSV, TXT, DOC"
                     onChange={(event) => updateFiles("context", event)}
                     onRemoveFile={(file) => removeFile("context", file)}
-                    subtitle="Añade tu rutina o un archivo de apoyo para entender mejor tu punto de partida."
+                    subtitle="Añade tu rutina reciente o cualquier archivo que ayude a entender cómo vienes entrenando."
                     title="Sube tu rutina actual"
                   />
                 </section>
