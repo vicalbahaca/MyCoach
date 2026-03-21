@@ -376,7 +376,7 @@ export function FormLabelWithTooltip({
   const tooltipId = useId();
 
   return (
-    <div className={cx("flex items-center gap-3 pl-1", className)}>
+    <div className={cx("flex min-h-6 items-center gap-3 pl-1", className)}>
       <div className="form-ui-label">{label}</div>
       <div className="relative">
         <button

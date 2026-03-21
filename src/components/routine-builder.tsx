@@ -1137,9 +1137,9 @@ export function RoutineBuilder() {
               <div className="relative left-1/2 w-screen max-w-[72rem] -translate-x-1/2 px-6 sm:px-8">
                 <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2 lg:items-stretch">
                   <section className="grid min-h-[395px] grid-rows-[auto_1fr] gap-4">
-                    <label className="form-ui-label block pl-1">
-                      Descripción del entrenamiento (Opcional)
-                    </label>
+                    <div className="flex min-h-6 items-center pl-1">
+                      <label className="form-ui-label">Descripción del entrenamiento (Opcional)</label>
+                    </div>
                     <div className="flex-1 overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)] ring-1 ring-transparent transition-all focus-within:ring-2 focus-within:ring-[rgba(0,80,204,0.12)]">
                       <textarea
                         className="h-full min-h-[347px] w-full resize-none border-0 bg-transparent px-6 py-6 text-[15px] font-medium leading-7 text-[var(--form-ink)] outline-none placeholder:font-normal placeholder:text-[rgba(114,118,135,0.55)]"
@@ -1172,11 +1172,11 @@ export function RoutineBuilder() {
             {step === 3 ? (
               <div className="relative left-1/2 w-screen max-w-[72rem] -translate-x-1/2 px-6 sm:px-8">
                 <div className="mx-auto max-w-6xl">
-                  <article className="form-ui-panel grid gap-8 px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:grid-cols-2 lg:items-stretch">
+                  <article className="form-ui-panel grid gap-8 px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:grid-cols-2 lg:items-stretch lg:gap-12">
                     <div className="flex min-h-[395px] flex-col justify-start space-y-6">
                       <div className="space-y-5">
-                        <div className="mb-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
-                          <span className="inline-flex h-8 w-8 items-center justify-center">
+                        <div className="inline-flex items-center gap-3 rounded-full border border-[rgba(194,198,216,0.66)] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)] shadow-[0_12px_28px_-22px_rgba(26,28,27,0.28)]">
+                          <span className="inline-flex h-7 w-7 items-center justify-center">
                             <svg
                               aria-hidden="true"
                               className="h-7 w-7"
