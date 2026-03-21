@@ -1173,8 +1173,8 @@ export function RoutineBuilder() {
               <div className="relative left-1/2 w-screen max-w-[72rem] -translate-x-1/2 px-6 sm:px-8">
                 <div className="mx-auto max-w-6xl">
                   <article className="form-ui-panel grid gap-8 px-8 py-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] lg:grid-cols-2 lg:items-stretch">
-                    <div className="grid min-h-[395px] grid-rows-[auto_1fr] gap-8">
-                      <div className="space-y-8">
+                    <div className="flex min-h-[395px] flex-col justify-start space-y-6">
+                      <div className="space-y-5">
                         <div className="mb-8 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--form-accent)]">
                           <span className="inline-flex h-8 w-8 items-center justify-center">
                             <svg
@@ -1196,13 +1196,11 @@ export function RoutineBuilder() {
                         </div>
 
                         <p className="max-w-xl text-[15px] leading-7 text-[var(--form-muted)]">
-                          Estas referencias ayudan a que el material sea más útil y nos
-                          permita revisar tu físico con mejor criterio antes de construir
-                          la personalización.
+                          El contenido que subas ayudará a que la personalización del
+                          formulario y de la rutina sea más completa, con un análisis
+                          detallado del físico para detectar asimetrías,
+                          descompensaciones y señales relevantes del punto de partida.
                         </p>
-                      </div>
-
-                      <div className="space-y-8 self-end">
                         {[
                           "Iluminación frontal clara, evita sombras duras sobre el torso.",
                           "Cuerpo completo visible desde los pies hasta la cabeza.",
@@ -1221,10 +1219,7 @@ export function RoutineBuilder() {
                     </div>
 
                     <section className="grid min-h-[395px] grid-rows-[auto_1fr] gap-4">
-                      <FormLabelWithTooltip
-                        label="Archivos para el análisis"
-                        tooltip="Lo más recomendable es compartir fotos limpias de frente, perfil y espalda, o un vídeo corto donde se vea el cuerpo completo con buena luz. Así el análisis visual sale con más contexto útil."
-                      />
+                      <label className="form-ui-label block pl-1">Archivos para el análisis</label>
                       <FormUploadTile
                         accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
                         className="h-full min-h-[347px]"
