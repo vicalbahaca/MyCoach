@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useId, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
-import { ArrowLeft, ChevronDown, Info, Upload, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Info, Plus, Upload, X } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
 
@@ -418,7 +418,7 @@ export function FormUploadTile({
   files = [],
   onRemoveFile,
   formatHint,
-  hoverHint,
+  maxHint,
   className,
 }: {
   title: string;
@@ -429,18 +429,50 @@ export function FormUploadTile({
   files?: File[];
   onRemoveFile?: (file: File) => void;
   formatHint?: string;
-  hoverHint?: string;
+  maxHint?: string;
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isDragValid, setIsDragValid] = useState<boolean | null>(null);
   const dragDepthRef = useRef(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function isAcceptedFile(file: File) {
+    const acceptedTypes = accept
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!acceptedTypes.length) return true;
+
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+
+    return acceptedTypes.some((acceptedType) => {
+      if (acceptedType.startsWith(".")) {
+        return fileName.endsWith(acceptedType);
+      }
+
+      if (acceptedType.endsWith("/*")) {
+        return fileType.startsWith(acceptedType.replace("*", ""));
+      }
+
+      return fileType === acceptedType;
+    });
+  }
+
+  function readDraggedFiles(event: DragEvent<HTMLDivElement>) {
+    return Array.from(event.dataTransfer.items || [])
+      .map((item) => item.getAsFile())
+      .filter((file): file is File => Boolean(file));
+  }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
     dragDepthRef.current = 0;
     setIsDragging(false);
+    setIsDragValid(null);
 
     if (!onFilesDropped) return;
 
@@ -453,6 +485,10 @@ export function FormUploadTile({
     event.preventDefault();
     event.stopPropagation();
     dragDepthRef.current += 1;
+    const draggedFiles = readDraggedFiles(event);
+    setIsDragValid(
+      draggedFiles.length ? draggedFiles.every((file) => isAcceptedFile(file)) : null
+    );
     setIsDragging(true);
   }
 
@@ -462,13 +498,19 @@ export function FormUploadTile({
     dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
     if (dragDepthRef.current === 0) {
       setIsDragging(false);
+      setIsDragValid(null);
     }
   }
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
-    event.dataTransfer.dropEffect = "copy";
+    const draggedFiles = readDraggedFiles(event);
+    const nextDragValid = draggedFiles.length
+      ? draggedFiles.every((file) => isAcceptedFile(file))
+      : null;
+    event.dataTransfer.dropEffect = nextDragValid === false ? "none" : "copy";
+    setIsDragValid(nextDragValid);
     setIsDragging(true);
   }
 
@@ -507,16 +549,24 @@ export function FormUploadTile({
           {formatHint}
         </span>
       ) : null}
-      {hoverHint ? (
+      {maxHint ? (
+        <span
+          className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-muted)]"
+        >
+          {maxHint}
+        </span>
+      ) : null}
+      {isDragging ? (
         <span
           className={cx(
-            "pointer-events-none absolute left-1/2 top-full z-20 mt-3 w-[min(92%,21rem)] -translate-x-1/2 rounded-[1.1rem] border border-slate-200 bg-white px-4 py-3 text-xs leading-5 text-[var(--form-muted)] shadow-[0_18px_40px_-26px_rgba(18,25,45,0.38)] transition duration-200",
-            isDragging
-              ? "translate-y-0 opacity-100"
-              : "translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+            "pointer-events-none absolute left-1/2 top-6 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] shadow-[0_18px_40px_-24px_rgba(18,25,45,0.32)]",
+            isDragValid === false
+              ? "border-rose-200 bg-rose-50 text-rose-700"
+              : "border-[#dae1ff] bg-white text-[var(--form-accent)]"
           )}
         >
-          {hoverHint}
+          {isDragValid === false ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          {isDragValid === false ? "Formato no admitido" : "Suelta para añadirlo"}
         </span>
       ) : null}
       {files.length ? (

@@ -137,8 +137,6 @@ const UPLOAD_RULES = {
   context: {
     acceptedExtensions: [".pdf", ".xls", ".xlsx", ".csv", ".txt", ".doc"],
     formatsLabel: "PDF, XLS, XLSX, CSV, TXT, DOC",
-    hoverHint:
-      "Admite PDF, XLS, XLSX, CSV, TXT o DOC. Puedes arrastrar o hacer clic para subir archivos. Máximo total: 10 MB.",
     maxBytes: 10 * MEGABYTE,
     maxSizeLabel: "10 MB",
     modalTitle: "Documento no admitido",
@@ -146,8 +144,6 @@ const UPLOAD_RULES = {
   visual: {
     acceptedExtensions: [".jpg", ".jpeg", ".png", ".heic", ".mp4", ".mov", ".avi"],
     formatsLabel: "JPG, JPEG, PNG, HEIC, MP4, MOV, AVI",
-    hoverHint:
-      "Admite JPG, JPEG, PNG, HEIC, MP4, MOV y AVI. Puedes arrastrar o hacer clic para subir archivos. Máximo total: 50 MB.",
     maxBytes: 50 * MEGABYTE,
     maxSizeLabel: "50 MB en total",
     modalTitle: "Archivo visual no admitido",
@@ -164,7 +160,8 @@ type UploadType = keyof typeof UPLOAD_RULES;
 
 type UploadErrorState = {
   title: string;
-  description: string;
+  summary: string;
+  rules: string;
 } | null;
 
 type StepOneField =
@@ -383,7 +380,8 @@ export function RoutineBuilder() {
         files: totalBytes <= rule.maxBytes ? mergedFiles : currentFiles,
         error: {
           title: rule.modalTitle,
-          description: `No se han admitido: ${invalidNames}. Formatos válidos: ${rule.formatsLabel}. Peso máximo admitido: ${rule.maxSizeLabel}.`,
+          summary: `No se han admitido los siguientes archivos: ${invalidNames}.`,
+          rules: `Solo se admiten los siguientes formatos: ${rule.formatsLabel}. El peso máximo admitido es de ${rule.maxSizeLabel}.`,
         },
       };
     }
@@ -393,7 +391,8 @@ export function RoutineBuilder() {
         files: currentFiles,
         error: {
           title: "Se ha superado el límite de peso",
-          description: `Los archivos seleccionados superan el máximo permitido para este bloque. Formatos válidos: ${rule.formatsLabel}. Peso máximo admitido: ${rule.maxSizeLabel}.`,
+          summary: "Los archivos seleccionados superan el máximo permitido para este bloque.",
+          rules: `Solo se admiten los siguientes formatos: ${rule.formatsLabel}. El peso máximo admitido es de ${rule.maxSizeLabel}.`,
         },
       };
     }
@@ -999,8 +998,9 @@ export function RoutineBuilder() {
         {uploadError ? (
           <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
             <div className="max-w-2xl space-y-5">
-              <p className="text-base leading-8 text-slate-700">{uploadError.description}</p>
-              <div className="flex justify-end">
+              <p className="text-base leading-8 text-slate-700">{uploadError.summary}</p>
+              <p className="text-base leading-8 text-slate-700">{uploadError.rules}</p>
+              <div className="flex justify-center">
                 <button
                   className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
                   onClick={() => setUploadError(null)}
@@ -1283,8 +1283,8 @@ export function RoutineBuilder() {
                       accept=".pdf,.xls,.xlsx,.csv,.txt,.doc"
                       className="h-full min-h-[347px]"
                       files={contextFiles}
-                      formatHint="Formatos admitidos: PDF, XLS, XLSX, CSV, TXT, DOC · Máximo 10 MB"
-                      hoverHint={UPLOAD_RULES.context.hoverHint}
+                      formatHint="Formatos admitidos: PDF, XLS, XLSX, CSV, TXT, DOC"
+                      maxHint="Peso máximo admitido: 10 MB"
                       onChange={(event) => updateFiles("context", event)}
                       onFilesDropped={(files) => addFiles("context", files)}
                       onRemoveFile={(file) => removeFile("context", file)}
@@ -1350,8 +1350,8 @@ export function RoutineBuilder() {
                         accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
                         className="h-full min-h-[347px]"
                         files={visualFiles}
-                        formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI · Máximo total 50 MB"
-                        hoverHint={UPLOAD_RULES.visual.hoverHint}
+                        formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
+                        maxHint="Peso máximo total: 50 MB"
                         onChange={(event) => updateFiles("visual", event)}
                         onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}
@@ -1626,8 +1626,9 @@ export function RoutineBuilder() {
       {uploadError ? (
         <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
           <div className="max-w-2xl space-y-5">
-            <p className="text-base leading-8 text-slate-700">{uploadError.description}</p>
-            <div className="flex justify-end">
+            <p className="text-base leading-8 text-slate-700">{uploadError.summary}</p>
+            <p className="text-base leading-8 text-slate-700">{uploadError.rules}</p>
+            <div className="flex justify-center">
               <button
                 className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
                 onClick={() => setUploadError(null)}
@@ -1940,8 +1941,8 @@ function ModalShell({
       <div className="max-h-full w-full max-w-5xl overflow-auto rounded-[38px] border border-white/70 bg-[#fcfbf8] p-6 shadow-[0_48px_140px_-70px_rgba(18,25,45,0.48)]">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <BrandMark className="text-sm font-black text-slate-500" />
-            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950">
+            <BrandMark className="text-sm font-black text-[#1a1c1b]" />
+            <h3 className="mt-4 font-display text-2xl font-semibold tracking-tight text-slate-950">
               {title}
             </h3>
           </div>
