@@ -21,7 +21,6 @@ type Props = {
   onRotationChange: (index: number) => void;
   onOpenExercise: (exercise: ExercisePlan) => void;
   onOpenSwap: (sessionId: string, exerciseId: string) => void;
-  onOpenModify: () => void;
   onExport: () => void;
 };
 
@@ -31,7 +30,6 @@ export function RoutineWorkspace({
   onRotationChange,
   onOpenExercise,
   onOpenSwap,
-  onOpenModify,
   onExport,
 }: Props) {
   const activeRotation = routine.rotationLabels[rotationIndex] || routine.rotationLabels[0];
@@ -66,13 +64,6 @@ export function RoutineWorkspace({
             </div>
 
             <div className="flex gap-3">
-              <button
-                className="rounded-2xl border-2 border-[#1b1b1b] px-6 py-3 font-bold transition-all hover:bg-[#1b1b1b] hover:text-white"
-                onClick={onOpenModify}
-                type="button"
-              >
-                Modificar rutina
-              </button>
               <button
                 className="flex items-center gap-2 rounded-2xl bg-[#1b1b1b] px-6 py-3 font-bold text-white"
                 onClick={onExport}

@@ -11,18 +11,18 @@ import {
 import Link from "next/link";
 import {
   ArrowLeft,
-  ArrowRight,
   BrainCircuit,
   Bolt,
   CheckCircle2,
   ClipboardList,
-  Edit3,
   FileText,
   ImageUp,
   Info,
   LoaderCircle,
+  MessageCircle,
   Plus,
   PlusCircle,
+  SendHorizontal,
   Sparkles,
   Target,
   X,
@@ -128,6 +128,13 @@ const OBJECTIVE_OPTIONS: FormOption[] = [
 ];
 
 const VISIBLE_STEP_TOTAL = 4;
+const AGENT_MESSAGE_LIMIT = 10;
+
+type AgentMessage = {
+  id: string;
+  role: "assistant" | "user";
+  content: string;
+};
 
 function arrayValue(value: DynamicAnswerValue | undefined) {
   return Array.isArray(value) ? value : [];
@@ -157,16 +164,26 @@ export function RoutineBuilder() {
   const [routine, setRoutine] = useState<RoutinePlan | null>(null);
   const [rotationIndex, setRotationIndex] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isRevising, setIsRevising] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<ExercisePlan | null>(null);
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
     null
   );
   const [selectedSwapAlternative, setSelectedSwapAlternative] = useState("");
-  const [isModifyOpen, setIsModifyOpen] = useState(false);
-  const [changeRequest, setChangeRequest] = useState("");
   const [isDocsTooltipOpen, setIsDocsTooltipOpen] = useState(false);
-  const [isMaintenanceOpen, setIsMaintenanceOpen] = useState(false);
+  const [isAgentOpen, setIsAgentOpen] = useState(false);
+  const [agentInput, setAgentInput] = useState("");
+  const [agentCreditsUsed, setAgentCreditsUsed] = useState(0);
+  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([
+    {
+      id: "agent-welcome",
+      role: "assistant",
+      content:
+        "Soy el agente de personalización. Dime qué quieres ajustar de la rutina y te propondré cambios concretos o te pediré la información mínima que falte.",
+    },
+  ]);
   const [visibleDisciplineValues, setVisibleDisciplineValues] = useState<string[]>(
     () => getInitialSportDisciplineOptions().map((option) => option.value)
   );
@@ -269,11 +286,6 @@ export function RoutineBuilder() {
     );
   }
 
-  function openMaintenanceModal() {
-    setErrorMessage("");
-    setIsMaintenanceOpen(true);
-  }
-
   async function personalizeForm() {
     setIsAnalyzing(true);
     setErrorMessage("");
@@ -307,12 +319,123 @@ export function RoutineBuilder() {
     setAnswers((current) => ({ ...current, [questionId]: value }));
   }
 
-  function generatePlan() {
-    openMaintenanceModal();
+  async function generatePlan() {
+    if (!analysis) return;
+
+    setIsGenerating(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/routine/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile,
+          analysis,
+          answers,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo generar la rutina.");
+      }
+
+      const data = (await response.json()) as { routine: RoutinePlan };
+      setRoutine(data.routine);
+      setRotationIndex(0);
+      setIsAgentOpen(false);
+      setAgentInput("");
+      setAgentCreditsUsed(0);
+      setAgentMessages([
+        {
+          id: "agent-welcome",
+          role: "assistant",
+          content:
+            "Soy el agente de personalización. Dime qué quieres ajustar de la rutina y te propondré cambios concretos o te pediré la información mínima que falte.",
+        },
+      ]);
+    } catch {
+      setErrorMessage("No se pudo generar la rutina. Vuelve a intentarlo.");
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
-  function reviseCurrentPlan() {
-    openMaintenanceModal();
+  async function reviseCurrentPlan(changeRequest: string) {
+    if (!routine || !analysis || !changeRequest.trim()) return;
+
+    setIsRevising(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/routine/revise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile,
+          analysis,
+          answers,
+          currentRoutine: routine,
+          changeRequest,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo modificar la rutina.");
+      }
+
+      const data = (await response.json()) as {
+        routine?: RoutinePlan;
+        assistantMessage: string;
+        requiresClarification?: boolean;
+      };
+
+      if (data.routine) {
+        setRoutine(data.routine);
+      }
+
+      setAgentMessages((current) => [
+        ...current,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          content: data.assistantMessage,
+        },
+      ]);
+    } catch {
+      setErrorMessage("No se pudo modificar la rutina. Vuelve a intentarlo.");
+      setAgentMessages((current) => [
+        ...current,
+        {
+          id: `assistant-error-${Date.now()}`,
+          role: "assistant",
+          content:
+            "No he podido aplicar cambios ahora mismo. Revisa la petición o vuelve a intentarlo en unos segundos.",
+        },
+      ]);
+    } finally {
+      setIsRevising(false);
+    }
+  }
+
+  async function submitAgentMessage() {
+    const nextMessage = agentInput.trim();
+
+    if (!nextMessage || !routine || agentCreditsUsed >= AGENT_MESSAGE_LIMIT || isRevising) {
+      return;
+    }
+
+    setAgentMessages((current) => [
+      ...current,
+      {
+        id: `user-${Date.now()}`,
+        role: "user",
+        content: nextMessage,
+      },
+    ]);
+    setAgentInput("");
+    setAgentCreditsUsed((current) => current + 1);
+    await reviseCurrentPlan(nextMessage);
   }
 
   function swapExercise(alternative: string) {
@@ -390,7 +513,11 @@ export function RoutineBuilder() {
             </Link>
             <button
               className="ghost-button px-4 py-2 text-sm"
-              onClick={() => setRoutine(null)}
+              onClick={() => {
+                setRoutine(null);
+                setAgentInput("");
+                setIsAgentOpen(false);
+              }}
               type="button"
             >
               Volver al formulario
@@ -408,11 +535,21 @@ export function RoutineBuilder() {
           <RoutineWorkspace
             onExport={() => exportRoutineWorkbook(routine)}
             onOpenExercise={setSelectedExercise}
-            onOpenModify={() => setIsModifyOpen(true)}
             onOpenSwap={(sessionId, exerciseId) => setSwapTarget({ sessionId, exerciseId })}
             onRotationChange={setRotationIndex}
             rotationIndex={rotationIndex}
             routine={routine}
+          />
+
+          <AgentChatDrawer
+            creditsUsed={agentCreditsUsed}
+            inputValue={agentInput}
+            isOpen={isAgentOpen}
+            isSending={isRevising}
+            messages={agentMessages}
+            onChangeInput={setAgentInput}
+            onOpenChange={setIsAgentOpen}
+            onSubmit={submitAgentMessage}
           />
         </main>
 
@@ -642,69 +779,6 @@ export function RoutineBuilder() {
           </ModalShell>
         ) : null}
 
-        {isModifyOpen ? (
-          <ModalShell onClose={() => setIsModifyOpen(false)} title="Modificar rutina">
-            <div className="relative space-y-10 overflow-hidden">
-              <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#0050cc]/5 blur-3xl" />
-
-              <div className="relative space-y-3">
-                <div className="flex items-center gap-2 text-[#0050cc]">
-                  <Edit3 className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-[0.22em]">
-                    Ajuste Inteligente
-                  </span>
-                </div>
-                <h2 className="font-display text-4xl font-black leading-tight tracking-[-0.05em] text-[#1a1c1b]">
-                  ¿Qué deseas modificar?
-                </h2>
-              </div>
-
-              <div className="space-y-6">
-                <div className="relative">
-                  <label className="mb-3 block text-xs font-bold uppercase tracking-[0.18em] text-[#424656]">
-                    Tus ajustes
-                  </label>
-                  <textarea
-                    className="min-h-[160px] w-full resize-none border-0 border-b-2 border-[#c2c6d8] bg-transparent px-0 py-2 text-xl font-medium text-[#1a1c1b] transition-all placeholder:text-[#424656]/30 focus:border-[#0050cc] focus:outline-none focus:ring-0"
-                    onChange={(event) => setChangeRequest(event.target.value)}
-                    placeholder="Escribe aquí tus ajustes (ej: quiero priorizar hombros o cambiar el día 3 por HIIT)"
-                    value={changeRequest}
-                  />
-                </div>
-
-                <div className="flex items-start gap-4 rounded-xl bg-[#f4f4f2] p-5">
-                  <Sparkles className="h-5 w-5 text-[#3e4853]" />
-                  <p className="text-sm leading-relaxed text-[#3e4853]">
-                    <span className="font-bold">Pro Tip:</span> Puedes ser específico con
-                    ejercicios, tiempos de descanso o grupos musculares que quieras
-                    enfatizar hoy.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center gap-4 pt-4 md:flex-row-reverse">
-                <button
-                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#1b1b1b] px-10 py-5 text-lg font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:bg-slate-300 md:w-auto"
-                  disabled={!changeRequest.trim()}
-                  onClick={reviseCurrentPlan}
-                  type="button"
-                >
-                  <>
-                    <span>Aplicar cambios</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </>
-                </button>
-                <button
-                  className="w-full px-10 py-5 text-lg font-semibold text-[#424656] transition-colors hover:text-[#1a1c1b] md:w-auto"
-                  onClick={() => setIsModifyOpen(false)}
-                  type="button"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </ModalShell>
-        ) : null}
       </>
     );
   }
@@ -1091,9 +1165,13 @@ export function RoutineBuilder() {
 
           <FormFooter
             backLabel={step > 1 ? "Paso anterior" : undefined}
-            nextDisabled={isAnalyzing}
-            nextIcon={isAnalyzing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : undefined}
-            nextLabel={getNextLabel(step, isAnalyzing)}
+            nextDisabled={isAnalyzing || isGenerating}
+            nextIcon={
+              isAnalyzing || isGenerating ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : undefined
+            }
+            nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
             onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
             onNext={() => {
               if (step === 1) {
@@ -1135,18 +1213,6 @@ export function RoutineBuilder() {
         </section>
       </section>
 
-      {isMaintenanceOpen ? (
-        <ModalShell onClose={() => setIsMaintenanceOpen(false)} title="Plataforma en mantenimiento">
-          <div>
-            <p className="max-w-2xl text-base leading-8 text-slate-700">
-              La plataforma está temporalmente en mantenimiento. Hemos desactivado
-              momentáneamente la generación y personalización asistida mientras terminamos
-              ajustes internos.
-            </p>
-          </div>
-        </ModalShell>
-      ) : null}
-
       {isAnalyzing ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f9f9f7]/78 px-6 backdrop-blur-md">
           <div className="w-full max-w-xl rounded-[2rem] border border-white/70 bg-white/92 p-8 shadow-[0_30px_80px_-30px_rgba(18,25,45,0.32)]">
@@ -1166,17 +1232,37 @@ export function RoutineBuilder() {
           </div>
         </div>
       ) : null}
+
+      {isGenerating ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f9f9f7]/78 px-6 backdrop-blur-md">
+          <div className="w-full max-w-xl rounded-[2rem] border border-white/70 bg-white/92 p-8 shadow-[0_30px_80px_-30px_rgba(18,25,45,0.32)]">
+            <div className="mb-4 flex items-center gap-3 text-[#0050cc]">
+              <LoaderCircle className="h-5 w-5 animate-spin" />
+              <span className="text-xs font-bold uppercase tracking-[0.22em]">
+                Generando rutina
+              </span>
+            </div>
+            <h3 className="font-display text-3xl font-black tracking-[-0.04em] text-[#1a1c1b]">
+              Construyendo tu mesociclo
+            </h3>
+            <p className="mt-4 text-base leading-8 text-[#424656]">
+              Estamos cruzando tu contexto, el análisis visual y las respuestas del
+              formulario para devolverte una rutina editable con lógica real de progresión.
+            </p>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
 
-function getNextLabel(step: number, isAnalyzing: boolean) {
+function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean) {
   if (step === 3) {
     return isAnalyzing ? "Personalizando..." : "Personalizar formulario";
   }
 
   if (step === 6) {
-    return "Generar rutina";
+    return isGenerating ? "Generando..." : "Generar rutina";
   }
 
   return "Continuar";
@@ -1335,6 +1421,120 @@ function QuestionField({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function AgentChatDrawer({
+  isOpen,
+  onOpenChange,
+  messages,
+  creditsUsed,
+  inputValue,
+  onChangeInput,
+  onSubmit,
+  isSending,
+}: {
+  isOpen: boolean;
+  onOpenChange: (next: boolean) => void;
+  messages: AgentMessage[];
+  creditsUsed: number;
+  inputValue: string;
+  onChangeInput: (value: string) => void;
+  onSubmit: () => void;
+  isSending: boolean;
+}) {
+  const creditsLeft = Math.max(0, AGENT_MESSAGE_LIMIT - creditsUsed);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-40">
+      {isOpen ? (
+        <div className="w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-[2rem] border border-white/70 bg-[#fcfbf8]/96 shadow-[0_34px_100px_-42px_rgba(18,25,45,0.48)] backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 px-5 py-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#0050cc]">
+                Agente MyCoach
+              </p>
+              <h3 className="mt-1 font-display text-xl font-black tracking-[-0.04em] text-[#1a1c1b]">
+                Ajusta la rutina desde el chat
+              </h3>
+            </div>
+            <button
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-[rgba(66,108,255,0.3)]"
+              onClick={() => onOpenChange(false)}
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between border-b border-slate-200/50 px-5 py-3 text-xs font-semibold text-[#727687]">
+            <span>{creditsLeft} de {AGENT_MESSAGE_LIMIT} mensajes disponibles</span>
+            <span>{isSending ? "Aplicando cambios..." : "Rutina editable"}</span>
+          </div>
+
+          <div className="max-h-[420px] space-y-4 overflow-y-auto px-5 py-5">
+            {messages.map((message) => (
+              <div
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                key={message.id}
+              >
+                <div
+                  className={`max-w-[88%] rounded-[1.5rem] px-4 py-3 text-sm leading-7 ${
+                    message.role === "user"
+                      ? "bg-[#1b1b1b] text-white"
+                      : "bg-[#f4f4f2] text-[#1a1c1b]"
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-slate-200/60 px-5 py-4">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-3">
+              <textarea
+                className="min-h-[92px] w-full resize-none border-0 bg-transparent text-sm leading-7 text-[#1a1c1b] outline-none placeholder:text-[#727687]"
+                disabled={creditsLeft === 0 || isSending}
+                onChange={(event) => onChangeInput(event.target.value)}
+                placeholder={
+                  creditsLeft === 0
+                    ? "Has agotado los mensajes de esta sesión."
+                    : "Cuéntame qué quieres modificar de la rutina y lo ajusto directamente o te pediré el dato mínimo que falte."
+                }
+                value={inputValue}
+              />
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <p className="text-xs leading-5 text-[#727687]">
+                  Sé concreto con ejercicios, prioridades, molestias, volumen, frecuencia o fatiga.
+                </p>
+                <button
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#1b1b1b] text-white transition hover:bg-[#2a2a2a] disabled:cursor-not-allowed disabled:bg-slate-300"
+                  disabled={!inputValue.trim() || creditsLeft === 0 || isSending}
+                  onClick={onSubmit}
+                  type="button"
+                >
+                  {isSending ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <SendHorizontal className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <button
+          className="flex items-center gap-3 rounded-full bg-[#1b1b1b] px-5 py-4 text-sm font-bold text-white shadow-[0_24px_60px_-32px_rgba(18,18,18,0.7)] transition hover:bg-[#2a2a2a]"
+          onClick={() => onOpenChange(true)}
+          type="button"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Abrir agente
+        </button>
+      )}
     </div>
   );
 }
