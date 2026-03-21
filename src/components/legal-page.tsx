@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { BrandMark } from "@/components/brand-mark";
 
 type LegalSection = {
@@ -23,14 +21,8 @@ export function LegalPage({
   return (
     <main className="min-h-screen bg-[#f9f9f7] text-[#1a1c1b]">
       <header className="border-b border-slate-200/50 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-6 py-5">
+        <div className="mx-auto flex max-w-[1200px] items-center px-6 py-5">
           <BrandMark className="text-2xl font-extrabold" />
-          <Link
-            className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-[#424656] transition-colors hover:border-[#0050cc]/30 hover:text-[#0050cc]"
-            href="/"
-          >
-            Volver a la landing
-          </Link>
         </div>
       </header>
 
