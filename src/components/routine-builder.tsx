@@ -5,8 +5,10 @@ import {
   startTransition,
   useEffect,
   useEffectEvent,
+  useRef,
   useState,
   type ChangeEvent,
+  type FocusEvent,
 } from "react";
 import Link from "next/link";
 import {
@@ -136,6 +138,45 @@ type AgentMessage = {
   content: string;
 };
 
+type StepOneField =
+  | "sex"
+  | "height"
+  | "weight"
+  | "yearsTraining"
+  | "diet"
+  | "objective"
+  | "disciplines";
+
+const STEP_ONE_FIELDS: StepOneField[] = [
+  "sex",
+  "height",
+  "weight",
+  "yearsTraining",
+  "diet",
+  "objective",
+  "disciplines",
+];
+
+const STEP_ONE_FIELD_IDS: Record<StepOneField, string> = {
+  sex: "step-one-sex-group",
+  height: "step-one-height",
+  weight: "step-one-weight",
+  yearsTraining: "step-one-years-training",
+  diet: "step-one-diet",
+  objective: "step-one-objective",
+  disciplines: "step-one-disciplines-group",
+};
+
+const STEP_ONE_ERROR_IDS: Record<StepOneField, string> = {
+  sex: "step-one-sex-error",
+  height: "step-one-height-error",
+  weight: "step-one-weight-error",
+  yearsTraining: "step-one-years-training-error",
+  diet: "step-one-diet-error",
+  objective: "step-one-objective-error",
+  disciplines: "step-one-disciplines-error",
+};
+
 function arrayValue(value: DynamicAnswerValue | undefined) {
   return Array.isArray(value) ? value : [];
 }
@@ -152,6 +193,23 @@ function chunkQuestions(section: DynamicSection) {
     title: index === 0 ? section.title : `${section.title} · ${index + 1}`,
     questions,
   }));
+}
+
+function getStepOneErrors(profile: IntakeProfile): Partial<Record<StepOneField, string>> {
+  return {
+    sex: profile.sex ? undefined : "Es obligatorio seleccionar un género.",
+    height: profile.height?.trim() ? undefined : "Es obligatorio indicar la altura.",
+    weight: profile.weight?.trim() ? undefined : "Es obligatorio indicar el peso.",
+    yearsTraining:
+      profile.yearsTraining?.trim() ? undefined : "Es obligatorio indicar los años entrenando.",
+    diet: profile.diet?.trim() ? undefined : "Es obligatorio seleccionar una dieta.",
+    objective:
+      profile.objective?.trim() ? undefined : "Es obligatorio seleccionar un objetivo principal.",
+    disciplines:
+      profile.disciplines?.length
+        ? undefined
+        : "Es obligatorio seleccionar al menos una opción.",
+  };
 }
 
 export function RoutineBuilder() {
@@ -187,14 +245,38 @@ export function RoutineBuilder() {
   const [visibleDisciplineValues, setVisibleDisciplineValues] = useState<string[]>(
     () => getInitialSportDisciplineOptions().map((option) => option.value)
   );
+  const [stepOneTouched, setStepOneTouched] = useState<Record<StepOneField, boolean>>({
+    sex: false,
+    height: false,
+    weight: false,
+    yearsTraining: false,
+    diet: false,
+    objective: false,
+    disciplines: false,
+  });
+  const [showStepOneSummary, setShowStepOneSummary] = useState(false);
+  const stepOneSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToActiveStep = useEffectEvent(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
+  const stepOneErrors = getStepOneErrors(profile);
+  const hasStepOneErrors = STEP_ONE_FIELDS.some((field) => Boolean(stepOneErrors[field]));
+
   useEffect(() => {
     scrollToActiveStep();
   }, [step, routine]);
+
+  useEffect(() => {
+    if (!(step === 1 && showStepOneSummary && hasStepOneErrors)) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      stepOneSummaryRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [hasStepOneErrors, showStepOneSummary, step]);
 
   function invalidateAnalysis() {
     setAnalysis(null);
@@ -275,15 +357,44 @@ export function RoutineBuilder() {
   }
 
   function isStepOneComplete() {
-    return Boolean(
-      profile.sex &&
-        profile.height?.trim() &&
-        profile.weight?.trim() &&
-        profile.yearsTraining?.trim() &&
-        profile.diet?.trim() &&
-        profile.objective?.trim() &&
-        profile.disciplines?.length
+    return !hasStepOneErrors;
+  }
+
+  function markStepOneTouched(field: StepOneField) {
+    setStepOneTouched((current) =>
+      current[field] ? current : { ...current, [field]: true }
     );
+  }
+
+  function markAllStepOneFieldsTouched() {
+    setStepOneTouched({
+      sex: true,
+      height: true,
+      weight: true,
+      yearsTraining: true,
+      diet: true,
+      objective: true,
+      disciplines: true,
+    });
+  }
+
+  function shouldShowStepOneError(field: StepOneField) {
+    return Boolean(stepOneErrors[field] && (stepOneTouched[field] || showStepOneSummary));
+  }
+
+  function focusStepOneField(field: StepOneField) {
+    const element = document.getElementById(STEP_ONE_FIELD_IDS[field]);
+    if (!element) return;
+
+    element.focus();
+    element.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  function handleGroupBlur(field: StepOneField) {
+    return (event: FocusEvent<HTMLDivElement>) => {
+      if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+      markStepOneTouched(field);
+    };
   }
 
   async function personalizeForm() {
@@ -812,70 +923,182 @@ export function RoutineBuilder() {
           <div className="space-y-12">
             {step === 1 ? (
               <div className="space-y-10">
-                <FormSection label="Género">
-                  <div className="grid gap-3 sm:grid-cols-3">
+                <section className="space-y-5">
+                  <div className="space-y-2">
+                    <div className="form-ui-label" id="step-one-sex-label">
+                      Género
+                    </div>
+                  </div>
+                  <div
+                    aria-describedby={
+                      shouldShowStepOneError("sex") ? STEP_ONE_ERROR_IDS.sex : undefined
+                    }
+                    aria-invalid={shouldShowStepOneError("sex") ? "true" : "false"}
+                    aria-labelledby="step-one-sex-label"
+                    aria-required="true"
+                    className={`grid gap-3 rounded-[1.5rem] border p-1 sm:grid-cols-3 ${
+                      shouldShowStepOneError("sex")
+                        ? "border-rose-500/70"
+                        : "border-transparent"
+                    }`}
+                    id={STEP_ONE_FIELD_IDS.sex}
+                    onBlur={handleGroupBlur("sex")}
+                    role="radiogroup"
+                    tabIndex={-1}
+                  >
                     {SEX_OPTIONS.map((option) => (
                       <FormPillButton
                         active={profile.sex === option}
+                        aria-checked={profile.sex === option}
+                        id={option === SEX_OPTIONS[0] ? "step-one-sex-option" : undefined}
                         key={option}
-                        onClick={() => updateProfile("sex", option)}
+                        onClick={() => {
+                          markStepOneTouched("sex");
+                          updateProfile("sex", option);
+                        }}
+                        role="radio"
                       >
                         {option}
                       </FormPillButton>
                     ))}
                   </div>
-                </FormSection>
+                  {shouldShowStepOneError("sex") ? (
+                    <p
+                      className="text-sm leading-6 text-rose-600"
+                      id={STEP_ONE_ERROR_IDS.sex}
+                      role="alert"
+                    >
+                      {stepOneErrors.sex}
+                    </p>
+                  ) : null}
+                </section>
 
                 <div className="grid gap-8 md:grid-cols-3">
                   <FormLineInput
+                    describedBy={
+                      shouldShowStepOneError("height") ? STEP_ONE_ERROR_IDS.height : undefined
+                    }
+                    errorMessage={shouldShowStepOneError("height") ? stepOneErrors.height : undefined}
+                    id={STEP_ONE_FIELD_IDS.height}
                     inputMode="numeric"
+                    invalid={shouldShowStepOneError("height")}
                     label="Altura (cm)"
+                    onBlur={() => markStepOneTouched("height")}
                     onChange={(value) => updateProfile("height", value)}
                     placeholder="180"
+                    required
                     value={profile.height || ""}
                   />
                   <FormLineInput
+                    describedBy={
+                      shouldShowStepOneError("weight") ? STEP_ONE_ERROR_IDS.weight : undefined
+                    }
+                    errorMessage={shouldShowStepOneError("weight") ? stepOneErrors.weight : undefined}
+                    id={STEP_ONE_FIELD_IDS.weight}
                     inputMode="decimal"
+                    invalid={shouldShowStepOneError("weight")}
                     label="Peso (kg)"
+                    onBlur={() => markStepOneTouched("weight")}
                     onChange={(value) => updateProfile("weight", value)}
                     placeholder="75"
+                    required
                     value={profile.weight || ""}
                   />
                   <FormLineInput
+                    describedBy={
+                      shouldShowStepOneError("yearsTraining")
+                        ? STEP_ONE_ERROR_IDS.yearsTraining
+                        : undefined
+                    }
+                    errorMessage={
+                      shouldShowStepOneError("yearsTraining")
+                        ? stepOneErrors.yearsTraining
+                        : undefined
+                    }
+                    id={STEP_ONE_FIELD_IDS.yearsTraining}
                     inputMode="numeric"
+                    invalid={shouldShowStepOneError("yearsTraining")}
                     label="Años entrenando"
+                    onBlur={() => markStepOneTouched("yearsTraining")}
                     onChange={(value) => updateProfile("yearsTraining", value)}
                     placeholder="2"
+                    required
                     value={profile.yearsTraining || ""}
                   />
                 </div>
 
                 <div className="space-y-8">
                   <FormLineSelect
+                    describedBy={
+                      shouldShowStepOneError("diet") ? STEP_ONE_ERROR_IDS.diet : undefined
+                    }
+                    errorMessage={shouldShowStepOneError("diet") ? stepOneErrors.diet : undefined}
+                    id={STEP_ONE_FIELD_IDS.diet}
+                    invalid={shouldShowStepOneError("diet")}
                     label="Dieta"
+                    onBlur={() => markStepOneTouched("diet")}
                     onChange={(value) => updateProfile("diet", value)}
                     options={DIET_OPTIONS}
                     placeholder="Selecciona tu preferencia"
+                    required
                     value={profile.diet || ""}
                   />
                   <FormLineSelect
+                    describedBy={
+                      shouldShowStepOneError("objective") ? STEP_ONE_ERROR_IDS.objective : undefined
+                    }
+                    errorMessage={
+                      shouldShowStepOneError("objective") ? stepOneErrors.objective : undefined
+                    }
+                    id={STEP_ONE_FIELD_IDS.objective}
+                    invalid={shouldShowStepOneError("objective")}
                     label="Objetivo principal"
+                    onBlur={() => markStepOneTouched("objective")}
                     onChange={(value) => updateProfile("objective", value)}
                     options={OBJECTIVE_OPTIONS}
                     placeholder="¿Qué quieres lograr?"
+                    required
                     value={profile.objective || ""}
                   />
                 </div>
 
-                <FormSection label="Disciplinas deportivas · Seleccionar al menos una">
-                  <div className="flex flex-wrap gap-3">
+                <FormSection label="Disciplinas deportivas (Selecciona al menos una opción)">
+                  <input
+                    aria-describedby={
+                      shouldShowStepOneError("disciplines")
+                        ? STEP_ONE_ERROR_IDS.disciplines
+                        : undefined
+                    }
+                    aria-invalid={shouldShowStepOneError("disciplines") ? "true" : "false"}
+                    aria-required="true"
+                    className="sr-only"
+                    id="step-one-disciplines-input"
+                    readOnly
+                    tabIndex={-1}
+                    value={(profile.disciplines || []).join(",")}
+                  />
+                  <div
+                    className={`rounded-[1.5rem] border p-1 ${
+                      shouldShowStepOneError("disciplines")
+                        ? "border-rose-500/70"
+                        : "border-transparent"
+                    }`}
+                    id={STEP_ONE_FIELD_IDS.disciplines}
+                    onBlur={handleGroupBlur("disciplines")}
+                    tabIndex={-1}
+                  >
+                    <div className="flex flex-wrap gap-3">
                     {visibleDisciplines.map((option) => {
                       const selected = profile.disciplines?.includes(option.value) || false;
                       return (
                         <FormChipButton
                           active={selected}
+                          aria-pressed={selected}
                           key={option.value}
-                          onClick={() => toggleDiscipline(option.value)}
+                          onClick={() => {
+                            markStepOneTouched("disciplines");
+                            toggleDiscipline(option.value);
+                          }}
                         >
                           {option.label}
                         </FormChipButton>
@@ -897,6 +1120,16 @@ export function RoutineBuilder() {
                       </button>
                     ) : null}
                   </div>
+                  </div>
+                  {shouldShowStepOneError("disciplines") ? (
+                    <p
+                      className="text-sm leading-6 text-rose-600"
+                      id={STEP_ONE_ERROR_IDS.disciplines}
+                      role="alert"
+                    >
+                      {stepOneErrors.disciplines}
+                    </p>
+                  ) : null}
                 </FormSection>
               </div>
             ) : null}
@@ -1163,6 +1396,35 @@ export function RoutineBuilder() {
             ) : null}
           </div>
 
+          {step === 1 && showStepOneSummary && hasStepOneErrors ? (
+            <div
+              className="mt-12 space-y-3 text-sm leading-6 text-rose-600"
+              ref={stepOneSummaryRef}
+              role="alert"
+              tabIndex={-1}
+            >
+              <p className="font-semibold">
+                Revisa los campos obligatorios antes de continuar:
+              </p>
+              <ul className="space-y-1">
+                {STEP_ONE_FIELDS.filter((field) => stepOneErrors[field]).map((field) => (
+                  <li key={field}>
+                    <a
+                      className="underline decoration-rose-300 underline-offset-4 hover:text-rose-700"
+                      href={`#${STEP_ONE_FIELD_IDS[field]}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        focusStepOneField(field);
+                      }}
+                    >
+                      {stepOneErrors[field]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <FormFooter
             backLabel={step > 1 ? "Paso anterior" : undefined}
             nextDisabled={isAnalyzing || isGenerating}
@@ -1176,12 +1438,12 @@ export function RoutineBuilder() {
             onNext={() => {
               if (step === 1) {
                 if (!isStepOneComplete()) {
-                  setErrorMessage(
-                    "Completa todos los campos del paso 1 y selecciona al menos una disciplina deportiva."
-                  );
+                  markAllStepOneFieldsTouched();
+                  setShowStepOneSummary(true);
                   return;
                 }
 
+                setShowStepOneSummary(false);
                 setErrorMessage("");
                 moveTo(2);
                 return;

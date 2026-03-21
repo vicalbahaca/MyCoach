@@ -187,57 +187,112 @@ export function FormChipButton({
 }
 
 export function FormLineInput({
+  id,
   label,
   value,
   onChange,
   placeholder,
   type = "text",
   inputMode,
+  onBlur,
+  errorMessage,
+  describedBy,
+  invalid,
+  required,
 }: {
+  id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
+  errorMessage?: string;
+  describedBy?: string;
+  invalid?: boolean;
+  required?: boolean;
 }) {
   return (
     <label className="block">
       <span className="form-ui-label mb-2 block">{label}</span>
-      <span className="form-ui-line-field block">
+      <span
+        className={cx(
+          "form-ui-line-field block",
+          invalid && "border-rose-500 focus-within:border-rose-500"
+        )}
+      >
         <input
-          className="form-ui-line-input"
+          aria-describedby={describedBy}
+          aria-invalid={invalid ? "true" : "false"}
+          className={cx(
+            "form-ui-line-input",
+            invalid && "text-rose-700 placeholder:text-rose-300"
+          )}
+          id={id}
           inputMode={inputMode}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
           placeholder={placeholder}
+          required={required}
           type={type}
           value={value}
         />
       </span>
+      {errorMessage ? (
+        <p className="mt-3 text-sm leading-6 text-rose-600" id={describedBy} role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
     </label>
   );
 }
 
 export function FormLineSelect({
+  id,
   label,
   value,
   onChange,
   options,
   placeholder,
+  onBlur,
+  errorMessage,
+  describedBy,
+  invalid,
+  required,
 }: {
+  id?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: FormOption[];
   placeholder: string;
+  onBlur?: React.FocusEventHandler<HTMLSelectElement>;
+  errorMessage?: string;
+  describedBy?: string;
+  invalid?: boolean;
+  required?: boolean;
 }) {
   return (
     <label className="block">
       <span className="form-ui-label mb-2 block">{label}</span>
-      <span className="form-ui-line-field relative block">
+      <span
+        className={cx(
+          "form-ui-line-field relative block",
+          invalid && "border-rose-500 focus-within:border-rose-500"
+        )}
+      >
         <select
-          className="form-ui-line-input appearance-none cursor-pointer pr-10"
+          aria-describedby={describedBy}
+          aria-invalid={invalid ? "true" : "false"}
+          className={cx(
+            "form-ui-line-input appearance-none cursor-pointer pr-10",
+            invalid && "text-rose-700"
+          )}
+          id={id}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
+          required={required}
           value={value}
         >
           <option value="">{placeholder}</option>
@@ -247,8 +302,18 @@ export function FormLineSelect({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-1 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--form-outline-strong)]" />
+        <ChevronDown
+          className={cx(
+            "pointer-events-none absolute right-1 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--form-outline-strong)]",
+            invalid && "text-rose-500"
+          )}
+        />
       </span>
+      {errorMessage ? (
+        <p className="mt-3 text-sm leading-6 text-rose-600" id={describedBy} role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
     </label>
   );
 }
