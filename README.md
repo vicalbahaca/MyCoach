@@ -48,3 +48,9 @@ npm run dev
 npm run lint
 npm run build
 ```
+
+## Documentación de upload privado
+
+- [Setup en Vercel (storage privado)](/Users/victorsaiz/Documents/MyCoach/docs/01-vercel-private-storage-setup.md)
+- [Arquitectura objetivo en este repo](/Users/victorsaiz/Documents/MyCoach/docs/02-repo-architecture-private-upload-flow.md)
+- [Checklist de implementación y runbook](/Users/victorsaiz/Documents/MyCoach/docs/03-implementation-checklist-and-runbook.md)
