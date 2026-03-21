@@ -418,6 +418,7 @@ export function FormUploadTile({
   files = [],
   onRemoveFile,
   formatHint,
+  hoverHint,
   className,
 }: {
   title: string;
@@ -428,37 +429,12 @@ export function FormUploadTile({
   files?: File[];
   onRemoveFile?: (file: File) => void;
   formatHint?: string;
+  hoverHint?: string;
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const dragDepthRef = useRef(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  function getAcceptedFiles(nextFiles: File[]) {
-    const acceptedTypes = accept
-      .split(",")
-      .map((item) => item.trim().toLowerCase())
-      .filter(Boolean);
-
-    if (!acceptedTypes.length) return nextFiles;
-
-    return nextFiles.filter((file) => {
-      const fileName = file.name.toLowerCase();
-      const fileType = file.type.toLowerCase();
-
-      return acceptedTypes.some((acceptedType) => {
-        if (acceptedType.startsWith(".")) {
-          return fileName.endsWith(acceptedType);
-        }
-
-        if (acceptedType.endsWith("/*")) {
-          return fileType.startsWith(acceptedType.replace("*", ""));
-        }
-
-        return fileType === acceptedType;
-      });
-    });
-  }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -468,7 +444,7 @@ export function FormUploadTile({
 
     if (!onFilesDropped) return;
 
-    const droppedFiles = getAcceptedFiles(Array.from(event.dataTransfer.files || []));
+    const droppedFiles = Array.from(event.dataTransfer.files || []);
     if (!droppedFiles.length) return;
     onFilesDropped(droppedFiles);
   }
@@ -506,7 +482,7 @@ export function FormUploadTile({
     <div
       aria-label={title}
       className={cx(
-        "form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.62)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(218,225,255,0.12)]",
+        "form-ui-panel group relative flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.62)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(218,225,255,0.12)]",
         isDragging && "border-[rgba(0,80,204,0.4)] bg-[rgba(218,225,255,0.18)]",
         className
       )}
@@ -529,6 +505,18 @@ export function FormUploadTile({
       {formatHint ? (
         <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-muted)]">
           {formatHint}
+        </span>
+      ) : null}
+      {hoverHint ? (
+        <span
+          className={cx(
+            "pointer-events-none absolute left-1/2 top-full z-20 mt-3 w-[min(92%,21rem)] -translate-x-1/2 rounded-[1.1rem] border border-slate-200 bg-white px-4 py-3 text-xs leading-5 text-[var(--form-muted)] shadow-[0_18px_40px_-26px_rgba(18,25,45,0.38)] transition duration-200",
+            isDragging
+              ? "translate-y-0 opacity-100"
+              : "translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          )}
+        >
+          {hoverHint}
         </span>
       ) : null}
       {files.length ? (

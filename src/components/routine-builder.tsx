@@ -131,12 +131,41 @@ const OBJECTIVE_OPTIONS: FormOption[] = [
 
 const VISIBLE_STEP_TOTAL = 4;
 const AGENT_MESSAGE_LIMIT = 10;
+const MEGABYTE = 1024 * 1024;
+
+const UPLOAD_RULES = {
+  context: {
+    acceptedExtensions: [".pdf", ".xls", ".xlsx", ".csv", ".txt", ".doc"],
+    formatsLabel: "PDF, XLS, XLSX, CSV, TXT, DOC",
+    hoverHint:
+      "Admite PDF, XLS, XLSX, CSV, TXT o DOC. Puedes arrastrar o hacer clic para subir archivos. Máximo total: 10 MB.",
+    maxBytes: 10 * MEGABYTE,
+    maxSizeLabel: "10 MB",
+    modalTitle: "Documento no admitido",
+  },
+  visual: {
+    acceptedExtensions: [".jpg", ".jpeg", ".png", ".heic", ".mp4", ".mov", ".avi"],
+    formatsLabel: "JPG, JPEG, PNG, HEIC, MP4, MOV, AVI",
+    hoverHint:
+      "Admite JPG, JPEG, PNG, HEIC, MP4, MOV y AVI. Puedes arrastrar o hacer clic para subir archivos. Máximo total: 50 MB.",
+    maxBytes: 50 * MEGABYTE,
+    maxSizeLabel: "50 MB en total",
+    modalTitle: "Archivo visual no admitido",
+  },
+} as const;
 
 type AgentMessage = {
   id: string;
   role: "assistant" | "user";
   content: string;
 };
+
+type UploadType = keyof typeof UPLOAD_RULES;
+
+type UploadErrorState = {
+  title: string;
+  description: string;
+} | null;
 
 type StepOneField =
   | "sex"
@@ -225,6 +254,7 @@ export function RoutineBuilder() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRevising, setIsRevising] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadError, setUploadError] = useState<UploadErrorState>(null);
   const [selectedExercise, setSelectedExercise] = useState<ExercisePlan | null>(null);
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
     null
@@ -310,38 +340,96 @@ export function RoutineBuilder() {
     });
   }
 
+  function getFileExtension(fileName: string) {
+    const parts = fileName.toLowerCase().match(/\.[^.]+$/);
+    return parts ? parts[0] : "";
+  }
+
   function mergeUniqueFiles(current: File[], nextFiles: File[]) {
     const seen = new Set(
       current.map((file) => `${file.name}-${file.lastModified}-${file.size}`)
     );
 
     const merged = [...current];
+    let didAddFile = false;
     nextFiles.forEach((file) => {
       const key = `${file.name}-${file.lastModified}-${file.size}`;
       if (seen.has(key)) return;
       seen.add(key);
       merged.push(file);
+      didAddFile = true;
     });
 
-    return merged;
+    return didAddFile ? merged : current;
   }
 
-  function addFiles(type: "context" | "visual", nextFiles: File[]) {
-    invalidateAnalysis();
+  function validateFiles(type: UploadType, currentFiles: File[], nextFiles: File[]) {
+    const rule = UPLOAD_RULES[type];
+    const isAcceptedExtension = (fileName: string) =>
+      rule.acceptedExtensions.some((extension) => extension === getFileExtension(fileName));
+    const invalidFormatFiles = nextFiles.filter(
+      (file) => !isAcceptedExtension(file.name)
+    );
+    const validFiles = nextFiles.filter(
+      (file) => isAcceptedExtension(file.name)
+    );
+    const mergedFiles = mergeUniqueFiles(currentFiles, validFiles);
+    const totalBytes = mergedFiles.reduce((sum, file) => sum + file.size, 0);
 
-    if (type === "context") {
-      setContextFiles((current) => mergeUniqueFiles(current, nextFiles));
+    if (invalidFormatFiles.length) {
+      const invalidNames = invalidFormatFiles.map((file) => file.name).join(", ");
+
+      return {
+        files: totalBytes <= rule.maxBytes ? mergedFiles : currentFiles,
+        error: {
+          title: rule.modalTitle,
+          description: `No se han admitido: ${invalidNames}. Formatos válidos: ${rule.formatsLabel}. Peso máximo admitido: ${rule.maxSizeLabel}.`,
+        },
+      };
+    }
+
+    if (totalBytes > rule.maxBytes) {
+      return {
+        files: currentFiles,
+        error: {
+          title: "Se ha superado el límite de peso",
+          description: `Los archivos seleccionados superan el máximo permitido para este bloque. Formatos válidos: ${rule.formatsLabel}. Peso máximo admitido: ${rule.maxSizeLabel}.`,
+        },
+      };
+    }
+
+    return { files: mergedFiles, error: null };
+  }
+
+  function addFiles(type: UploadType, nextFiles: File[]) {
+    if (!nextFiles.length) return;
+
+    const currentFiles = type === "context" ? contextFiles : visualFiles;
+    const result = validateFiles(type, currentFiles, nextFiles);
+
+    if (result.error) {
+      setUploadError(result.error);
+    }
+
+    if (result.files === currentFiles) {
       return;
     }
 
-    setVisualFiles((current) => mergeUniqueFiles(current, nextFiles).slice(0, 10));
+    invalidateAnalysis();
+
+    if (type === "context") {
+      setContextFiles(result.files);
+      return;
+    }
+
+    setVisualFiles(result.files.slice(0, 10));
   }
 
-  function updateFiles(type: "context" | "visual", event: ChangeEvent<HTMLInputElement>) {
+  function updateFiles(type: UploadType, event: ChangeEvent<HTMLInputElement>) {
     addFiles(type, Array.from(event.target.files || []));
   }
 
-  function removeFile(type: "context" | "visual", target: File) {
+  function removeFile(type: UploadType, target: File) {
     invalidateAnalysis();
 
     if (type === "context") {
@@ -908,6 +996,23 @@ export function RoutineBuilder() {
           </ModalShell>
         ) : null}
 
+        {uploadError ? (
+          <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
+            <div className="max-w-2xl space-y-5">
+              <p className="text-base leading-8 text-slate-700">{uploadError.description}</p>
+              <div className="flex justify-end">
+                <button
+                  className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
+                  onClick={() => setUploadError(null)}
+                  type="button"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </ModalShell>
+        ) : null}
+
       </>
     );
   }
@@ -1178,7 +1283,8 @@ export function RoutineBuilder() {
                       accept=".pdf,.xls,.xlsx,.csv,.txt,.doc"
                       className="h-full min-h-[347px]"
                       files={contextFiles}
-                      formatHint="Formatos admitidos: PDF, XLS, XLSX, CSV, TXT, DOC"
+                      formatHint="Formatos admitidos: PDF, XLS, XLSX, CSV, TXT, DOC · Máximo 10 MB"
+                      hoverHint={UPLOAD_RULES.context.hoverHint}
                       onChange={(event) => updateFiles("context", event)}
                       onFilesDropped={(files) => addFiles("context", files)}
                       onRemoveFile={(file) => removeFile("context", file)}
@@ -1244,7 +1350,8 @@ export function RoutineBuilder() {
                         accept=".jpg,.jpeg,.png,.heic,.mp4,.mov,.avi"
                         className="h-full min-h-[347px]"
                         files={visualFiles}
-                        formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
+                        formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI · Máximo total 50 MB"
+                        hoverHint={UPLOAD_RULES.visual.hoverHint}
                         onChange={(event) => updateFiles("visual", event)}
                         onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}
@@ -1514,6 +1621,23 @@ export function RoutineBuilder() {
             </p>
           </div>
         </div>
+      ) : null}
+
+      {uploadError ? (
+        <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
+          <div className="max-w-2xl space-y-5">
+            <p className="text-base leading-8 text-slate-700">{uploadError.description}</p>
+            <div className="flex justify-end">
+              <button
+                className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
+                onClick={() => setUploadError(null)}
+                type="button"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </ModalShell>
       ) : null}
     </main>
   );
