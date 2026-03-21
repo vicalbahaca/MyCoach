@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useId, useState, type DragEvent } from "react";
 import { ArrowLeft, ChevronDown, Info, Upload, X } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
@@ -414,6 +414,7 @@ export function FormUploadTile({
   subtitle,
   accept,
   onChange,
+  onFilesDropped,
   files = [],
   onRemoveFile,
   formatHint,
@@ -423,17 +424,64 @@ export function FormUploadTile({
   subtitle?: string;
   accept: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFilesDropped?: (files: File[]) => void;
   files?: File[];
   onRemoveFile?: (file: File) => void;
   formatHint?: string;
   className?: string;
 }) {
+  const [isDragging, setIsDragging] = useState(false);
+
+  function getAcceptedFiles(nextFiles: File[]) {
+    const acceptedTypes = accept
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!acceptedTypes.length) return nextFiles;
+
+    return nextFiles.filter((file) => {
+      const fileName = file.name.toLowerCase();
+      const fileType = file.type.toLowerCase();
+
+      return acceptedTypes.some((acceptedType) => {
+        if (acceptedType.startsWith(".")) {
+          return fileName.endsWith(acceptedType);
+        }
+
+        if (acceptedType.endsWith("/*")) {
+          return fileType.startsWith(acceptedType.replace("*", ""));
+        }
+
+        return fileType === acceptedType;
+      });
+    });
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+
+    if (!onFilesDropped) return;
+
+    const droppedFiles = getAcceptedFiles(Array.from(event.dataTransfer.files || []));
+    if (!droppedFiles.length) return;
+    onFilesDropped(droppedFiles);
+  }
+
   return (
     <label
       className={cx(
         "form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.62)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(218,225,255,0.12)]",
+        isDragging && "border-[rgba(0,80,204,0.4)] bg-[rgba(218,225,255,0.18)]",
         className
       )}
+      onDragLeave={() => setIsDragging(false)}
+      onDragOver={(event) => {
+        event.preventDefault();
+        setIsDragging(true);
+      }}
+      onDrop={handleDrop}
     >
       <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(218,225,255,0.5)] text-[var(--form-accent)]">
         <Upload className="h-5 w-5" />
@@ -473,7 +521,16 @@ export function FormUploadTile({
           ))}
         </span>
       ) : null}
-      <input accept={accept} className="hidden" multiple onChange={onChange} type="file" />
+      <input
+        accept={accept}
+        className="hidden"
+        multiple
+        onChange={(event) => {
+          onChange(event);
+          event.target.value = "";
+        }}
+        type="file"
+      />
     </label>
   );
 }

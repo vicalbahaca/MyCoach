@@ -310,16 +310,35 @@ export function RoutineBuilder() {
     });
   }
 
-  function updateFiles(type: "context" | "visual", event: ChangeEvent<HTMLInputElement>) {
-    const nextFiles = Array.from(event.target.files || []);
+  function mergeUniqueFiles(current: File[], nextFiles: File[]) {
+    const seen = new Set(
+      current.map((file) => `${file.name}-${file.lastModified}-${file.size}`)
+    );
+
+    const merged = [...current];
+    nextFiles.forEach((file) => {
+      const key = `${file.name}-${file.lastModified}-${file.size}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      merged.push(file);
+    });
+
+    return merged;
+  }
+
+  function addFiles(type: "context" | "visual", nextFiles: File[]) {
     invalidateAnalysis();
 
     if (type === "context") {
-      setContextFiles(nextFiles);
+      setContextFiles((current) => mergeUniqueFiles(current, nextFiles));
       return;
     }
 
-    setVisualFiles(nextFiles.slice(0, 10));
+    setVisualFiles((current) => mergeUniqueFiles(current, nextFiles).slice(0, 10));
+  }
+
+  function updateFiles(type: "context" | "visual", event: ChangeEvent<HTMLInputElement>) {
+    addFiles(type, Array.from(event.target.files || []));
   }
 
   function removeFile(type: "context" | "visual", target: File) {
@@ -1161,6 +1180,7 @@ export function RoutineBuilder() {
                       files={contextFiles}
                       formatHint="Formatos admitidos: PDF, XLS, CSV, TXT, DOC"
                       onChange={(event) => updateFiles("context", event)}
+                      onFilesDropped={(files) => addFiles("context", files)}
                       onRemoveFile={(file) => removeFile("context", file)}
                       title="Sube tu rutina actual"
                     />
@@ -1226,6 +1246,7 @@ export function RoutineBuilder() {
                         files={visualFiles}
                         formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
                         onChange={(event) => updateFiles("visual", event)}
+                        onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}
                         title="Sube fotos o vídeo"
                       />
