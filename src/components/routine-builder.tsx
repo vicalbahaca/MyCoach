@@ -254,6 +254,18 @@ export function RoutineBuilder() {
     startTransition(() => setStep(nextStep));
   }
 
+  function isStepOneComplete() {
+    return Boolean(
+      profile.sex &&
+        profile.height?.trim() &&
+        profile.weight?.trim() &&
+        profile.yearsTraining?.trim() &&
+        profile.diet?.trim() &&
+        profile.objective?.trim() &&
+        profile.disciplines?.length
+    );
+  }
+
   function openMaintenanceModal() {
     setErrorMessage("");
     setIsMaintenanceOpen(true);
@@ -751,7 +763,7 @@ export function RoutineBuilder() {
                   />
                 </div>
 
-                <FormSection label="Disciplinas deportivas">
+                <FormSection label="Disciplinas deportivas · Seleccionar al menos una">
                   <div className="flex flex-wrap gap-3">
                     {visibleDisciplines.map((option) => {
                       const selected = profile.disciplines?.includes(option.value) || false;
@@ -1020,6 +1032,14 @@ export function RoutineBuilder() {
             onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
             onNext={() => {
               if (step === 1) {
+                if (!isStepOneComplete()) {
+                  setErrorMessage(
+                    "Completa todos los campos del paso 1 y selecciona al menos una disciplina deportiva."
+                  );
+                  return;
+                }
+
+                setErrorMessage("");
                 moveTo(2);
                 return;
               }
