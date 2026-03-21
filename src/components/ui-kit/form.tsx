@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useId, useState, type DragEvent } from "react";
+import { useId, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { ArrowLeft, ChevronDown, Info, Upload, X } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
@@ -431,6 +431,8 @@ export function FormUploadTile({
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
+  const dragDepthRef = useRef(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   function getAcceptedFiles(nextFiles: File[]) {
     const acceptedTypes = accept
@@ -458,8 +460,10 @@ export function FormUploadTile({
     });
   }
 
-  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current = 0;
     setIsDragging(false);
 
     if (!onFilesDropped) return;
@@ -469,19 +473,51 @@ export function FormUploadTile({
     onFilesDropped(droppedFiles);
   }
 
+  function handleDragEnter(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current += 1;
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setIsDragging(false);
+    }
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "copy";
+    setIsDragging(true);
+  }
+
+  function handleKeyboardOpen(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    inputRef.current?.click();
+  }
+
   return (
-    <label
+    <div
+      aria-label={title}
       className={cx(
         "form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.62)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(218,225,255,0.12)]",
         isDragging && "border-[rgba(0,80,204,0.4)] bg-[rgba(218,225,255,0.18)]",
         className
       )}
-      onDragLeave={() => setIsDragging(false)}
-      onDragOver={(event) => {
-        event.preventDefault();
-        setIsDragging(true);
-      }}
+      onClick={() => inputRef.current?.click()}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onKeyDown={handleKeyboardOpen}
+      role="button"
+      tabIndex={0}
     >
       <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(218,225,255,0.5)] text-[var(--form-accent)]">
         <Upload className="h-5 w-5" />
@@ -525,13 +561,14 @@ export function FormUploadTile({
         accept={accept}
         className="hidden"
         multiple
+        ref={inputRef}
         onChange={(event) => {
           onChange(event);
           event.target.value = "";
         }}
         type="file"
       />
-    </label>
+    </div>
   );
 }
 
