@@ -144,8 +144,8 @@ const UPLOAD_RULES = {
   visual: {
     acceptedExtensions: [".jpg", ".jpeg", ".png", ".heic", ".mp4", ".mov", ".avi"],
     formatsLabel: "JPG, JPEG, PNG, HEIC, MP4, MOV, AVI",
-    maxBytes: 50 * MEGABYTE,
-    maxSizeLabel: "50 MB en total",
+    maxBytes: 100 * MEGABYTE,
+    maxSizeLabel: "100 MB en total",
     modalTitle: "Archivo visual no admitido",
   },
 } as const;
@@ -997,7 +997,7 @@ export function RoutineBuilder() {
 
         {uploadError ? (
           <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
-            <div className="max-w-2xl space-y-5">
+            <div className="w-full space-y-5">
               <p className="text-base leading-8 text-slate-700">{uploadError.summary}</p>
               <p className="text-base leading-8 text-slate-700">{uploadError.rules}</p>
               <div className="flex justify-center">
@@ -1351,7 +1351,7 @@ export function RoutineBuilder() {
                         className="h-full min-h-[347px]"
                         files={visualFiles}
                         formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
-                        maxHint="Peso máximo total: 50 MB"
+                        maxHint="Peso máximo total: 100 MB"
                         onChange={(event) => updateFiles("visual", event)}
                         onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}
@@ -1625,7 +1625,7 @@ export function RoutineBuilder() {
 
       {uploadError ? (
         <ModalShell onClose={() => setUploadError(null)} title={uploadError.title}>
-          <div className="max-w-2xl space-y-5">
+          <div className="w-full space-y-5">
             <p className="text-base leading-8 text-slate-700">{uploadError.summary}</p>
             <p className="text-base leading-8 text-slate-700">{uploadError.rules}</p>
             <div className="flex justify-center">
