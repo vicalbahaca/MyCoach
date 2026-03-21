@@ -577,7 +577,7 @@ export function FormUploadTile({
             "pointer-events-none absolute left-1/2 top-6 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] shadow-[0_18px_40px_-24px_rgba(18,25,45,0.32)]",
             isDragValid === false
               ? "border-rose-200 bg-rose-50 text-rose-700"
-              : "border-[#bfdbff] bg-[#dceaff] text-[#0050cc]"
+              : "border-[#bfdbff] bg-white text-[#0050cc]"
           )}
         >
           {isDragValid === false ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
