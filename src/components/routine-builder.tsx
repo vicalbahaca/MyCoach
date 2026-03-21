@@ -1175,10 +1175,10 @@ export function RoutineBuilder() {
                       tooltip="Lo más útil es subir la rutina que hayas seguido durante las últimas semanas, o el último documento real con el que hayas entrenado. Así entendemos mejor volumen, frecuencia y estructura."
                     />
                     <FormUploadTile
-                      accept=".pdf,.xls,.csv,.txt,.doc"
+                      accept=".pdf,.xls,.xlsx,.csv,.txt,.doc"
                       className="h-full min-h-[347px]"
                       files={contextFiles}
-                      formatHint="Formatos admitidos: PDF, XLS, CSV, TXT, DOC"
+                      formatHint="Formatos admitidos: PDF, XLS, XLSX, CSV, TXT, DOC"
                       onChange={(event) => updateFiles("context", event)}
                       onFilesDropped={(files) => addFiles("context", files)}
                       onRemoveFile={(file) => removeFile("context", file)}
