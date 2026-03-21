@@ -1398,19 +1398,16 @@ export function RoutineBuilder() {
 
           {step === 1 && showStepOneSummary && hasStepOneErrors ? (
             <div
-              className="mt-12 space-y-3 text-sm leading-6 text-rose-600"
+              className="sr-only"
               ref={stepOneSummaryRef}
               role="alert"
               tabIndex={-1}
             >
-              <p className="font-semibold">
-                Revisa los campos obligatorios antes de continuar:
-              </p>
-              <ul className="space-y-1">
+              <p>Revisa los campos obligatorios antes de continuar:</p>
+              <ul>
                 {STEP_ONE_FIELDS.filter((field) => stepOneErrors[field]).map((field) => (
                   <li key={field}>
                     <a
-                      className="underline decoration-rose-300 underline-offset-4 hover:text-rose-700"
                       href={`#${STEP_ONE_FIELD_IDS[field]}`}
                       onClick={(event) => {
                         event.preventDefault();
