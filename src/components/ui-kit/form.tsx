@@ -8,6 +8,18 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+function formatFileSize(size: number) {
+  if (size >= 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+  }
+
+  if (size >= 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+
+  return `${size} B`;
+}
+
 export type FormOption = {
   label: string;
   value: string;
@@ -525,7 +537,10 @@ export function FormUploadTile({
       aria-label={title}
       className={cx(
         "form-ui-panel group relative flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.62)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.34)] hover:bg-[rgba(218,225,255,0.12)]",
-        isDragging && "border-[rgba(0,80,204,0.4)] bg-[rgba(218,225,255,0.18)]",
+        isDragging &&
+          (isDragValid === false
+            ? "border-[2px] border-rose-300 bg-rose-50"
+            : "border-[3px] border-[#2f7bff] bg-[#eaf2ff]"),
         className
       )}
       onClick={() => inputRef.current?.click()}
@@ -562,7 +577,7 @@ export function FormUploadTile({
             "pointer-events-none absolute left-1/2 top-6 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] shadow-[0_18px_40px_-24px_rgba(18,25,45,0.32)]",
             isDragValid === false
               ? "border-rose-200 bg-rose-50 text-rose-700"
-              : "border-[#dae1ff] bg-white text-[var(--form-accent)]"
+              : "border-[#bfdbff] bg-[#dceaff] text-[#0050cc]"
           )}
         >
           {isDragValid === false ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -573,10 +588,15 @@ export function FormUploadTile({
         <span className="mt-3 flex w-full flex-wrap justify-center gap-3">
           {files.map((file) => (
             <span
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--form-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--form-ink)]"
+              className="inline-flex items-center gap-2 rounded-[1.25rem] border border-[var(--form-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--form-ink)]"
               key={`${file.name}-${file.lastModified}`}
             >
-              <span className="max-w-[12rem] truncate">{file.name}</span>
+              <span className="flex min-w-0 flex-col">
+                <span className="max-w-[12rem] truncate">{file.name}</span>
+                <span className="mt-0.5 text-xs font-normal text-[var(--form-muted)]">
+                  {formatFileSize(file.size)}
+                </span>
+              </span>
               {onRemoveFile ? (
                 <button
                   aria-label={`Eliminar ${file.name}`}
