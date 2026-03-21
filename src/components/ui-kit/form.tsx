@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, Upload, X } from "lucide-react";
+import { useId, useState } from "react";
+import { ArrowLeft, ChevronDown, Info, Upload, X } from "lucide-react";
 
 import { BrandMark } from "@/components/brand-mark";
 
@@ -362,6 +363,52 @@ export function FormInfoNotice({
   );
 }
 
+export function FormLabelWithTooltip({
+  label,
+  tooltip,
+  className,
+}: {
+  label: string;
+  tooltip: string;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const tooltipId = useId();
+
+  return (
+    <div className={cx("flex items-center gap-3 pl-1", className)}>
+      <div className="form-ui-label">{label}</div>
+      <div className="relative">
+        <button
+          aria-describedby={isOpen ? tooltipId : undefined}
+          aria-expanded={isOpen}
+          aria-label={`Información sobre ${label.toLowerCase()}`}
+          className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-[var(--form-outline)] bg-white text-[var(--form-muted)] transition hover:border-[var(--form-accent)] hover:text-[var(--form-accent)]"
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+              setIsOpen(false);
+            }
+          }}
+          onClick={() => setIsOpen((current) => !current)}
+          type="button"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+        <div
+          className={cx(
+            "absolute left-0 top-full z-20 mt-3 w-[280px] rounded-[1.25rem] border border-slate-200 bg-white p-4 text-sm leading-6 text-[#424656] shadow-[0_20px_40px_-18px_rgba(26,28,27,0.22)]",
+            isOpen ? "block" : "hidden"
+          )}
+          id={tooltipId}
+          role="tooltip"
+        >
+          {tooltip}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FormUploadTile({
   title,
   subtitle,
@@ -370,22 +417,31 @@ export function FormUploadTile({
   files = [],
   onRemoveFile,
   formatHint,
+  className,
 }: {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   accept: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   files?: File[];
   onRemoveFile?: (file: File) => void;
   formatHint?: string;
+  className?: string;
 }) {
   return (
-    <label className="form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-dashed px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.36)] hover:bg-[rgba(218,225,255,0.12)]">
+    <label
+      className={cx(
+        "form-ui-panel flex cursor-pointer flex-col items-center justify-center gap-3 border-[1.5px] border-dashed border-[rgba(194,198,216,0.9)] px-6 py-10 text-center transition hover:border-[rgba(0,80,204,0.36)] hover:bg-[rgba(218,225,255,0.12)]",
+        className
+      )}
+    >
       <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(218,225,255,0.5)] text-[var(--form-accent)]">
         <Upload className="h-5 w-5" />
       </span>
       <span className="font-display text-lg font-semibold text-[var(--form-ink)]">{title}</span>
-      <span className="max-w-md text-sm leading-7 text-[var(--form-muted)]">{subtitle}</span>
+      {subtitle ? (
+        <span className="max-w-md text-sm leading-7 text-[var(--form-muted)]">{subtitle}</span>
+      ) : null}
       {formatHint ? (
         <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-muted)]">
           {formatHint}
