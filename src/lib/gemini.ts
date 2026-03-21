@@ -210,6 +210,25 @@ function asPromptAnswers(answers: DynamicAnswers) {
   return JSON.stringify(answers, null, 2);
 }
 
+function describeGeminiParts(parts: GeminiPart[]) {
+  return parts.map((part, index) => {
+    if ("text" in part) {
+      return {
+        index,
+        type: "text",
+        preview: part.text.slice(0, 800),
+      };
+    }
+
+    return {
+      index,
+      type: "inlineData",
+      mimeType: part.inlineData.mimeType,
+      approxBytes: Math.round((part.inlineData.data.length * 3) / 4),
+    };
+  });
+}
+
 async function callGeminiJson<T>(
   systemInstruction: string,
   parts: GeminiPart[],
@@ -220,6 +239,13 @@ async function callGeminiJson<T>(
   if (!client) {
     throw new Error("Gemini API key missing");
   }
+
+  console.log("[Gemini] Outgoing request", {
+    model: DEFAULT_MODEL,
+    systemInstruction,
+    parts: describeGeminiParts(parts),
+    schema,
+  });
 
   const response = await client.models.generateContent({
     model: DEFAULT_MODEL,
@@ -242,6 +268,8 @@ async function callGeminiJson<T>(
   if (!raw) {
     throw new Error("Gemini returned an empty response");
   }
+
+  console.log("[Gemini] Raw response", raw);
 
   return JSON.parse(raw) as T;
 }
