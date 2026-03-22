@@ -1,30 +1,104 @@
+import { del, get } from "@vercel/blob";
+
+import { isAllowedBlobPathname } from "@/lib/blob-upload";
 import { processAttachments } from "@/lib/file-intelligence";
 import { generateIntakeAnalysis } from "@/lib/gemini";
-import type { AnalyzeIntakePayload } from "@/lib/types";
+import type { AnalyzeIntakePayload, AnalyzeIntakeRequest, UploadedAsset } from "@/lib/types";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
-  try {
-    const formData = await request.formData();
-    const payloadRaw = formData.get("payload");
+const MAX_CONTEXT_FILES = 5;
+const MAX_VISUAL_FILES = 10;
 
-    if (typeof payloadRaw !== "string") {
-      return Response.json(
-        { error: "Falta el payload del onboarding." },
-        { status: 400 }
-      );
+function withError(status: number, message: string) {
+  return Response.json({ error: message }, { status });
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
+}
+
+function parsePayload(data: unknown): AnalyzeIntakePayload | null {
+  if (!isObject(data)) return null;
+  if (!isObject(data.profile)) return null;
+  return data as AnalyzeIntakePayload;
+}
+
+function toUploadedAssets(value: unknown, kind: UploadedAsset["kind"]) {
+  if (!Array.isArray(value)) return [];
+
+  return value.filter((entry): entry is UploadedAsset => {
+    if (!isObject(entry)) return false;
+    if (entry.kind !== kind) return false;
+    if (typeof entry.name !== "string") return false;
+    if (typeof entry.pathname !== "string") return false;
+    if (typeof entry.url !== "string") return false;
+    if (typeof entry.contentType !== "string") return false;
+    if (typeof entry.size !== "number" || Number.isNaN(entry.size)) return false;
+    if (!isAllowedBlobPathname(kind, entry.pathname)) return false;
+    return true;
+  });
+}
+
+async function blobAssetToFile(asset: UploadedAsset) {
+  const blobResult = await get(asset.pathname, {
+    access: "private",
+    useCache: false,
+  });
+
+  if (!blobResult || blobResult.statusCode !== 200 || !blobResult.stream) {
+    throw new Error(`No se pudo leer el archivo de Blob: ${asset.pathname}`);
+  }
+
+  const contentType =
+    blobResult.blob.contentType || asset.contentType || "application/octet-stream";
+  const arrayBuffer = await new Response(blobResult.stream).arrayBuffer();
+  const file = new File([arrayBuffer], asset.name, {
+    type: contentType,
+    lastModified: Date.now(),
+  });
+
+  return file;
+}
+
+export async function POST(request: Request) {
+  const uploadedPathnames: string[] = [];
+
+  try {
+    const body = (await request.json()) as AnalyzeIntakeRequest;
+    const payload = parsePayload(body.payload);
+
+    if (!payload) {
+      return withError(400, "Falta el payload del onboarding.");
     }
 
-    const payload = JSON.parse(payloadRaw) as AnalyzeIntakePayload;
-    const contextFiles = formData
-      .getAll("contextFiles")
-      .filter((value): value is File => value instanceof File)
-      .slice(0, 5);
-    const visualFiles = formData
-      .getAll("visualFiles")
-      .filter((value): value is File => value instanceof File)
-      .slice(0, 10);
+    const contextAssets = toUploadedAssets(body.contextFiles, "context").slice(
+      0,
+      MAX_CONTEXT_FILES
+    );
+    const visualAssets = toUploadedAssets(body.visualFiles, "visual").slice(0, MAX_VISUAL_FILES);
+
+    uploadedPathnames.push(
+      ...contextAssets.map((asset) => asset.pathname),
+      ...visualAssets.map((asset) => asset.pathname)
+    );
+
+    console.info("[intake/analyze] start", {
+      contextRefs: contextAssets.length,
+      visualRefs: visualAssets.length,
+      contextBytes: contextAssets.reduce((sum, file) => sum + file.size, 0),
+      visualBytes: visualAssets.reduce((sum, file) => sum + file.size, 0),
+    });
+
+    const [contextFiles, visualFiles] = await Promise.all([
+      Promise.all(contextAssets.map((asset) => blobAssetToFile(asset))),
+      Promise.all(visualAssets.map((asset) => blobAssetToFile(asset))),
+    ]);
+
+    console.info("[intake/analyze] blob-download-complete", {
+      contextFiles: contextFiles.length,
+      visualFiles: visualFiles.length,
+    });
 
     const attachments = await processAttachments(
       contextFiles,
@@ -34,13 +108,26 @@ export async function POST(request: Request) {
 
     const analysis = await generateIntakeAnalysis(payload, attachments);
 
+    console.info("[intake/analyze] success", {
+      personalizedSections: analysis.personalizedSections.length,
+      cautionFlags: analysis.cautionFlags.length,
+    });
+
     return Response.json({ analysis });
   } catch (error) {
-    console.error(error);
+    console.error("[intake/analyze] failed", error);
 
-    return Response.json(
-      { error: "No se pudo preparar el formulario personalizado." },
-      { status: 500 }
-    );
+    return withError(500, "No se pudo preparar el formulario personalizado.");
+  } finally {
+    if (!uploadedPathnames.length) return;
+
+    try {
+      await del(Array.from(new Set(uploadedPathnames)));
+      console.info("[intake/analyze] blob-cleanup-ok", {
+        deleted: Array.from(new Set(uploadedPathnames)).length,
+      });
+    } catch (cleanupError) {
+      console.error("[intake/analyze] blob-cleanup-failed", cleanupError);
+    }
   }
 }

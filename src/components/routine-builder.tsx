@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import Image from "next/image";
 import {
   startTransition,
@@ -49,8 +50,10 @@ import {
   FormUploadTile,
   type FormOption,
 } from "@/components/ui-kit/form";
+import { createBlobPathname } from "@/lib/blob-upload";
 import { exportRoutineWorkbook } from "@/lib/excel";
 import type {
+  AnalyzeIntakeRequest,
   DynamicAnswerValue,
   DynamicAnswers,
   DynamicQuestion,
@@ -59,6 +62,7 @@ import type {
   IntakeAnalysis,
   IntakeProfile,
   RoutinePlan,
+  UploadedAsset,
 } from "@/lib/types";
 import {
   getExerciseVisual,
@@ -139,6 +143,7 @@ const UPLOAD_RULES = {
     formatsLabel: "PDF, XLS, XLSX, CSV, TXT, DOC",
     maxBytes: 10 * MEGABYTE,
     maxSizeLabel: "10 MB",
+    maxFiles: 5,
     modalTitle: "Documento no admitido",
   },
   visual: {
@@ -146,6 +151,7 @@ const UPLOAD_RULES = {
     formatsLabel: "JPG, JPEG, PNG, HEIC, MP4, MOV, AVI",
     maxBytes: 100 * MEGABYTE,
     maxSizeLabel: "100 MB en total",
+    maxFiles: 10,
     modalTitle: "Archivo visual no admitido",
   },
 } as const;
@@ -417,11 +423,11 @@ export function RoutineBuilder() {
     invalidateAnalysis();
 
     if (type === "context") {
-      setContextFiles(result.files);
+      setContextFiles(result.files.slice(0, UPLOAD_RULES.context.maxFiles));
       return;
     }
 
-    setVisualFiles(result.files.slice(0, 10));
+    setVisualFiles(result.files.slice(0, UPLOAD_RULES.visual.maxFiles));
   }
 
   function updateFiles(type: UploadType, event: ChangeEvent<HTMLInputElement>) {
@@ -507,25 +513,119 @@ export function RoutineBuilder() {
     setErrorMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("payload", JSON.stringify({ profile }));
-      contextFiles.forEach((file) => formData.append("contextFiles", file));
-      visualFiles.forEach((file) => formData.append("visualFiles", file));
+      const uploadBatch = async (
+        kind: UploadedAsset["kind"],
+        files: File[]
+      ): Promise<UploadedAsset[]> => {
+        const uploadedAssets: UploadedAsset[] = [];
+
+        for (const file of files) {
+          const pathname = createBlobPathname(kind, file.name);
+          console.info("[intake/upload] start", {
+            kind,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            pathname,
+          });
+
+          const result = await upload(pathname, file, {
+            access: "private",
+            handleUploadUrl: "/api/blob/upload",
+            clientPayload: JSON.stringify({
+              kind,
+              originalName: file.name,
+            }),
+            multipart: file.size >= 5 * MEGABYTE,
+          });
+
+          console.info("[intake/upload] done", {
+            kind,
+            pathname: result.pathname,
+            size: file.size,
+            contentType: result.contentType,
+          });
+
+          uploadedAssets.push({
+            kind,
+            name: file.name,
+            pathname: result.pathname,
+            url: result.url,
+            contentType: result.contentType || file.type || "application/octet-stream",
+            size: file.size,
+          });
+        }
+
+        return uploadedAssets;
+      };
+
+      const contextFilesToUpload = contextFiles.slice(0, 5);
+      const visualFilesToUpload = visualFiles.slice(0, 10);
+      if (contextFiles.length > contextFilesToUpload.length) {
+        console.warn("[intake/upload] context-files-truncated", {
+          provided: contextFiles.length,
+          uploaded: contextFilesToUpload.length,
+        });
+      }
+      if (visualFiles.length > visualFilesToUpload.length) {
+        console.warn("[intake/upload] visual-files-truncated", {
+          provided: visualFiles.length,
+          uploaded: visualFilesToUpload.length,
+        });
+      }
+
+      const contextUploadedAssets = await uploadBatch("context", contextFilesToUpload);
+      const visualUploadedAssets = await uploadBatch("visual", visualFilesToUpload);
+      const requestBody: AnalyzeIntakeRequest = {
+        payload: { profile },
+        contextFiles: contextUploadedAssets,
+        visualFiles: visualUploadedAssets,
+      };
+      const requestBodySize = JSON.stringify(requestBody).length;
+      console.info("[intake/analyze] request-ready", {
+        contextRefs: contextUploadedAssets.length,
+        visualRefs: visualUploadedAssets.length,
+        bodyBytes: requestBodySize,
+      });
 
       const response = await fetch("/api/intake/analyze", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      const rawResponse = await response.text();
+      let parsedResponse: { analysis?: IntakeAnalysis; error?: string } | null = null;
+      try {
+        parsedResponse = rawResponse
+          ? (JSON.parse(rawResponse) as { analysis?: IntakeAnalysis; error?: string })
+          : null;
+      } catch {
+        parsedResponse = null;
+      }
+
+      console.info("[intake/analyze] response", {
+        status: response.status,
+        ok: response.ok,
+        error: parsedResponse?.error ?? null,
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo preparar el formulario.");
+        throw new Error(
+          parsedResponse?.error || "No se pudo preparar el formulario personalizado."
+        );
       }
 
-      const data = (await response.json()) as { analysis: IntakeAnalysis };
-      setAnalysis(data.analysis);
+      if (!parsedResponse?.analysis) {
+        throw new Error("La respuesta del análisis no tiene contenido válido.");
+      }
+
+      setAnalysis(parsedResponse.analysis);
       moveTo(4);
-    } catch {
-      setErrorMessage("No se pudo personalizar el formulario. Vuelve a intentarlo.");
+    } catch (error) {
+      console.error("[intake/personalize] failed", error);
+      const fallbackMessage = "No se pudo personalizar el formulario. Vuelve a intentarlo.";
+      setErrorMessage(error instanceof Error ? error.message || fallbackMessage : fallbackMessage);
     } finally {
       setIsAnalyzing(false);
     }

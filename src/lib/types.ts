@@ -66,6 +66,23 @@ export type AnalyzeIntakePayload = {
   profile: IntakeProfile;
 };
 
+export type UploadedAssetKind = "context" | "visual";
+
+export type UploadedAsset = {
+  kind: UploadedAssetKind;
+  name: string;
+  pathname: string;
+  url: string;
+  contentType: string;
+  size: number;
+};
+
+export type AnalyzeIntakeRequest = {
+  payload: AnalyzeIntakePayload;
+  contextFiles?: UploadedAsset[];
+  visualFiles?: UploadedAsset[];
+};
+
 export type IntakeAnalysis = {
   signalSummary: string[];
   visualSignals: string[];
