@@ -91,7 +91,12 @@ export async function POST(request: Request) {
 
     return Response.json(jsonResponse);
   } catch (error) {
-    console.error("[blob/upload] failed", error);
-    return withError(400, "No se pudo preparar la subida del archivo.");
+    const details = error instanceof Error ? error.message : "Unknown error";
+    console.error("[blob/upload] failed", {
+      details,
+      hasBlobToken: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      eventType: body?.type ?? "unknown",
+    });
+    return withError(400, `No se pudo preparar la subida del archivo. ${details}`);
   }
 }
