@@ -17,6 +17,8 @@ import {
   BrainCircuit,
   Bolt,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   ClipboardList,
   FileText,
   ImageUp,
@@ -134,7 +136,7 @@ const OBJECTIVE_OPTIONS: FormOption[] = [
   { value: "Salud general", label: "Salud general" },
 ];
 
-const VISIBLE_STEP_TOTAL = 4;
+const BASE_PROGRESS_STEPS = 5;
 const AGENT_MESSAGE_LIMIT = 10;
 const MEGABYTE = 1024 * 1024;
 
@@ -288,6 +290,8 @@ export function RoutineBuilder() {
     disciplines: false,
   });
   const [showStepOneSummary, setShowStepOneSummary] = useState(false);
+  const [formPageIndex, setFormPageIndex] = useState(0);
+  const [areSignalsExpanded, setAreSignalsExpanded] = useState(true);
   const stepOneSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToActiveStep = useEffectEvent(() => {
@@ -680,6 +684,7 @@ export function RoutineBuilder() {
       }
 
       setAnalysis(parsedResponse.analysis);
+      setFormPageIndex(0);
       console.info("[intake/personalize] phase:success", {
         traceId,
         totalElapsedMs: Date.now() - attemptStartedAt,
@@ -868,9 +873,36 @@ export function RoutineBuilder() {
   }
 
   const currentMeta = STEP_META[step - 1];
-  const visibleStep = Math.min(step, VISIBLE_STEP_TOTAL);
   const personalizedCards = analysis
     ? analysis.personalizedSections.flatMap((section) => chunkQuestions(section))
+    : [];
+  const formPageCount = Math.max(1, personalizedCards.length || (step === 4 ? 1 : 0));
+  const progressTotalSteps = BASE_PROGRESS_STEPS + formPageCount;
+  const progressStep =
+    step === 1
+      ? 1
+      : step === 2
+        ? 2
+        : step === 3
+          ? 3
+          : step === 4
+            ? 4 + formPageIndex
+            : step === 5
+              ? 4 + formPageCount
+              : 5 + formPageCount;
+  const progressTitle = step === 4 ? "FORMULARIO" : currentMeta.title;
+  const activeDynamicSection =
+    analysis && personalizedCards.length
+      ? personalizedCards[Math.min(formPageIndex, personalizedCards.length - 1)]
+      : null;
+  const isLastFormPage = formPageIndex >= formPageCount - 1;
+  const signalGroups = analysis
+    ? [
+        { title: "Valor de contexto", items: analysis.signalSummary },
+        { title: "Señales visuales", items: analysis.visualSignals },
+        { title: "Notas de planificación", items: analysis.planningNotes },
+        { title: "Alertas y cautelas", items: analysis.cautionFlags },
+      ].filter((group) => group.items.length > 0)
     : [];
   const visibleDisciplines = getVisibleSportDisciplines(visibleDisciplineValues);
   const nextDisciplineBatch = getNextSportDisciplineBatch(
@@ -879,6 +911,11 @@ export function RoutineBuilder() {
     SPORT_DISCIPLINE_BATCH_SIZE
   );
   const canLoadMoreDisciplines = nextDisciplineBatch.length > 0;
+
+  useEffect(() => {
+    if (step !== 4) return;
+    setFormPageIndex((current) => Math.min(current, Math.max(0, formPageCount - 1)));
+  }, [formPageCount, step]);
 
   const swapExerciseOptions =
     swapTarget && routine
@@ -1217,9 +1254,9 @@ export function RoutineBuilder() {
 
         <section>
           <FormProgress
-            step={visibleStep}
-            title={currentMeta.title}
-            totalSteps={VISIBLE_STEP_TOTAL}
+            step={progressStep}
+            title={progressTitle}
+            totalSteps={progressTotalSteps}
           />
 
           {step === 2 ? (
@@ -1554,37 +1591,74 @@ export function RoutineBuilder() {
               <div className="space-y-10">
                 <FormStepIntro
                   eyebrow="Preguntas dinámicas"
-                  text="Cada bloque contiene preguntas que sí cambian la estructura, el volumen o la selección de ejercicios."
-                  title="El formulario ya está ajustado al caso."
+                  text="Revisa primero las señales detectadas y completa el formulario por páginas. El diseño y los componentes siguen la misma lógica visual de los pasos anteriores."
+                  title="FORMULARIO"
                 />
 
                 {analysis ? (
                   <>
-                    {analysis.signalSummary.length ? (
-                      <FormSection label="Señales detectadas">
-                        <div className="flex flex-wrap gap-3">
-                          {analysis.signalSummary.map((signal) => (
-                            <span
-                              className="form-ui-chip min-h-10 px-4 text-sm"
-                              key={signal}
-                            >
-                              {signal}
-                            </span>
-                          ))}
+                    {signalGroups.length ? (
+                      <section className="space-y-4">
+                        <button
+                          aria-controls="signals-details"
+                          aria-expanded={areSignalsExpanded}
+                          className="flex w-full items-center justify-between rounded-[1.5rem] border border-[var(--form-outline)] bg-white px-5 py-4 text-left transition hover:border-[rgba(0,80,204,0.36)]"
+                          onClick={() => setAreSignalsExpanded((current) => !current)}
+                          type="button"
+                        >
+                          <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-outline-strong)]">
+                              Señales detectadas
+                            </p>
+                            <p className="mt-1 text-sm leading-7 text-[var(--form-muted)]">
+                              Bloque colapsable con contexto, señales visuales, notas y alertas.
+                            </p>
+                          </div>
+                          {areSignalsExpanded ? (
+                            <ChevronUp className="h-5 w-5 text-[var(--form-outline-strong)]" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-[var(--form-outline-strong)]" />
+                          )}
+                        </button>
+
+                        <div
+                          className={areSignalsExpanded ? "block" : "hidden"}
+                          id="signals-details"
+                        >
+                          <div className="space-y-6 rounded-[1.5rem] border border-[var(--form-outline)] bg-white px-5 py-5">
+                            {signalGroups.map((group) => (
+                              <section className="space-y-3" key={group.title}>
+                                <h3 className="form-ui-label text-[var(--form-accent)]">
+                                  {group.title}
+                                </h3>
+                                <ul className="space-y-2 text-sm leading-7 text-[var(--form-muted)]">
+                                  {group.items.map((item) => (
+                                    <li className="flex items-start gap-2" key={item}>
+                                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--form-accent)]" />
+                                      <span>{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </section>
+                            ))}
+                          </div>
                         </div>
-                      </FormSection>
+                      </section>
                     ) : null}
 
-                    <div className="grid gap-4">
-                      {personalizedCards.map((section) => (
-                        <DynamicSectionCard
-                          answers={answers}
-                          key={section.id}
-                          onAnswer={updateAnswer}
-                          section={section}
-                        />
-                      ))}
-                    </div>
+                    <div className="h-px w-full bg-[rgba(194,198,216,0.72)]" />
+
+                    {activeDynamicSection ? (
+                      <DynamicSectionPage
+                        answers={answers}
+                        onAnswer={updateAnswer}
+                        pageIndex={formPageIndex}
+                        section={activeDynamicSection}
+                        totalPages={formPageCount}
+                      />
+                    ) : (
+                      <LoaderBlock />
+                    )}
                   </>
                 ) : (
                   <LoaderBlock />
@@ -1728,8 +1802,25 @@ export function RoutineBuilder() {
                 <LoaderCircle className="h-4 w-4 animate-spin" />
               ) : undefined
             }
-            nextLabel={getNextLabel(step, isAnalyzing, isGenerating)}
-            onBack={step > 1 ? () => moveTo(Math.max(1, step - 1)) : undefined}
+            nextLabel={getNextLabel(step, isAnalyzing, isGenerating, isLastFormPage)}
+            onBack={
+              step > 1
+                ? () => {
+                    if (step === 4 && formPageIndex > 0) {
+                      setFormPageIndex((current) => Math.max(0, current - 1));
+                      return;
+                    }
+
+                    if (step === 5) {
+                      setFormPageIndex(Math.max(0, formPageCount - 1));
+                      moveTo(4);
+                      return;
+                    }
+
+                    moveTo(Math.max(1, step - 1));
+                  }
+                : undefined
+            }
             onNext={() => {
               if (step === 1) {
                 if (!isStepOneComplete()) {
@@ -1755,6 +1846,10 @@ export function RoutineBuilder() {
               }
 
               if (step === 4) {
+                if (!isLastFormPage) {
+                  setFormPageIndex((current) => Math.min(current + 1, formPageCount - 1));
+                  return;
+                }
                 moveTo(5);
                 return;
               }
@@ -1831,9 +1926,18 @@ export function RoutineBuilder() {
   );
 }
 
-function getNextLabel(step: number, isAnalyzing: boolean, isGenerating: boolean) {
+function getNextLabel(
+  step: number,
+  isAnalyzing: boolean,
+  isGenerating: boolean,
+  isLastFormPage: boolean
+) {
   if (step === 3) {
     return isAnalyzing ? "Personalizando..." : "Personalizar formulario";
+  }
+
+  if (step === 4) {
+    return isLastFormPage ? "Continuar" : "Siguiente sección";
   }
 
   if (step === 6) {
@@ -1860,28 +1964,46 @@ function LoaderBlock() {
   );
 }
 
-function DynamicSectionCard({
+function DynamicSectionPage({
   section,
   answers,
   onAnswer,
+  pageIndex,
+  totalPages,
 }: {
   section: DynamicSection;
   answers: DynamicAnswers;
   onAnswer: (questionId: string, value: DynamicAnswerValue) => void;
+  pageIndex: number;
+  totalPages: number;
 }) {
   return (
-    <FormQuestionCard description={section.description} title={section.title}>
-      <div className="grid gap-5">
-        {section.questions.map((question) => (
-          <QuestionField
-            answer={answers[question.id]}
-            key={question.id}
-            onAnswer={onAnswer}
-            question={question}
-          />
+    <section className="space-y-7">
+      <div className="space-y-2">
+        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--form-outline-strong)]">
+          Página {pageIndex + 1} de {totalPages}
+        </div>
+        <h3 className="font-display text-3xl font-black tracking-[-0.04em] text-[var(--form-ink)]">
+          {section.title}
+        </h3>
+        <p className="text-sm leading-7 text-[var(--form-muted)]">{section.description}</p>
+      </div>
+
+      <div className="space-y-10">
+        {section.questions.map((question, questionIndex) => (
+          <div className="space-y-5" key={question.id}>
+            <QuestionField
+              answer={answers[question.id]}
+              onAnswer={onAnswer}
+              question={question}
+            />
+            {questionIndex < section.questions.length - 1 ? (
+              <div className="h-px w-full bg-[rgba(194,198,216,0.62)]" />
+            ) : null}
+          </div>
         ))}
       </div>
-    </FormQuestionCard>
+    </section>
   );
 }
 
@@ -1894,6 +2016,28 @@ function QuestionField({
   answer: DynamicAnswerValue | undefined;
   onAnswer: (questionId: string, value: DynamicAnswerValue) => void;
 }) {
+  const sliderBounds = (input: DynamicQuestion) => {
+    if (input.options && input.options.length >= 2) {
+      return {
+        minLabel: input.options[0].label,
+        maxLabel: input.options[input.options.length - 1].label,
+      };
+    }
+
+    const normalizedLabel = input.label.toLowerCase();
+    if (normalizedLabel.includes("fatiga") || normalizedLabel.includes("toler")) {
+      return { minLabel: "Baja tolerancia", maxLabel: "Alta tolerancia" };
+    }
+    if (normalizedLabel.includes("energ")) {
+      return { minLabel: "Energía baja", maxLabel: "Energía alta" };
+    }
+    if (normalizedLabel.includes("prior")) {
+      return { minLabel: "Prioridad baja", maxLabel: "Prioridad alta" };
+    }
+
+    return { minLabel: "Nivel bajo", maxLabel: "Nivel alto" };
+  };
+
   if (question.type === "textarea" || question.type === "text") {
     return (
       <div className="space-y-3">
@@ -1919,26 +2063,71 @@ function QuestionField({
   }
 
   if (question.type === "slider") {
-    const currentValue = typeof answer === "number" ? answer : question.min || 1;
+    const currentValue =
+      typeof answer === "number" && Number.isFinite(answer)
+        ? Math.max(1, Math.min(5, Math.round(answer)))
+        : 3;
+    const levelSteps = [1, 2, 3, 4, 5];
+    const { minLabel, maxLabel } = sliderBounds(question);
 
     return (
-      <div className="form-ui-panel bg-[rgba(244,244,242,0.72)] p-4">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <div className="form-ui-label">{question.label}</div>
-          <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[var(--form-accent)]">
-            {currentValue}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="form-ui-label">{question.label}</div>
+            <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
+          </div>
+          <span className="rounded-full border border-[var(--form-outline)] bg-white px-3 py-1 text-xs font-bold text-[var(--form-accent)]">
+            Nivel {currentValue}
           </span>
         </div>
-        <p className="mb-4 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
+
         <input
+          aria-valuemax={5}
+          aria-valuemin={1}
+          aria-valuenow={currentValue}
           className="slider-accent h-2 w-full appearance-none rounded-full bg-[rgba(66,108,255,0.16)]"
-          max={question.max}
-          min={question.min}
+          max={5}
+          min={1}
           onChange={(event) => onAnswer(question.id, Number(event.target.value))}
-          step={question.step || 1}
+          step={1}
           type="range"
           value={currentValue}
         />
+
+        <div className="flex items-center justify-between px-1">
+          {levelSteps.map((stepValue) => (
+            <button
+              aria-label={`Seleccionar nivel ${stepValue}`}
+              className="group flex flex-col items-center gap-2"
+              key={stepValue}
+              onClick={() => onAnswer(question.id, stepValue)}
+              type="button"
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full border transition ${
+                  currentValue >= stepValue
+                    ? "border-[var(--form-accent)] bg-[var(--form-accent)]"
+                    : "border-[var(--form-outline)] bg-white group-hover:border-[var(--form-accent)]"
+                }`}
+              />
+              <span
+                className={`text-[11px] font-bold uppercase tracking-[0.18em] ${
+                  currentValue === stepValue
+                    ? "text-[var(--form-accent)]"
+                    : "text-[var(--form-outline-strong)]"
+                }`}
+              >
+                {stepValue}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--form-outline-strong)]">
+          <span>{minLabel}</span>
+          <span>{maxLabel}</span>
+        </div>
       </div>
     );
   }
@@ -1950,18 +2139,18 @@ function QuestionField({
           <div className="form-ui-label">{question.label}</div>
           <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
         </div>
-        <div className="grid gap-3">
+        <div className="flex flex-wrap gap-3">
           {question.options?.map((option) => {
             const selected = answer === option.value;
 
             return (
-              <FormChoiceCard
+              <FormPillButton
                 active={selected}
                 key={option.value}
                 onClick={() => onAnswer(question.id, option.value)}
-                label={option.label}
-                sublabel={option.description}
-              />
+              >
+                {option.label}
+              </FormPillButton>
             );
           })}
         </div>

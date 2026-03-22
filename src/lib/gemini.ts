@@ -381,17 +381,28 @@ async function callGeminiJson<T>(
 }
 
 function analysisPrompt(payload: AnalyzeIntakePayload, attachments: AttachmentDigest) {
+  const referenceSections = createFallbackAnalysis(
+    payload,
+    attachments
+  ).personalizedSections;
+
   return [
     "Analiza el onboarding de MyCoach para preparar un formulario dinámico, corto y accionable.",
     "No redactes motivacional. No inventes señales visuales si no son claras.",
-    "Quiero máximo 3 secciones y entre 3 y 5 preguntas por sección.",
-    "Prioriza radios, checkboxes y sliders. Usa solo 1-2 campos abiertos si aportan valor real.",
+    "La sección de formulario se renderiza por páginas y el encabezado superior es FORMULARIO, así que devuelve secciones limpias y consistentes.",
+    "Devuelve entre 3 y 6 secciones con 3-6 preguntas por sección cuando haya contexto suficiente.",
+    "Prioriza radios, checkboxes y sliders. Usa campos abiertos solo si cambian decisiones reales del mesociclo.",
+    "SLIDER OBLIGATORIO: todos los sliders deben usar min=1, max=5, step=1 y representar exactamente 5 niveles.",
+    "Incluye en help el significado del extremo mínimo y máximo del slider para etiquetar ambos lados en UI.",
     "Todos los campos deben seguir siendo opcionales.",
+    "Usa como base el catálogo de preguntas de referencia y añade preguntas extra para disciplinas específicas detectadas.",
     "La plataforma sirve para musculación, pesas, Hyrox y CrossFit.",
     "Contexto del atleta y onboarding base:",
     asPromptProfile(payload.profile),
     "Resumen de archivos adjuntos:",
     attachmentsDigestText(attachments) || "Sin archivos adjuntos.",
+    "Catálogo de preguntas de referencia:",
+    JSON.stringify(referenceSections, null, 2),
     "Devuelve SOLO JSON válido con el esquema pedido.",
   ].join("\n\n");
 }
