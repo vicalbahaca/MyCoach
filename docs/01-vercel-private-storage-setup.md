@@ -24,7 +24,7 @@ npm install @vercel/blob
 
 ## 2) Crear storage en Vercel
 
-1. Vercel Dashboard -> proyecto `my-coach-mu`.
+1. Vercel Dashboard -> proyecto `my-coach`.
 2. Storage -> Blob -> crear store.
 3. Configurar acceso privado (no público por defecto).
 
@@ -76,4 +76,3 @@ Puedes usar:
 
 - `Vercel Postgres` (si quieres mantener todo en Vercel).
 - `Supabase` (si ya usáis su stack/Auth/RLS).
-
