@@ -35,6 +35,7 @@ function withError(status: number, message: string) {
 }
 
 export async function POST(request: Request) {
+  const traceId = request.headers.get("x-trace-id") || `blob-${Date.now()}`;
   let body: HandleUploadBody;
 
   try {
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
         }
 
         console.info("[blob/upload] token-request", {
+          traceId,
           kind,
           originalName,
           pathname,
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
       onUploadCompleted: async ({ blob, tokenPayload }) => {
         const parsedPayload = parseClientPayload(tokenPayload ?? null);
         console.info("[blob/upload] completed", {
+          traceId,
           pathname: blob.pathname,
           contentType: blob.contentType,
           kind: parsedPayload?.kind ?? "unknown",
@@ -93,6 +96,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const details = error instanceof Error ? error.message : "Unknown error";
     console.error("[blob/upload] failed", {
+      traceId,
       details,
       hasBlobToken: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
       eventType: body?.type ?? "unknown",

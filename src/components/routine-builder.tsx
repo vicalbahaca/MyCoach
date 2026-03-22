@@ -511,8 +511,18 @@ export function RoutineBuilder() {
   async function personalizeForm() {
     setIsAnalyzing(true);
     setErrorMessage("");
+    const traceId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? `intake-${crypto.randomUUID()}`
+        : `intake-${Date.now()}`;
+    const attemptStartedAt = Date.now();
+    let analyzeHeartbeatInterval: ReturnType<typeof setInterval> | null = null;
+    let analyzeTimeout: ReturnType<typeof setTimeout> | null = null;
+    let analyzeAbortController: AbortController | null = null;
 
     try {
+      console.info("[intake/personalize] phase:start", { traceId });
+
       const uploadBatch = async (
         kind: UploadedAsset["kind"],
         files: File[]
@@ -536,6 +546,9 @@ export function RoutineBuilder() {
               kind,
               originalName: file.name,
             }),
+            headers: {
+              "x-trace-id": traceId,
+            },
             multipart: file.size >= 5 * MEGABYTE,
           });
 
@@ -555,6 +568,12 @@ export function RoutineBuilder() {
             size: file.size,
           });
         }
+
+        console.info("[intake/personalize] phase:upload-batch-complete", {
+          traceId,
+          kind,
+          uploadedCount: uploadedAssets.length,
+        });
 
         return uploadedAssets;
       };
@@ -583,16 +602,40 @@ export function RoutineBuilder() {
       };
       const requestBodySize = JSON.stringify(requestBody).length;
       console.info("[intake/analyze] request-ready", {
+        traceId,
         contextRefs: contextUploadedAssets.length,
         visualRefs: visualUploadedAssets.length,
         bodyBytes: requestBodySize,
       });
 
+      analyzeAbortController = new AbortController();
+      const analyzeStartedAt = Date.now();
+      analyzeHeartbeatInterval = setInterval(() => {
+        console.info("[intake/analyze] waiting", {
+          traceId,
+          elapsedMs: Date.now() - analyzeStartedAt,
+        });
+      }, 15000);
+      analyzeTimeout = setTimeout(() => {
+        console.error("[intake/analyze] timeout", {
+          traceId,
+          timeoutMs: 300000,
+        });
+        analyzeAbortController?.abort();
+      }, 300000);
+
       const response = await fetch("/api/intake/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        signal: analyzeAbortController.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "x-trace-id": traceId,
+        },
         body: JSON.stringify(requestBody),
       });
+
+      if (analyzeHeartbeatInterval) clearInterval(analyzeHeartbeatInterval);
+      if (analyzeTimeout) clearTimeout(analyzeTimeout);
 
       const rawResponse = await response.text();
       let parsedResponse: { analysis?: IntakeAnalysis; error?: string } | null = null;
@@ -605,9 +648,11 @@ export function RoutineBuilder() {
       }
 
       console.info("[intake/analyze] response", {
+        traceId,
         status: response.status,
         ok: response.ok,
         error: parsedResponse?.error ?? null,
+        elapsedMs: Date.now() - analyzeStartedAt,
       });
 
       if (!response.ok) {
@@ -621,12 +666,33 @@ export function RoutineBuilder() {
       }
 
       setAnalysis(parsedResponse.analysis);
+      console.info("[intake/personalize] phase:success", {
+        traceId,
+        totalElapsedMs: Date.now() - attemptStartedAt,
+      });
       moveTo(4);
     } catch (error) {
+      if (analyzeHeartbeatInterval) clearInterval(analyzeHeartbeatInterval);
+      if (analyzeTimeout) clearTimeout(analyzeTimeout);
       console.error("[intake/personalize] failed", error);
-      const fallbackMessage = "No se pudo personalizar el formulario. Vuelve a intentarlo.";
-      setErrorMessage(error instanceof Error ? error.message || fallbackMessage : fallbackMessage);
+      const isAbortError = error instanceof DOMException && error.name === "AbortError";
+      const fallbackMessage = isAbortError
+        ? "La personalización ha superado el tiempo máximo de espera. Revisa logs y vuelve a intentarlo."
+        : "No se pudo personalizar el formulario. Vuelve a intentarlo.";
+      setErrorMessage(
+        isAbortError
+          ? fallbackMessage
+          : error instanceof Error
+            ? error.message || fallbackMessage
+            : fallbackMessage
+      );
     } finally {
+      if (analyzeHeartbeatInterval) clearInterval(analyzeHeartbeatInterval);
+      if (analyzeTimeout) clearTimeout(analyzeTimeout);
+      console.info("[intake/personalize] phase:end", {
+        traceId,
+        totalElapsedMs: Date.now() - attemptStartedAt,
+      });
       setIsAnalyzing(false);
     }
   }

@@ -232,7 +232,8 @@ function describeGeminiParts(parts: GeminiPart[]) {
 async function callGeminiJson<T>(
   systemInstruction: string,
   parts: GeminiPart[],
-  schema: unknown
+  schema: unknown,
+  label: "intake-analyze" | "routine-generate" | "routine-revise"
 ): Promise<T> {
   const client = getClient();
 
@@ -240,11 +241,16 @@ async function callGeminiJson<T>(
     throw new Error("Gemini API key missing");
   }
 
-  console.log("[Gemini] Outgoing request", {
+  const startedAt = Date.now();
+  const requestId = `${label}-${startedAt}`;
+
+  console.log("[Gemini] request:start", {
+    requestId,
+    label,
     model: DEFAULT_MODEL,
-    systemInstruction,
+    systemInstructionPreview: systemInstruction.slice(0, 180),
     parts: describeGeminiParts(parts),
-    schema,
+    schemaType: typeof schema,
   });
 
   const response = await client.models.generateContent({
@@ -263,15 +269,34 @@ async function callGeminiJson<T>(
     },
   });
 
+  console.log("[Gemini] request:response", {
+    requestId,
+    label,
+    durationMs: Date.now() - startedAt,
+  });
+
   const raw = response.text?.trim();
 
   if (!raw) {
     throw new Error("Gemini returned an empty response");
   }
 
-  console.log("[Gemini] Raw response", raw);
+  console.log("[Gemini] request:raw", {
+    requestId,
+    label,
+    rawLength: raw.length,
+    rawPreview: raw.slice(0, 800),
+  });
 
-  return JSON.parse(raw) as T;
+  const parsed = JSON.parse(raw) as T;
+
+  console.log("[Gemini] request:parsed", {
+    requestId,
+    label,
+    totalDurationMs: Date.now() - startedAt,
+  });
+
+  return parsed;
 }
 
 function analysisPrompt(payload: AnalyzeIntakePayload, attachments: AttachmentDigest) {
@@ -436,7 +461,8 @@ export async function generateIntakeAnalysis(
         { text: analysisPrompt(payload, attachments) },
         ...attachmentsToGeminiParts(attachments),
       ],
-      analysisSchema
+      analysisSchema,
+      "intake-analyze"
     );
   } catch {
     return createFallbackAnalysis(payload, attachments);
@@ -450,7 +476,8 @@ export async function generateRoutine(
     const routine = await callGeminiJson<RoutinePlan>(
       "Eres el motor de programación de MyCoach. Diseñas bloques limpios, útiles y con criterio biomecánico. Priorizas lo que más retorno da para el objetivo indicado.",
       [{ text: generationPrompt(payload) }],
-      routineSchema
+      routineSchema,
+      "routine-generate"
     );
 
     return hydrateRoutine(routine);
@@ -466,7 +493,8 @@ export async function reviseRoutine(
     const routine = await callGeminiJson<RoutinePlan>(
       "Eres el motor de revisión de MyCoach. Modificas rutinas con criterio técnico, manteniendo coherencia entre selección de ejercicios, volumen y recuperación.",
       [{ text: revisionPrompt(payload) }],
-      routineSchema
+      routineSchema,
+      "routine-revise"
     );
 
     return hydrateRoutine(routine);
