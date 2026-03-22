@@ -150,8 +150,8 @@ const UPLOAD_RULES = {
   visual: {
     acceptedExtensions: [".jpg", ".jpeg", ".png", ".heic", ".mp4", ".mov", ".avi"],
     formatsLabel: "JPG, JPEG, PNG, HEIC, MP4, MOV, AVI",
-    maxBytes: 100 * MEGABYTE,
-    maxSizeLabel: "100 MB en total",
+    maxBytes: 15 * MEGABYTE,
+    maxSizeLabel: "15 MB en total",
     maxFiles: 10,
     modalTitle: "Archivo visual no admitido",
   },
@@ -1538,7 +1538,7 @@ export function RoutineBuilder() {
                         className="h-full min-h-[347px]"
                         files={visualFiles}
                         formatHint="Formatos admitidos: JPG, JPEG, PNG, HEIC, MP4, MOV, AVI"
-                        maxHint="Peso máximo total: 100 MB"
+                        maxHint="Peso máximo total: 15 MB"
                         onChange={(event) => updateFiles("visual", event)}
                         onFilesDropped={(files) => addFiles("visual", files)}
                         onRemoveFile={(file) => removeFile("visual", file)}

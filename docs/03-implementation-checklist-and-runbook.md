@@ -47,7 +47,7 @@ npm install @vercel/blob
 ## Límite funcional recomendado
 
 - Contexto (`ruta/documentos`): máximo total `10 MB`.
-- Visual (`fotos/videos`): máximo total `100 MB`.
+- Visual (`fotos/videos`): máximo total `15 MB`.
 
 ## Qué mostrar en UI
 
@@ -114,4 +114,3 @@ Acción inmediata:
    - ratio de error en `/api/intake/analyze`
    - tiempo medio de subida
    - tiempo medio de análisis
-

@@ -17,7 +17,7 @@ export const BLOB_UPLOAD_RULES = {
   },
   visual: {
     folder: "intake/visual",
-    maxBytes: 100 * 1024 * 1024,
+    maxBytes: 15 * 1024 * 1024,
     extensions: [".jpg", ".jpeg", ".png", ".heic", ".mp4", ".mov", ".avi"],
     contentTypes: [
       "image/jpeg",
