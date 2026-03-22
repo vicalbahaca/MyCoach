@@ -29,6 +29,7 @@ export type DynamicQuestion = {
   label: string;
   help: string;
   type: QuestionType;
+  required?: boolean;
   placeholder?: string;
   options?: QuestionOption[];
   min?: number;

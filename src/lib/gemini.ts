@@ -70,6 +70,7 @@ const analysisSchema = {
                 id: { type: "string" },
                 label: { type: "string" },
                 help: { type: "string" },
+                required: { type: "boolean" },
                 type: {
                   type: "string",
                   enum: ["radio", "checkbox", "slider", "text", "textarea"],
@@ -392,6 +393,8 @@ function analysisPrompt(payload: AnalyzeIntakePayload, attachments: AttachmentDi
     "La sección de formulario se renderiza por páginas y el encabezado superior es FORMULARIO, así que devuelve secciones limpias y consistentes.",
     "Devuelve entre 3 y 6 secciones con 3-6 preguntas por sección cuando haya contexto suficiente.",
     "Prioriza radios, checkboxes y sliders. Usa campos abiertos solo si cambian decisiones reales del mesociclo.",
+    "Marca required=true en las preguntas clave que son imprescindibles para generar una rutina con criterio.",
+    "No marques todo como obligatorio: limita required a lo realmente crítico.",
     "SLIDER OBLIGATORIO: todos los sliders deben usar min=1, max=5, step=1 y representar exactamente 5 niveles.",
     "Incluye en help el significado del extremo mínimo y máximo del slider para etiquetar ambos lados en UI.",
     "Todos los campos deben seguir siendo opcionales.",

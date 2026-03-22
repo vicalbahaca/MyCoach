@@ -1309,6 +1309,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
       id: "priority_focus",
       label: "¿Qué bloque quieres que se vea realmente mejor al final del mesociclo?",
       help: "Esto decide qué grupos salen antes, cuáles reciben más estabilidad y dónde se gasta el volumen útil.",
+      required: true,
       type: "radio",
       options: [
         { label: "Pecho y torso frontal", value: "chest" },
@@ -1321,6 +1322,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
       id: "fatigue_tolerance",
       label: "¿Cuánto castigo semanal toleras sin que baje tu rendimiento o adherencia?",
       help: "Valor 1: muy poca tolerancia. Valor 5: puedes apretar bastante sin que se derrumbe la semana.",
+      required: true,
       type: "slider",
       min: 1,
       max: 5,
@@ -1330,6 +1332,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
       id: "preferred_stability",
       label: "¿Qué prefieres para progresar mejor ahora mismo?",
       help: "La selección condiciona la calidad del estímulo, sobre todo si vienes cansado o con molestias.",
+      required: true,
       type: "checkbox",
       options: [
         { label: "Máquinas convergentes", value: "machines" },
@@ -1356,6 +1359,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
         id: "session_energy",
         label: "¿Con qué energía real llegas a entrenar la mayoría de días?",
         help: "No la energía ideal: la real.",
+        required: true,
         type: "radio",
         options: [
           { label: "Muy alta", value: "high" },
@@ -1368,6 +1372,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
         id: "session_cap",
         label: "¿Qué duración máxima quieres que respete el plan casi siempre?",
         help: "Esto evita meter sesiones perfectas sobre el papel pero malas en adherencia.",
+        required: true,
         type: "radio",
         options: [
           { label: "45-60 min", value: "45-60" },
@@ -1380,6 +1385,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
         id: "progress_style",
         label: "¿Cómo quieres progresar este bloque?",
         help: "La progresión principal del plan.",
+        required: true,
         type: "radio",
         options: [
           { label: "Más repeticiones antes que carga", value: "reps-first" },
@@ -1401,6 +1407,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
             id: "hyrox_focus",
             label: "¿Qué quieres mejorar primero?",
             help: "Elige el cuello de botella real.",
+            required: true,
             type: "radio",
             options: [
               { label: "Carrera y pacing", value: "running" },
@@ -1427,6 +1434,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
             id: "crossfit_focus",
             label: "¿Dónde quieres subir más en este bloque?",
             help: "Elige una prioridad clara.",
+            required: true,
             type: "radio",
             options: [
               { label: "Fuerza", value: "strength" },
@@ -1458,6 +1466,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
           id: "failure_usage",
           label: "¿Dónde te sienta mejor acercarte más al fallo?",
           help: "Puedes marcar más de una.",
+          required: true,
           type: "checkbox",
           options: [
             { label: "Aislados estables", value: "isolations" },
@@ -1470,6 +1479,7 @@ function defaultDynamicSections(profile: IntakeProfile): DynamicSection[] {
           id: "technique_priority",
           label: "¿Qué necesitas que el plan cuide más?",
           help: "Esto decide orden, estabilidad y densidad de cada sesión.",
+          required: true,
           type: "radio",
           options: [
             { label: "Más conexión con el músculo", value: "connection" },

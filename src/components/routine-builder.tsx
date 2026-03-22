@@ -216,6 +216,53 @@ function arrayValue(value: DynamicAnswerValue | undefined) {
   return Array.isArray(value) ? value : [];
 }
 
+function hasAnswer(question: DynamicQuestion, answer: DynamicAnswerValue | undefined) {
+  if (question.type === "checkbox") {
+    return Array.isArray(answer) && answer.length > 0;
+  }
+
+  if (question.type === "slider") {
+    return typeof answer === "number" && Number.isFinite(answer);
+  }
+
+  if (question.type === "radio") {
+    return typeof answer === "string" && answer.trim().length > 0;
+  }
+
+  if (question.type === "text" || question.type === "textarea") {
+    return typeof answer === "string" && answer.trim().length > 0;
+  }
+
+  return Boolean(answer);
+}
+
+function requiredErrorMessage(question: DynamicQuestion) {
+  if (question.type === "checkbox") {
+    return "Selecciona al menos una opción para continuar.";
+  }
+
+  if (question.type === "slider") {
+    return "Selecciona un nivel del 1 al 5 para continuar.";
+  }
+
+  return "Este campo es obligatorio para continuar.";
+}
+
+function validateRequiredQuestions(
+  section: DynamicSection,
+  answers: DynamicAnswers
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+
+  section.questions.forEach((question) => {
+    if (!question.required) return;
+    if (hasAnswer(question, answers[question.id])) return;
+    errors[question.id] = requiredErrorMessage(question);
+  });
+
+  return errors;
+}
+
 function chunkQuestions(section: DynamicSection) {
   const chunks: DynamicQuestion[][] = [];
   for (let index = 0; index < section.questions.length; index += 2) {
@@ -292,6 +339,7 @@ export function RoutineBuilder() {
   const [showStepOneSummary, setShowStepOneSummary] = useState(false);
   const [formPageIndex, setFormPageIndex] = useState(0);
   const [areSignalsExpanded, setAreSignalsExpanded] = useState(true);
+  const [dynamicQuestionErrors, setDynamicQuestionErrors] = useState<Record<string, string>>({});
   const stepOneSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToActiveStep = useEffectEvent(() => {
@@ -320,6 +368,7 @@ export function RoutineBuilder() {
     setAnswers({});
     setRoutine(null);
     setErrorMessage("");
+    setDynamicQuestionErrors({});
   }
 
   function updateProfile<K extends keyof IntakeProfile>(key: K, value: IntakeProfile[K]) {
@@ -718,6 +767,12 @@ export function RoutineBuilder() {
 
   function updateAnswer(questionId: string, value: DynamicAnswerValue) {
     setAnswers((current) => ({ ...current, [questionId]: value }));
+    setDynamicQuestionErrors((current) => {
+      if (!current[questionId]) return current;
+      const next = { ...current };
+      delete next[questionId];
+      return next;
+    });
   }
 
   async function generatePlan() {
@@ -1651,6 +1706,7 @@ export function RoutineBuilder() {
                     {activeDynamicSection ? (
                       <DynamicSectionPage
                         answers={answers}
+                        errors={dynamicQuestionErrors}
                         onAnswer={updateAnswer}
                         pageIndex={formPageIndex}
                         section={activeDynamicSection}
@@ -1846,10 +1902,23 @@ export function RoutineBuilder() {
               }
 
               if (step === 4) {
+                if (activeDynamicSection) {
+                  const pageErrors = validateRequiredQuestions(activeDynamicSection, answers);
+                  if (Object.keys(pageErrors).length > 0) {
+                    setDynamicQuestionErrors((current) => ({ ...current, ...pageErrors }));
+                    setErrorMessage(
+                      "Completa las preguntas obligatorias de esta página para continuar."
+                    );
+                    return;
+                  }
+                }
+
                 if (!isLastFormPage) {
+                  setErrorMessage("");
                   setFormPageIndex((current) => Math.min(current + 1, formPageCount - 1));
                   return;
                 }
+                setErrorMessage("");
                 moveTo(5);
                 return;
               }
@@ -1967,12 +2036,14 @@ function LoaderBlock() {
 function DynamicSectionPage({
   section,
   answers,
+  errors,
   onAnswer,
   pageIndex,
   totalPages,
 }: {
   section: DynamicSection;
   answers: DynamicAnswers;
+  errors: Record<string, string>;
   onAnswer: (questionId: string, value: DynamicAnswerValue) => void;
   pageIndex: number;
   totalPages: number;
@@ -1994,6 +2065,7 @@ function DynamicSectionPage({
           <div className="space-y-5" key={question.id}>
             <QuestionField
               answer={answers[question.id]}
+              errorMessage={errors[question.id]}
               onAnswer={onAnswer}
               question={question}
             />
@@ -2010,12 +2082,17 @@ function DynamicSectionPage({
 function QuestionField({
   question,
   answer,
+  errorMessage,
   onAnswer,
 }: {
   question: DynamicQuestion;
   answer: DynamicAnswerValue | undefined;
+  errorMessage?: string;
   onAnswer: (questionId: string, value: DynamicAnswerValue) => void;
 }) {
+  const labelWithRequired = question.required ? `${question.label} *` : question.label;
+  const questionErrorId = `${question.id}-error`;
+
   const sliderBounds = (input: DynamicQuestion) => {
     if (input.options && input.options.length >= 2) {
       return {
@@ -2044,7 +2121,7 @@ function QuestionField({
         <p className="text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
         {question.type === "textarea" ? (
           <FormTextArea
-            label={question.label}
+            label={labelWithRequired}
             onChange={(value) => onAnswer(question.id, value)}
             placeholder={question.placeholder}
             rows={5}
@@ -2052,12 +2129,21 @@ function QuestionField({
           />
         ) : (
           <FormLineInput
-            label={question.label}
+            describedBy={errorMessage ? questionErrorId : undefined}
+            errorMessage={errorMessage}
+            invalid={Boolean(errorMessage)}
+            label={labelWithRequired}
             onChange={(value) => onAnswer(question.id, value)}
             placeholder={question.placeholder}
+            required={question.required}
             value={typeof answer === "string" ? answer : ""}
           />
         )}
+        {question.type === "textarea" && errorMessage ? (
+          <p className="text-sm leading-6 text-rose-600" id={questionErrorId} role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -2074,7 +2160,7 @@ function QuestionField({
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="form-ui-label">{question.label}</div>
+            <div className="form-ui-label">{labelWithRequired}</div>
             <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
           </div>
           <span className="rounded-full border border-[var(--form-outline)] bg-white px-3 py-1 text-xs font-bold text-[var(--form-accent)]">
@@ -2083,6 +2169,8 @@ function QuestionField({
         </div>
 
         <input
+          aria-describedby={errorMessage ? questionErrorId : undefined}
+          aria-invalid={errorMessage ? "true" : "false"}
           aria-valuemax={5}
           aria-valuemin={1}
           aria-valuenow={currentValue}
@@ -2128,6 +2216,11 @@ function QuestionField({
           <span>{minLabel}</span>
           <span>{maxLabel}</span>
         </div>
+        {errorMessage ? (
+          <p className="text-sm leading-6 text-rose-600" id={questionErrorId} role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -2136,7 +2229,7 @@ function QuestionField({
     return (
       <div className="space-y-4">
         <div>
-          <div className="form-ui-label">{question.label}</div>
+          <div className="form-ui-label">{labelWithRequired}</div>
           <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -2154,6 +2247,11 @@ function QuestionField({
             );
           })}
         </div>
+        {errorMessage ? (
+          <p className="text-sm leading-6 text-rose-600" id={questionErrorId} role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -2161,7 +2259,7 @@ function QuestionField({
   return (
     <div className="space-y-4">
       <div>
-        <div className="form-ui-label">{question.label}</div>
+        <div className="form-ui-label">{labelWithRequired}</div>
         <p className="mt-2 text-sm leading-7 text-[var(--form-muted)]">{question.help}</p>
       </div>
       <div className="flex flex-wrap gap-3">
@@ -2185,6 +2283,11 @@ function QuestionField({
           );
         })}
       </div>
+      {errorMessage ? (
+        <p className="text-sm leading-6 text-rose-600" id={questionErrorId} role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
     </div>
   );
 }
