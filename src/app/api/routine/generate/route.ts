@@ -6,9 +6,9 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as GenerateRoutinePayload;
-    const routine = await generateRoutine(payload);
+    const { routine, usage } = await generateRoutine(payload);
 
-    return Response.json({ routine });
+    return Response.json({ routine, usage });
   } catch (error) {
     console.error(error);
 

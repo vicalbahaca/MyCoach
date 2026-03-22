@@ -20,11 +20,12 @@ export async function POST(request: Request) {
       });
     }
 
-    const routine = await reviseRoutine(payload);
+    const { routine, usage } = await reviseRoutine(payload);
 
     return Response.json({
       assistantMessage: buildAssistantSummary(trimmedRequest),
       routine,
+      usage,
     });
   } catch (error) {
     console.error(error);

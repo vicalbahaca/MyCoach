@@ -66,6 +66,20 @@ export type AnalyzeIntakePayload = {
   profile: IntakeProfile;
 };
 
+export type GeminiUsage = {
+  label: "intake-analyze" | "routine-generate" | "routine-revise";
+  model: string;
+  promptTokens: number;
+  responseTokens: number;
+  totalTokens: number;
+  cachedTokens: number;
+  thoughtsTokens: number;
+  toolUsePromptTokens: number;
+  estimatedCostUsd: number | null;
+  inputPricePerMillionUsd: number | null;
+  outputPricePerMillionUsd: number | null;
+};
+
 export type UploadedAssetKind = "context" | "visual";
 
 export type UploadedAsset = {

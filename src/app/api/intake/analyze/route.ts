@@ -138,7 +138,7 @@ export async function POST(request: Request) {
 
     const geminiStartedAt = Date.now();
     console.info("[intake/analyze] phase:gemini-start", { traceId });
-    const analysis = await generateIntakeAnalysis(payload, attachments);
+    const { analysis, usage } = await generateIntakeAnalysis(payload, attachments);
     console.info("[intake/analyze] phase:gemini-complete", {
       traceId,
       durationMs: Date.now() - geminiStartedAt,
@@ -148,10 +148,11 @@ export async function POST(request: Request) {
       traceId,
       personalizedSections: analysis.personalizedSections.length,
       cautionFlags: analysis.cautionFlags.length,
+      usage,
       totalDurationMs: Date.now() - startedAt,
     });
 
-    return Response.json({ analysis });
+    return Response.json({ analysis, usage });
   } catch (error) {
     console.error("[intake/analyze] phase:failed", {
       traceId,

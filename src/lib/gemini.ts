@@ -10,6 +10,7 @@ import type {
   AttachmentDigest,
   DynamicAnswers,
   ExercisePlan,
+  GeminiUsage,
   GenerateRoutinePayload,
   IntakeAnalysis,
   IntakeProfile,
@@ -19,6 +20,13 @@ import type {
 } from "@/lib/types";
 
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+
+const INPUT_PRICE_PER_1M = Number.parseFloat(
+  process.env.GEMINI_INPUT_PRICE_PER_1M_USD ?? ""
+);
+const OUTPUT_PRICE_PER_1M = Number.parseFloat(
+  process.env.GEMINI_OUTPUT_PRICE_PER_1M_USD ?? ""
+);
 
 type GeminiPart =
   | { text: string }
@@ -229,12 +237,72 @@ function describeGeminiParts(parts: GeminiPart[]) {
   });
 }
 
+function hasFiniteNumber(value: number) {
+  return Number.isFinite(value) && value >= 0;
+}
+
+function normalizeTokenCount(value: unknown) {
+  if (typeof value !== "number") return 0;
+  return hasFiniteNumber(value) ? value : 0;
+}
+
+function estimateGeminiCostUsd(promptTokens: number, responseTokens: number) {
+  const hasInputPrice = hasFiniteNumber(INPUT_PRICE_PER_1M);
+  const hasOutputPrice = hasFiniteNumber(OUTPUT_PRICE_PER_1M);
+  if (!hasInputPrice || !hasOutputPrice) return null;
+
+  const inputCost = (promptTokens / 1_000_000) * INPUT_PRICE_PER_1M;
+  const outputCost = (responseTokens / 1_000_000) * OUTPUT_PRICE_PER_1M;
+  return Number((inputCost + outputCost).toFixed(8));
+}
+
+function extractUsage(
+  response: unknown,
+  label: GeminiUsage["label"]
+): GeminiUsage | null {
+  if (!response || typeof response !== "object") return null;
+  const usageRaw =
+    "usageMetadata" in response &&
+    response.usageMetadata &&
+    typeof response.usageMetadata === "object"
+      ? response.usageMetadata
+      : null;
+
+  if (!usageRaw) return null;
+
+  const usage = usageRaw as Record<string, unknown>;
+  const promptTokens = normalizeTokenCount(usage.promptTokenCount);
+  const responseTokens = normalizeTokenCount(
+    usage.responseTokenCount ?? usage.candidatesTokenCount
+  );
+  const totalTokens = normalizeTokenCount(usage.totalTokenCount);
+  const cachedTokens = normalizeTokenCount(usage.cachedContentTokenCount);
+  const thoughtsTokens = normalizeTokenCount(usage.thoughtsTokenCount);
+  const toolUsePromptTokens = normalizeTokenCount(usage.toolUsePromptTokenCount);
+
+  return {
+    label,
+    model: DEFAULT_MODEL,
+    promptTokens,
+    responseTokens,
+    totalTokens,
+    cachedTokens,
+    thoughtsTokens,
+    toolUsePromptTokens,
+    estimatedCostUsd: estimateGeminiCostUsd(promptTokens, responseTokens),
+    inputPricePerMillionUsd: hasFiniteNumber(INPUT_PRICE_PER_1M) ? INPUT_PRICE_PER_1M : null,
+    outputPricePerMillionUsd: hasFiniteNumber(OUTPUT_PRICE_PER_1M)
+      ? OUTPUT_PRICE_PER_1M
+      : null,
+  };
+}
+
 async function callGeminiJson<T>(
   systemInstruction: string,
   parts: GeminiPart[],
   schema: unknown,
   label: "intake-analyze" | "routine-generate" | "routine-revise"
-): Promise<T> {
+): Promise<{ data: T; usage: GeminiUsage | null }> {
   const client = getClient();
 
   if (!client) {
@@ -275,6 +343,19 @@ async function callGeminiJson<T>(
     durationMs: Date.now() - startedAt,
   });
 
+  const usage = extractUsage(response, label);
+  if (usage) {
+    console.log("[Gemini] request:usage", {
+      requestId,
+      usage,
+    });
+  } else {
+    console.log("[Gemini] request:usage", {
+      requestId,
+      usage: null,
+    });
+  }
+
   const raw = response.text?.trim();
 
   if (!raw) {
@@ -296,7 +377,7 @@ async function callGeminiJson<T>(
     totalDurationMs: Date.now() - startedAt,
   });
 
-  return parsed;
+  return { data: parsed, usage };
 }
 
 function analysisPrompt(payload: AnalyzeIntakePayload, attachments: AttachmentDigest) {
@@ -453,9 +534,9 @@ function hydrateRoutine(routine: RoutinePlan): RoutinePlan {
 export async function generateIntakeAnalysis(
   payload: AnalyzeIntakePayload,
   attachments: AttachmentDigest
-): Promise<IntakeAnalysis> {
+): Promise<{ analysis: IntakeAnalysis; usage: GeminiUsage | null }> {
   try {
-    return await callGeminiJson<IntakeAnalysis>(
+    const response = await callGeminiJson<IntakeAnalysis>(
       "Eres el motor de onboarding de MyCoach. Generas formularios cortos, precisos y accionables para entrenadores y atletas. No inventas observaciones si faltan datos.",
       [
         { text: analysisPrompt(payload, attachments) },
@@ -464,41 +545,48 @@ export async function generateIntakeAnalysis(
       analysisSchema,
       "intake-analyze"
     );
+    return { analysis: response.data, usage: response.usage };
   } catch {
-    return createFallbackAnalysis(payload, attachments);
+    return { analysis: createFallbackAnalysis(payload, attachments), usage: null };
   }
 }
 
 export async function generateRoutine(
   payload: GenerateRoutinePayload
-): Promise<RoutinePlan> {
+): Promise<{ routine: RoutinePlan; usage: GeminiUsage | null }> {
   try {
-    const routine = await callGeminiJson<RoutinePlan>(
+    const response = await callGeminiJson<RoutinePlan>(
       "Eres el motor de programación de MyCoach. Diseñas bloques limpios, útiles y con criterio biomecánico. Priorizas lo que más retorno da para el objetivo indicado.",
       [{ text: generationPrompt(payload) }],
       routineSchema,
       "routine-generate"
     );
 
-    return hydrateRoutine(routine);
+    return {
+      routine: hydrateRoutine(response.data),
+      usage: response.usage,
+    };
   } catch {
-    return createFallbackRoutine(payload);
+    return { routine: createFallbackRoutine(payload), usage: null };
   }
 }
 
 export async function reviseRoutine(
   payload: ReviseRoutinePayload
-): Promise<RoutinePlan> {
+): Promise<{ routine: RoutinePlan; usage: GeminiUsage | null }> {
   try {
-    const routine = await callGeminiJson<RoutinePlan>(
+    const response = await callGeminiJson<RoutinePlan>(
       "Eres el motor de revisión de MyCoach. Modificas rutinas con criterio técnico, manteniendo coherencia entre selección de ejercicios, volumen y recuperación.",
       [{ text: revisionPrompt(payload) }],
       routineSchema,
       "routine-revise"
     );
 
-    return hydrateRoutine(routine);
+    return {
+      routine: hydrateRoutine(response.data),
+      usage: response.usage,
+    };
   } catch {
-    return reviseFallbackRoutine(payload);
+    return { routine: reviseFallbackRoutine(payload), usage: null };
   }
 }

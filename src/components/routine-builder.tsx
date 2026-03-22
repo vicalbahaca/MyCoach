@@ -59,6 +59,7 @@ import type {
   DynamicQuestion,
   DynamicSection,
   ExercisePlan,
+  GeminiUsage,
   IntakeAnalysis,
   IntakeProfile,
   RoutinePlan,
@@ -638,10 +639,16 @@ export function RoutineBuilder() {
       if (analyzeTimeout) clearTimeout(analyzeTimeout);
 
       const rawResponse = await response.text();
-      let parsedResponse: { analysis?: IntakeAnalysis; error?: string } | null = null;
+      let parsedResponse:
+        | { analysis?: IntakeAnalysis; usage?: GeminiUsage | null; error?: string }
+        | null = null;
       try {
         parsedResponse = rawResponse
-          ? (JSON.parse(rawResponse) as { analysis?: IntakeAnalysis; error?: string })
+          ? (JSON.parse(rawResponse) as {
+              analysis?: IntakeAnalysis;
+              usage?: GeminiUsage | null;
+              error?: string;
+            })
           : null;
       } catch {
         parsedResponse = null;
@@ -654,6 +661,13 @@ export function RoutineBuilder() {
         error: parsedResponse?.error ?? null,
         elapsedMs: Date.now() - analyzeStartedAt,
       });
+
+      if (parsedResponse?.usage) {
+        console.info("[intake/analyze] token-usage", {
+          traceId,
+          usage: parsedResponse.usage,
+        });
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -722,8 +736,11 @@ export function RoutineBuilder() {
         throw new Error("No se pudo generar la rutina.");
       }
 
-      const data = (await response.json()) as { routine: RoutinePlan };
+      const data = (await response.json()) as { routine: RoutinePlan; usage?: GeminiUsage | null };
       setRoutine(data.routine);
+      if (data.usage) {
+        console.info("[routine/generate] token-usage", { usage: data.usage });
+      }
       setRotationIndex(0);
       setIsAgentOpen(false);
       setAgentInput("");
@@ -768,12 +785,16 @@ export function RoutineBuilder() {
 
       const data = (await response.json()) as {
         routine?: RoutinePlan;
+        usage?: GeminiUsage | null;
         assistantMessage: string;
         requiresClarification?: boolean;
       };
 
       if (data.routine) {
         setRoutine(data.routine);
+      }
+      if (data.usage) {
+        console.info("[routine/revise] token-usage", { usage: data.usage });
       }
 
       setAgentMessages((current) => [
