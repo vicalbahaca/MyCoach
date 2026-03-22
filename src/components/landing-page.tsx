@@ -119,7 +119,7 @@ export function LandingPage() {
       <main className="overflow-x-hidden bg-[#f9f9f7] pb-32 pt-24 text-[#1a1c1b] lg:pb-0">
         <section className="relative mx-auto max-w-[1440px] px-6 py-16" id="inicio">
           <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-            <ScrollReveal className="z-10 min-w-0 lg:col-span-6 lg:pr-4">
+            <ScrollReveal className="z-10 min-w-0 lg:col-span-7 lg:pr-4">
               <h1 className="mb-8 w-full max-w-[11ch] break-words font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.05em] text-[#1b1b1b] md:text-7xl lg:text-8xl">
                 Entrena como la <span className="italic text-[#0050cc]">élite</span> con
                 rutinas personalizadas
@@ -141,7 +141,7 @@ export function LandingPage() {
               </div>
             </ScrollReveal>
 
-            <ScrollReveal className="relative mt-12 min-w-0 lg:col-span-6 lg:mt-0 lg:pl-2" delay={80}>
+            <ScrollReveal className="relative mt-12 min-w-0 lg:col-span-5 lg:mt-0 lg:pl-2" delay={80}>
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] bg-[#eceeea] shadow-[0_20px_40px_-10px_rgba(26,28,27,0.06)]">
                 <Image
                   alt={landingPhotos[1].alt}
