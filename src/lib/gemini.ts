@@ -20,6 +20,21 @@ import type {
 } from "@/lib/types";
 
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const ANALYZE_MODEL = process.env.GEMINI_ANALYZE_MODEL || DEFAULT_MODEL;
+
+function positiveIntFromEnv(value: string | undefined, fallback: number) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const ANALYZE_MAX_OUTPUT_TOKENS = positiveIntFromEnv(
+  process.env.GEMINI_ANALYZE_MAX_OUTPUT_TOKENS,
+  1800
+);
+const ANALYZE_TIMEOUT_MS = positiveIntFromEnv(
+  process.env.GEMINI_ANALYZE_TIMEOUT_MS,
+  15000
+);
 
 const INPUT_PRICE_PER_1M = Number.parseFloat(
   process.env.GEMINI_INPUT_PRICE_PER_1M_USD ?? ""
@@ -212,11 +227,11 @@ function getClient() {
 }
 
 function asPromptProfile(profile: IntakeProfile) {
-  return JSON.stringify(profile, null, 2);
+  return JSON.stringify(profile);
 }
 
 function asPromptAnswers(answers: DynamicAnswers) {
-  return JSON.stringify(answers, null, 2);
+  return JSON.stringify(answers);
 }
 
 function describeGeminiParts(parts: GeminiPart[]) {
@@ -259,7 +274,8 @@ function estimateGeminiCostUsd(promptTokens: number, responseTokens: number) {
 
 function extractUsage(
   response: unknown,
-  label: GeminiUsage["label"]
+  label: GeminiUsage["label"],
+  model: string
 ): GeminiUsage | null {
   if (!response || typeof response !== "object") return null;
   const usageRaw =
@@ -283,7 +299,7 @@ function extractUsage(
 
   return {
     label,
-    model: DEFAULT_MODEL,
+    model,
     promptTokens,
     responseTokens,
     totalTokens,
@@ -298,11 +314,19 @@ function extractUsage(
   };
 }
 
+type GeminiCallOptions = {
+  model?: string;
+  temperature?: number;
+  maxOutputTokens?: number;
+  timeoutMs?: number;
+};
+
 async function callGeminiJson<T>(
   systemInstruction: string,
   parts: GeminiPart[],
   schema: unknown,
-  label: "intake-analyze" | "routine-generate" | "routine-revise"
+  label: "intake-analyze" | "routine-generate" | "routine-revise",
+  options: GeminiCallOptions = {}
 ): Promise<{ data: T; usage: GeminiUsage | null }> {
   const client = getClient();
 
@@ -312,18 +336,22 @@ async function callGeminiJson<T>(
 
   const startedAt = Date.now();
   const requestId = `${label}-${startedAt}`;
+  const model = options.model || DEFAULT_MODEL;
+  const temperature = options.temperature ?? 0.4;
 
   console.log("[Gemini] request:start", {
     requestId,
     label,
-    model: DEFAULT_MODEL,
+    model,
     systemInstructionPreview: systemInstruction.slice(0, 180),
     parts: describeGeminiParts(parts),
     schemaType: typeof schema,
+    maxOutputTokens: options.maxOutputTokens ?? null,
+    timeoutMs: options.timeoutMs ?? null,
   });
 
-  const response = await client.models.generateContent({
-    model: DEFAULT_MODEL,
+  const requestPromise = client.models.generateContent({
+    model,
     contents: [
       {
         role: "user",
@@ -334,9 +362,21 @@ async function callGeminiJson<T>(
       systemInstruction,
       responseMimeType: "application/json",
       responseSchema: schema as never,
-      temperature: 0.4,
+      temperature,
+      ...(options.maxOutputTokens ? { maxOutputTokens: options.maxOutputTokens } : {}),
     },
   });
+
+  const response = (await (options.timeoutMs
+    ? Promise.race([
+        requestPromise,
+        new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(new Error(`Gemini timeout after ${options.timeoutMs}ms`));
+          }, options.timeoutMs);
+        }),
+      ])
+    : requestPromise)) as Awaited<typeof requestPromise>;
 
   console.log("[Gemini] request:response", {
     requestId,
@@ -344,7 +384,7 @@ async function callGeminiJson<T>(
     durationMs: Date.now() - startedAt,
   });
 
-  const usage = extractUsage(response, label);
+  const usage = extractUsage(response, label, model);
   if (usage) {
     console.log("[Gemini] request:usage", {
       requestId,
@@ -382,30 +422,42 @@ async function callGeminiJson<T>(
 }
 
 function analysisPrompt(payload: AnalyzeIntakePayload, attachments: AttachmentDigest) {
-  const referenceSections = createFallbackAnalysis(
-    payload,
-    attachments
-  ).personalizedSections;
+  const referenceSections = createFallbackAnalysis(payload, attachments).personalizedSections;
+  const compactReferenceCatalog = referenceSections.map((section) => ({
+    id: section.id,
+    title: section.title,
+    description: section.description,
+    questions: section.questions.slice(0, 6).map((question) => ({
+      id: question.id,
+      label: question.label,
+      type: question.type,
+      required: Boolean(question.required),
+      options:
+        question.options?.slice(0, 8).map((option) => ({
+          label: option.label,
+          value: option.value,
+        })) || undefined,
+    })),
+  }));
+  const compactAttachmentsDigest = (attachmentsDigestText(attachments) || "Sin archivos adjuntos.")
+    .replace(/\s+/g, " ")
+    .slice(0, 2600);
 
   return [
-    "Analiza el onboarding de MyCoach para preparar un formulario dinámico, corto y accionable.",
-    "No redactes motivacional. No inventes señales visuales si no son claras.",
-    "La sección de formulario se renderiza por páginas y el encabezado superior es FORMULARIO, así que devuelve secciones limpias y consistentes.",
-    "Devuelve entre 3 y 6 secciones con 3-6 preguntas por sección cuando haya contexto suficiente.",
-    "Prioriza radios, checkboxes y sliders. Usa campos abiertos solo si cambian decisiones reales del mesociclo.",
-    "Marca required=true en las preguntas clave que son imprescindibles para generar una rutina con criterio.",
-    "No marques todo como obligatorio: limita required a lo realmente crítico.",
-    "SLIDER OBLIGATORIO: todos los sliders deben usar min=1, max=5, step=1 y representar exactamente 5 niveles.",
-    "Incluye en help el significado del extremo mínimo y máximo del slider para etiquetar ambos lados en UI.",
-    "Todos los campos deben seguir siendo opcionales.",
-    "Usa como base el catálogo de preguntas de referencia y añade preguntas extra para disciplinas específicas detectadas.",
-    "La plataforma sirve para musculación, pesas, Hyrox y CrossFit.",
-    "Contexto del atleta y onboarding base:",
+    "Objetivo: generar un formulario dinámico, breve y accionable para personalizar la rutina.",
+    "No inventes señales visuales ambiguas. Usa solo lo que sea claro.",
+    "Devuelve 3-5 secciones con 3-5 preguntas por sección.",
+    "Prioriza radio/checkbox/slider y usa text/textarea solo cuando cambie decisiones del plan.",
+    "required=true solo en preguntas críticas; el resto opcional.",
+    "Regla sliders: min=1, max=5, step=1. Incluye en help qué significa 1 y qué significa 5.",
+    "Compatibilidad de disciplina: musculación, pesas, Hyrox y CrossFit.",
+    "El frontend muestra páginas bajo encabezado fijo FORMULARIO; mantén secciones limpias y claras.",
+    "Perfil:",
     asPromptProfile(payload.profile),
-    "Resumen de archivos adjuntos:",
-    attachmentsDigestText(attachments) || "Sin archivos adjuntos.",
-    "Catálogo de preguntas de referencia:",
-    JSON.stringify(referenceSections, null, 2),
+    "Resumen de adjuntos:",
+    compactAttachmentsDigest,
+    "Catálogo de referencia (resumido):",
+    JSON.stringify(compactReferenceCatalog),
     "Devuelve SOLO JSON válido con el esquema pedido.",
   ].join("\n\n");
 }
@@ -557,10 +609,19 @@ export async function generateIntakeAnalysis(
         ...attachmentsToGeminiParts(attachments),
       ],
       analysisSchema,
-      "intake-analyze"
+      "intake-analyze",
+      {
+        model: ANALYZE_MODEL,
+        temperature: 0.2,
+        maxOutputTokens: ANALYZE_MAX_OUTPUT_TOKENS,
+        timeoutMs: ANALYZE_TIMEOUT_MS,
+      }
     );
     return { analysis: response.data, usage: response.usage };
-  } catch {
+  } catch (error) {
+    console.error("[Gemini] intake-analyze:fallback", {
+      reason: error instanceof Error ? error.message : "Unknown error",
+    });
     return { analysis: createFallbackAnalysis(payload, attachments), usage: null };
   }
 }
