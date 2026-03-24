@@ -54,11 +54,6 @@ import {
 } from "@/components/ui-kit/form";
 import { createBlobPathname } from "@/lib/blob-upload";
 import { exportRoutineWorkbook } from "@/lib/excel";
-import {
-  AI_MAINTENANCE_MESSAGE,
-  AI_MAINTENANCE_MODE,
-  AI_MAINTENANCE_TITLE,
-} from "@/lib/ai-maintenance";
 import type {
   AnalyzeIntakeRequest,
   DynamicAnswerValue,
@@ -313,7 +308,6 @@ export function RoutineBuilder() {
   const [isRevising, setIsRevising] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [uploadError, setUploadError] = useState<UploadErrorState>(null);
-  const [maintenanceModalMessage, setMaintenanceModalMessage] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<ExercisePlan | null>(null);
   const [swapTarget, setSwapTarget] = useState<{ sessionId: string; exerciseId: string } | null>(
     null
@@ -347,10 +341,6 @@ export function RoutineBuilder() {
   const [areSignalsExpanded, setAreSignalsExpanded] = useState(true);
   const [dynamicQuestionErrors, setDynamicQuestionErrors] = useState<Record<string, string>>({});
   const stepOneSummaryRef = useRef<HTMLDivElement | null>(null);
-
-  const openMaintenanceModal = (message?: string) => {
-    setMaintenanceModalMessage(message || AI_MAINTENANCE_MESSAGE);
-  };
 
   const scrollToActiveStep = useEffectEvent(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -573,11 +563,6 @@ export function RoutineBuilder() {
   }
 
   async function personalizeForm() {
-    if (AI_MAINTENANCE_MODE) {
-      openMaintenanceModal();
-      return;
-    }
-
     setIsAnalyzing(true);
     setErrorMessage("");
     const traceId =
@@ -708,12 +693,7 @@ export function RoutineBuilder() {
 
       const rawResponse = await response.text();
       let parsedResponse:
-        | {
-            analysis?: IntakeAnalysis;
-            usage?: GeminiUsage | null;
-            error?: string;
-            maintenance?: boolean;
-          }
+        | { analysis?: IntakeAnalysis; usage?: GeminiUsage | null; error?: string }
         | null = null;
       try {
         parsedResponse = rawResponse
@@ -721,7 +701,6 @@ export function RoutineBuilder() {
               analysis?: IntakeAnalysis;
               usage?: GeminiUsage | null;
               error?: string;
-              maintenance?: boolean;
             })
           : null;
       } catch {
@@ -744,10 +723,6 @@ export function RoutineBuilder() {
       }
 
       if (!response.ok) {
-        if (parsedResponse?.maintenance) {
-          openMaintenanceModal(parsedResponse.error);
-          return;
-        }
         throw new Error(
           parsedResponse?.error || "No se pudo preparar el formulario personalizado."
         );
@@ -802,10 +777,6 @@ export function RoutineBuilder() {
 
   async function generatePlan() {
     if (!analysis) return;
-    if (AI_MAINTENANCE_MODE) {
-      openMaintenanceModal();
-      return;
-    }
 
     setIsGenerating(true);
     setErrorMessage("");
@@ -821,25 +792,11 @@ export function RoutineBuilder() {
         }),
       });
 
-      const data = (await response.json()) as {
-        routine?: RoutinePlan;
-        usage?: GeminiUsage | null;
-        error?: string;
-        maintenance?: boolean;
-      };
-
       if (!response.ok) {
-        if (data.maintenance) {
-          openMaintenanceModal(data.error);
-          return;
-        }
-        throw new Error(data.error || "No se pudo generar la rutina.");
-      }
-
-      if (!data.routine) {
         throw new Error("No se pudo generar la rutina.");
       }
 
+      const data = (await response.json()) as { routine: RoutinePlan; usage?: GeminiUsage | null };
       setRoutine(data.routine);
       if (data.usage) {
         console.info("[routine/generate] token-usage", { usage: data.usage });
@@ -865,10 +822,6 @@ export function RoutineBuilder() {
 
   async function reviseCurrentPlan(changeRequest: string) {
     if (!routine || !analysis || !changeRequest.trim()) return;
-    if (AI_MAINTENANCE_MODE) {
-      openMaintenanceModal();
-      return;
-    }
 
     setIsRevising(true);
     setErrorMessage("");
@@ -886,22 +839,16 @@ export function RoutineBuilder() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error("No se pudo modificar la rutina.");
+      }
+
       const data = (await response.json()) as {
         routine?: RoutinePlan;
         usage?: GeminiUsage | null;
-        error?: string;
-        maintenance?: boolean;
         assistantMessage: string;
         requiresClarification?: boolean;
       };
-
-      if (!response.ok) {
-        if (data.maintenance) {
-          openMaintenanceModal(data.error);
-          return;
-        }
-        throw new Error(data.error || "No se pudo modificar la rutina.");
-      }
 
       if (data.routine) {
         setRoutine(data.routine);
@@ -2039,26 +1986,6 @@ export function RoutineBuilder() {
               <button
                 className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
                 onClick={() => setUploadError(null)}
-                type="button"
-              >
-                Entendido
-              </button>
-            </div>
-          </div>
-        </ModalShell>
-      ) : null}
-
-      {maintenanceModalMessage ? (
-        <ModalShell
-          onClose={() => setMaintenanceModalMessage(null)}
-          title={AI_MAINTENANCE_TITLE}
-        >
-          <div className="w-full space-y-6">
-            <p className="text-base leading-8 text-slate-700">{maintenanceModalMessage}</p>
-            <div className="flex justify-center">
-              <button
-                className="inline-flex items-center justify-center rounded-full bg-[#1b1b1b] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#2a2a2a]"
-                onClick={() => setMaintenanceModalMessage(null)}
                 type="button"
               >
                 Entendido

@@ -1,4 +1,3 @@
-import { AI_MAINTENANCE_MODE, buildAiMaintenancePayload } from "@/lib/ai-maintenance";
 import { reviseRoutine } from "@/lib/gemini";
 import type { ReviseRoutinePayload } from "@/lib/types";
 
@@ -10,10 +9,6 @@ function buildAssistantSummary(changeRequest: string) {
 
 export async function POST(request: Request) {
   try {
-    if (AI_MAINTENANCE_MODE) {
-      return Response.json(buildAiMaintenancePayload(), { status: 503 });
-    }
-
     const payload = (await request.json()) as ReviseRoutinePayload;
     const trimmedRequest = payload.changeRequest.trim();
 

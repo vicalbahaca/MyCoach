@@ -1,6 +1,5 @@
 import { del, get } from "@vercel/blob";
 
-import { AI_MAINTENANCE_MODE, buildAiMaintenancePayload } from "@/lib/ai-maintenance";
 import { isAllowedBlobPathname } from "@/lib/blob-upload";
 import { processAttachments } from "@/lib/file-intelligence";
 import { generateIntakeAnalysis } from "@/lib/gemini";
@@ -77,11 +76,6 @@ export async function POST(request: Request) {
   const startedAt = Date.now();
 
   try {
-    if (AI_MAINTENANCE_MODE) {
-      console.info("[intake/analyze] maintenance:on", { traceId });
-      return Response.json(buildAiMaintenancePayload(), { status: 503 });
-    }
-
     console.info("[intake/analyze] phase:request-received", { traceId });
 
     const parseBodyStartedAt = Date.now();
