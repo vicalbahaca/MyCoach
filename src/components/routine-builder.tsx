@@ -1950,9 +1950,6 @@ export function RoutineBuilder() {
               Estamos revisando tu contexto y el material visual para construir las
               preguntas que realmente merecen la pena en tu caso.
             </p>
-            <p className="mt-4 text-sm leading-7 text-[#727687]">
-              Este proceso puede tardar aproximadamente 1 minuto, dependiendo del contenido añadido.
-            </p>
           </div>
         </div>
       ) : null}
