@@ -9,7 +9,7 @@ type GeminiPart =
   | { inlineData: { mimeType: string; data: string } };
 
 const INLINE_LIMIT_BYTES = 10 * 1024 * 1024;
-const TEXT_LIMIT = 6000;
+const TEXT_LIMIT = 12000;
 
 function clip(text: string, max = TEXT_LIMIT) {
   return text.replace(/\s+/g, " ").trim().slice(0, max);
@@ -41,10 +41,10 @@ function canInline(mimeType: string, size: number) {
 
 async function extractExcelText(buffer: Buffer) {
   const workbook = XLSX.read(buffer, { type: "buffer" });
-  const slices = workbook.SheetNames.slice(0, 2).map((sheetName) => {
+  const slices = workbook.SheetNames.slice(0, 3).map((sheetName) => {
     const sheet = workbook.Sheets[sheetName];
     const asCsv = XLSX.utils.sheet_to_csv(sheet);
-    return `# ${sheetName}\n${clip(asCsv, 2500)}`;
+    return `# ${sheetName}\n${clip(asCsv, 5000)}`;
   });
   return clip(slices.join("\n\n"), TEXT_LIMIT);
 }
